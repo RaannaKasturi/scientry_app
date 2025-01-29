@@ -12,13 +12,13 @@ void main() {
   runApp(const MyApp());
 }
 
-class PostCard extends StatelessWidget {
+class Postcard extends StatelessWidget {
   final String title;
   final String image;
   final String category;
   final String link;
 
-  const PostCard({
+  const Postcard({
     super.key,
     required this.title,
     required this.image,
@@ -120,12 +120,24 @@ class _MyHomePageState extends State<MyHomePage> {
                 future: data,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
+                    return Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: CircularProgressIndicator(),
+                    );
                   } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
+                    return Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text('Error: ${snapshot.error}'),
+                    );
                   } else {
-                    return PostList(
-                      posts: snapshot.data!,
+                    return Padding(
+                      padding: const EdgeInsets.only(
+                        top: 10,
+                        bottom: 10,
+                      ),
+                      child: PostList(
+                        posts: snapshot.data!,
+                      ),
                     );
                   }
                 },
