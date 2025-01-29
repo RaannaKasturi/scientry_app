@@ -8,12 +8,27 @@ class Post {
   final String category;
   final String link;
 
-  Post({
-    required this.title,
-    required this.image,
-    required this.category,
-    required this.link,
-  });
+  Post(
+      {required this.title,
+      required this.image,
+      required this.category,
+      required this.link});
+
+  factory Post.fromJson(Map<String, dynamic> json) {
+    return Post(
+      title: json['title'],
+      image: json['image'],
+      category: json['category'],
+      link: json['link'],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'image': image,
+        'category': category,
+        'link': link,
+      };
 }
 
 class PostCard extends StatelessWidget {
@@ -34,39 +49,53 @@ class PostCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(top: 10, bottom: 10),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.grey[500]!,
+          ),
+        ),
+      ),
       child: InkWell(
         onTap: () => EasyLauncher.url(url: link),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
-              flex: 1,
-              child: image.startsWith("https")
-                  ? Image.network(
-                      image,
-                      fit: BoxFit.cover,
-                      width: 50,
-                      height: 100,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Text("Error loading image");
-                      },
-                    )
-                  : Image.memory(
-                      base64Decode(image.split(",")[1]),
-                      fit: BoxFit.cover,
-                      width: 50,
-                      height: 100,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Text(
-                            "Error loading image: $error :: $stackTrace");
-                      },
-                    ),
+              flex: 3,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    color: Colors.grey[300],
+                  ),
+                  child: image.startsWith("https")
+                      ? Image.network(
+                          image,
+                          fit: BoxFit.cover,
+                          height: 100,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Center(
+                                child: Text("Error loading image"));
+                          },
+                        )
+                      : Image.memory(
+                          base64Decode(image.split(",")[1]),
+                          fit: BoxFit.cover,
+                          height: 100,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Center(child: Text("Error: $error"));
+                          },
+                        ),
+                ),
+              ),
             ),
             SizedBox(
               width: 10,
             ),
             Expanded(
-              flex: 2,
+              flex: 7,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -74,24 +103,36 @@ class PostCard extends StatelessWidget {
                     text: TextSpan(
                       children: [
                         WidgetSpan(
-                          style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              background: Paint()
-                                ..color =
-                                    Theme.of(context).colorScheme.primary),
+                          alignment: PlaceholderAlignment.middle,
                           child: Container(
-                            padding: EdgeInsets.all(4),
-                            child: Text(category),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Text(
+                              category,
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
+                  SizedBox(
+                    height: 5,
+                  ),
                   Wrap(
                     children: [
                       Text(
                         title,
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
                         maxLines: 3,
                       ),
                     ],
@@ -115,6 +156,7 @@ class PostList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: posts
+          .take(5)
           .map((post) => PostCard(
                 title: post.title,
                 image: post.image,

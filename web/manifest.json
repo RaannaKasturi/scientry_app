@@ -1,6 +1,6 @@
 {
-    "name": "scientry_app",
-    "short_name": "scientry_app",
+    "name": "scientry",
+    "short_name": "scientry",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

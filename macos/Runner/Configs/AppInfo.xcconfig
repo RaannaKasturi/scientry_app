@@ -5,10 +5,10 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = scientry_app
+PRODUCT_NAME = scientry
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = eu.org.nayankasturi.scientryapp.scientryApp
+PRODUCT_BUNDLE_IDENTIFIER = eu.org.raannakasturi.scientry
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2025 eu.org.nayankasturi.scientryapp. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 eu.org.raannakasturi. All rights reserved.

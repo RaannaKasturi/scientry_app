@@ -1,4 +1,4 @@
-# scientry_app
+# scientry
 
 A new Flutter project.
 

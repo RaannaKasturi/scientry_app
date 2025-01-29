@@ -1,4 +1,4 @@
-package eu.org.nayankasturi.scientryapp.scientry_app
+package eu.org.raannakasturi.scientry
 
 import io.flutter.embedding.android.FlutterActivity
 
