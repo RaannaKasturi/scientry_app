@@ -9,6 +9,7 @@ import 'package:scientry/static/carousel.dart';
 import 'package:scientry/static/drawer.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'package:scientry/static/loading_posts.dart';
 import 'package:scientry/static/no_internet.dart';
 import 'package:scientry/static/post_list.dart';
 import 'package:scientry/static/section_title.dart';
@@ -191,7 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
           if (!isOnline) {
             return NoInternet();
           } else if (snapshot.connectionState == ConnectionState.waiting) {
-            return NoInternet();
+            return LoadingPosts();
           } else if (snapshot.hasError) {
             return Center(child: Text("Error loading data"));
           } else if (!snapshot.hasData || snapshot.data!.$1.isEmpty) {

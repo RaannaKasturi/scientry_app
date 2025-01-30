@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 
 class CarouselPost {
@@ -63,96 +64,164 @@ class _CarouselState extends State<Carousel> {
         children: [
           Stack(
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: InkWell(
-                  onTap: () {
-                    debugPrint("Post is $currentIndex");
-                  },
-                  child: CarouselSlider(
-                    items: diaplayCarouselPosts
-                        .map(
-                          (item) => item.image.startsWith("https")
-                              ? Stack(
-                                  children: [
-                                    Image.network(
-                                      item.image,
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return const Text(
-                                            "Error loading image");
-                                      },
-                                    ),
-                                  ],
-                                )
-                              : Stack(
-                                  children: [
-                                    Image.memory(
-                                      base64Decode(item.image.split(",")[1]),
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return Text(
-                                            "Error loading image: $error :: $stackTrace");
-                                      },
-                                    ),
-                                    Container(
-                                      padding: EdgeInsets.only(
-                                        left: 10,
-                                        right: 10,
-                                        bottom: 25,
-                                        top: 20,
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Container(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                              borderRadius:
-                                                  BorderRadius.circular(5),
-                                            ),
-                                            child: Text(
-                                              item.category,
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                          Text(item.title),
+              CarouselSlider(
+                items: diaplayCarouselPosts
+                    .map(
+                      (item) => item.image.startsWith("https")
+                          ? InkWell(
+                              onTap: () {
+                                EasyLauncher.url(url: item.link);
+                              },
+                              child: Stack(
+                                children: [
+                                  Image.network(
+                                    item.image,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Text(
+                                          "Error loading image: $error :: $stackTrace");
+                                    },
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.bottomCenter,
+                                        end: Alignment.topCenter,
+                                        colors: [
+                                          Colors.black.withAlpha(217),
+                                          Colors.transparent,
                                         ],
                                       ),
                                     ),
-                                  ],
-                                ),
-                        )
-                        .toList(),
-                    carouselController: carouselController,
-                    options: CarouselOptions(
-                      scrollPhysics: const BouncingScrollPhysics(),
-                      autoPlay: true,
-                      aspectRatio: 3 / 2,
-                      viewportFraction: 1,
-                      pauseAutoPlayOnManualNavigate: true,
-                      onPageChanged: (index, reason) {
-                        setState(() {
-                          currentIndex = index;
-                        });
-                      },
-                    ),
-                  ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.only(
+                                      left: 10,
+                                      right: 10,
+                                      bottom: 25,
+                                      top: 20,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            borderRadius:
+                                                BorderRadius.circular(5),
+                                          ),
+                                          child: Text(
+                                            item.category,
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                        Text(
+                                          item.title,
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : InkWell(
+                              onTap: () {
+                                EasyLauncher.url(url: item.link);
+                              },
+                              child: Stack(
+                                children: [
+                                  Image.memory(
+                                    base64Decode(item.image.split(",")[1]),
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Text(
+                                          "Error loading image: $error :: $stackTrace");
+                                    },
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.bottomCenter,
+                                        end: Alignment.topCenter,
+                                        colors: [
+                                          Colors.black.withAlpha(217),
+                                          Colors.transparent,
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.only(
+                                      left: 10,
+                                      right: 10,
+                                      bottom: 25,
+                                      top: 20,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            borderRadius:
+                                                BorderRadius.circular(5),
+                                          ),
+                                          child: Text(
+                                            item.category,
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                        Text(
+                                          item.title,
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                    )
+                    .toList(),
+                carouselController: carouselController,
+                options: CarouselOptions(
+                  scrollPhysics: const BouncingScrollPhysics(),
+                  autoPlay: true,
+                  aspectRatio: 3 / 2,
+                  viewportFraction: 1,
+                  pauseAutoPlayOnManualNavigate: true,
+                  onPageChanged: (index, reason) {
+                    setState(() {
+                      currentIndex = index;
+                    });
+                  },
                 ),
               ),
               Positioned(
@@ -175,10 +244,16 @@ class _CarouselState extends State<Carousel> {
                           horizontal: 3.0,
                         ),
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: currentIndex == entry.key
-                                ? Colors.red
-                                : Colors.teal),
+                          borderRadius: BorderRadius.circular(10),
+                          color: currentIndex == entry.key
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .onPrimary
+                                  .withAlpha(
+                                    (0.6 * 255).toInt(),
+                                  ),
+                        ),
                       ),
                     );
                   }).toList(),
