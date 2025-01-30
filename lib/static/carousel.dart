@@ -2,22 +2,58 @@ import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 
+class CarouselPost {
+  final int id;
+  final String title;
+  final String image;
+  final String category;
+  final String link;
+
+  CarouselPost(
+      {required this.id,
+      required this.title,
+      required this.image,
+      required this.category,
+      required this.link});
+
+  factory CarouselPost.fromJson(Map<String, dynamic> json) {
+    return CarouselPost(
+      id: json['id'],
+      title: json['title'],
+      image: json['image'],
+      category: json['category'],
+      link: json['link'],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'image': image,
+        'category': category,
+        'link': link,
+      };
+}
+
 class Carousel extends StatefulWidget {
-  const Carousel({super.key});
+  final List<CarouselPost> carouselPosts;
+  const Carousel({super.key, required this.carouselPosts});
 
   @override
   State<Carousel> createState() => _CarouselState();
 }
 
 class _CarouselState extends State<Carousel> {
-  List imageList = [
-    {"id": 1, "image_path": 'https://i.ibb.co/84pRh5y/529a0b20ffad.jpg'},
-    {"id": 2, "image_path": 'https://i.ibb.co/84pRh5y/529a0b20ffad.jpg'},
-    {"id": 3, "image_path": 'https://i.ibb.co/84pRh5y/529a0b20ffad.jpg'},
-    {"id": 4, "image_path": 'https://i.ibb.co/84pRh5y/529a0b20ffad.jpg'},
-  ];
+  late List<CarouselPost> diaplayCarouselPosts;
   final CarouselSliderController carouselController =
       CarouselSliderController();
+
+  @override
+  void initState() {
+    super.initState();
+    diaplayCarouselPosts = widget.carouselPosts.take(7).toList();
+  }
+
   int currentIndex = 0;
   @override
   Widget build(BuildContext context) {
@@ -36,25 +72,70 @@ class _CarouselState extends State<Carousel> {
                     debugPrint("Post is $currentIndex");
                   },
                   child: CarouselSlider(
-                    items: imageList
+                    items: diaplayCarouselPosts
                         .map(
-                          (item) => item['image_path'].startsWith("https")
-                              ? Image.network(
-                                  item['image_path'],
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return const Text("Error loading image");
-                                  },
+                          (item) => item.image.startsWith("https")
+                              ? Stack(
+                                  children: [
+                                    Image.network(
+                                      item.image,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return const Text(
+                                            "Error loading image");
+                                      },
+                                    ),
+                                  ],
                                 )
-                              : Image.memory(
-                                  base64Decode(item['image_path']),
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Text(
-                                        "Error loading image: $error :: $stackTrace");
-                                  },
+                              : Stack(
+                                  children: [
+                                    Image.memory(
+                                      base64Decode(item.image.split(",")[1]),
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Text(
+                                            "Error loading image: $error :: $stackTrace");
+                                      },
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.only(
+                                        left: 10,
+                                        right: 10,
+                                        bottom: 25,
+                                        top: 20,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Container(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary,
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                            ),
+                                            child: Text(
+                                              item.category,
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                          Text(item.title),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                         )
                         .toList(),
@@ -80,7 +161,7 @@ class _CarouselState extends State<Carousel> {
                 right: 0,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: imageList.asMap().entries.map((entry) {
+                  children: diaplayCarouselPosts.asMap().entries.map((entry) {
                     return GestureDetector(
                       onTap: () => carouselController.animateToPage(
                         entry.key,

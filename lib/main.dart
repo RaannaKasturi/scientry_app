@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -8,11 +9,14 @@ import 'package:scientry/static/carousel.dart';
 import 'package:scientry/static/drawer.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'package:scientry/static/no_internet.dart';
 import 'package:scientry/static/post_list.dart';
 import 'package:scientry/static/section_title.dart';
 import 'package:xml2json/xml2json.dart';
+import 'package:simple_connection_checker/simple_connection_checker.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -43,25 +47,88 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late StreamSubscription<bool> _connectionListener;
+  late Future<(List<Post>, List<Categories>)> data;
+  late List<CarouselPost> carouselPosts = [];
+  bool isOnline = false;
+
+  @override
+  void initState() {
+    super.initState();
+    data = Future.value((<Post>[], <Categories>[]));
+    carouselPosts = <CarouselPost>[];
+    checkConnection();
+    _connectionListener =
+        SimpleConnectionChecker().onConnectionChange.listen((connected) {
+      if (connected) {
+        fetchData();
+      }
+      setState(() {
+        isOnline = connected;
+      });
+    });
+  }
+
+  /// Fetch data when the internet is available
+  void fetchData() {
+    setState(() {
+      data = getData();
+    });
+  }
+
+  /// Check if the user is initially online
+  Future<void> checkConnection() async {
+    bool connected = await SimpleConnectionChecker.isConnectedToInternet();
+    if (connected) {
+      fetchData();
+    }
+    setState(() {
+      isOnline = connected;
+    });
+  }
+
   Future<(List<Post>, List<Categories>)> getData() async {
-    var data = await http.get(Uri.parse(
+    var response = await http.get(Uri.parse(
         "https://proxy.wafflehacker.io/?destination=https://thescientry.blogspot.com/feeds/posts/default?max-results=100"));
+
     Xml2Json xml2json = Xml2Json();
-    xml2json.parse(data.body);
+    xml2json.parse(response.body);
     var jsonData = xml2json.toGData();
     var jsondata = json.decode(jsonData);
-    var feed = jsondata["feed"]['entry'];
+
     List<Post> posts = [];
     List<Categories> categories = [];
+
+    var feed = jsondata["feed"]['entry'];
+    int i = 0;
+    int j = 1;
     for (var post in feed) {
-      posts.add(Post(
-        title: post['title']['\$t'],
-        image: extractImage(post['content']['\$t']) ?? '',
-        category: post['category'][0]['term'],
-        link: post['link']
-            .firstWhere((link) => link['rel'] == 'alternate')['href'],
-      ));
+      i++;
+      var imageData = extractImage(post['content']['\$t']) ?? '';
+      posts.add(
+        Post(
+          title: post['title']['\$t'],
+          image: imageData,
+          category: post['category'][0]['term'],
+          link: post['link']
+              .firstWhere((link) => link['rel'] == 'alternate')['href'],
+        ),
+      );
+      if (i > 5 && i % 3 == 0 && j <= 7) {
+        carouselPosts.add(CarouselPost(
+          id: j,
+          title: post['title']['\$t'],
+          image: imageData,
+          category: post['category'][0]['term'],
+          link: post['link']
+              .firstWhere((link) => link['rel'] == 'alternate')['href'],
+        ));
+        j++;
+      } else {
+        continue;
+      }
     }
+
     for (var category in jsondata["feed"]['category']) {
       if (category['term'] != "ZZZZZZZZZ") {
         categories.add(
@@ -83,21 +150,15 @@ class _MyHomePageState extends State<MyHomePage> {
     return match?.group(1);
   }
 
-  late Future<(List<Post>, List<Categories>)> data;
-
   @override
-  void initState() {
-    super.initState();
-    data = getData();
-    fetchedPosts = data.then((value) => value.$1);
-    fetchedCategories = data.then((value) => value.$2);
+  void dispose() {
+    _connectionListener.cancel();
+    super.dispose();
   }
 
-  late final Future<List<Post>> fetchedPosts;
-  late final Future<List<Categories>> fetchedCategories;
-
-  final int numPosts = 3;
-  final String category = 'Astrophysics';
+  final CarouselSliderController carouselController =
+      CarouselSliderController();
+  int currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -109,15 +170,10 @@ class _MyHomePageState extends State<MyHomePage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(LucideIcons.brainCircuit),
-            SizedBox(
-              width: 3.5,
-            ),
+            SizedBox(width: 3.5),
             Text(
               widget.title,
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -129,23 +185,38 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       drawer: Drawer(child: drawer(context)),
-      body: Container(
-        padding: EdgeInsets.all(10),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Carousel(),
-              SectionTitle(
-                  title: "Latest Posts",
-                  link: "https://thescientry.blogspot.com/",
-                  context: context),
-              LatestPosts(data: fetchedPosts),
-              CategoriesPostsList(
-                  fetchedCategories: fetchedCategories,
-                  fetchedPosts: fetchedPosts)
-            ],
-          ),
-        ),
+      body: FutureBuilder<(List<Post>, List<Categories>)>(
+        future: data,
+        builder: (context, snapshot) {
+          if (!isOnline) {
+            return NoInternet();
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
+            return NoInternet();
+          } else if (snapshot.hasError) {
+            return Center(child: Text("Error loading data"));
+          } else if (!snapshot.hasData || snapshot.data!.$1.isEmpty) {
+            return Center(child: Text("No posts available"));
+          } else {
+            var posts = snapshot.data!.$1;
+            var categories = snapshot.data!.$2;
+            return SingleChildScrollView(
+              padding: EdgeInsets.all(10),
+              child: Column(
+                children: [
+                  Carousel(carouselPosts: carouselPosts),
+                  SectionTitle(
+                      title: "Latest Posts",
+                      link: "https://thescientry.blogspot.com/",
+                      context: context),
+                  LatestPosts(data: Future.value(posts)),
+                  CategoriesPostsList(
+                      fetchedCategories: Future.value(categories),
+                      fetchedPosts: Future.value(posts)),
+                ],
+              ),
+            );
+          }
+        },
       ),
     );
   }
