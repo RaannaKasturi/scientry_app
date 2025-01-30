@@ -10,66 +10,106 @@ Column drawer(BuildContext context) {
       Column(
         children: [
           Container(
-            padding: EdgeInsets.only(top: 75, bottom: 40),
+            padding: EdgeInsets.only(top: 50, bottom: 10),
             color: Theme.of(context).colorScheme.inversePrimary,
-            child: Column(
-              children: [
-                Center(
-                  child: Text(
-                    'Scientry',
-                    style: TextStyle(fontSize: 30, color: Colors.black),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        minRadius: 25,
+                        maxRadius: 25,
+                        backgroundImage:
+                            AssetImage("assets/images/john_doe.jpeg"),
+                        backgroundColor: Colors.transparent,
+                        child: Image.asset(
+                          "assets/images/johdn_doe.jpeg",
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                                'assets/images/profile_image_error.png');
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "John Doe",
+                            style: TextStyle(
+                              overflow: TextOverflow.ellipsis,
+                              fontSize: 25,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                            ),
+                          ),
+                          Text("johndoe@example.com",
+                              softWrap: true,
+                              style: TextStyle(
+                                overflow: TextOverflow.ellipsis,
+                                fontSize: 15,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer
+                                    .withAlpha((0.6 * 255).toInt()),
+                              )),
+                        ],
+                      ),
+                    ],
                   ),
-                ),
-                Divider(
-                  indent: 40,
-                  endIndent: 40,
-                  color: Colors.black,
-                ),
-                Center(
-                  child: Text(
-                    'Welcome to Scientry',
-                    style: TextStyle(
-                        fontSize: 20,
-                        color: Theme.of(context).colorScheme.primary),
+                  IconButton(
+                    onPressed: () {
+                      debugPrint("Account Details");
+                    },
+                    icon: Icon(LucideIcons.chevronDown),
                   ),
-                )
-              ],
+                ],
+              ),
             ),
           ),
           Container(
             padding: EdgeInsets.only(top: 20),
-            child: ListView(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              children: [
-                ListTile(
-                  title: Text(
-                    'Home',
-                    style: TextStyle(fontSize: 25),
+            child: Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                children: [
+                  ListTile(
+                    title: Text(
+                      'Home',
+                      style: TextStyle(fontSize: 25),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
                   ),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: Text(
-                    'About',
-                    style: TextStyle(fontSize: 25),
+                  ListTile(
+                    title: Text(
+                      'About',
+                      style: TextStyle(fontSize: 25),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
                   ),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: Text(
-                    'Contact',
-                    style: TextStyle(fontSize: 25),
+                  ListTile(
+                    title: Text(
+                      'Contact',
+                      style: TextStyle(fontSize: 25),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
                   ),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
+                ],
+              ),
             ),
           )
         ],
