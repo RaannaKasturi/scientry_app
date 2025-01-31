@@ -1,179 +1,265 @@
 import 'package:easy_url_launcher/easy_url_launcher.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:scientry/screens/auth/login.dart';
+import 'package:scientry/screens/auth/register.dart';
 
-Column drawer(BuildContext context) {
+Column drawer(BuildContext context, isLoggedIn) {
   return Column(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
-      Column(
-        children: [
-          Container(
-            padding: EdgeInsets.only(top: 50, bottom: 10),
-            color: Theme.of(context).colorScheme.inversePrimary,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        minRadius: 25,
-                        maxRadius: 25,
-                        backgroundImage:
-                            AssetImage("assets/images/john_doe.jpeg"),
-                        backgroundColor: Colors.transparent,
-                        child: Image.asset(
-                          "assets/images/johdn_doe.jpeg",
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                                'assets/images/profile_image_error.png');
-                          },
+      isLoggedIn
+          ? ExpansionTile(
+              tilePadding:
+                  EdgeInsets.only(top: 40, left: 12, right: 13, bottom: 5),
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              collapsedBackgroundColor:
+                  Theme.of(context).colorScheme.primaryContainer,
+              iconColor: Theme.of(context).colorScheme.onPrimaryContainer,
+              collapsedIconColor:
+                  Theme.of(context).colorScheme.onPrimaryContainer,
+              leading: CircleAvatar(
+                radius: 30,
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                backgroundImage: AssetImage("assets/images/john_doe.jpeg"),
+              ),
+              title: Text(
+                "John Doe",
+                softWrap: true,
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+              ),
+              subtitle: Text(
+                "johndoe@example.com",
+                softWrap: true,
+                style: TextStyle(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onPrimaryContainer
+                      .withAlpha((0.5 * 255).toInt()),
+                ),
+              ),
+              children: [
+                Divider(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: IconButton(
+                        iconSize: 30,
+                        onPressed: (() {}),
+                        icon: Icon(LucideIcons.circleUserRound),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: IconButton(
+                        iconSize: 30,
+                        onPressed: (() {}),
+                        icon: Icon(LucideIcons.settings),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: IconButton(
+                        iconSize: 30,
+                        onPressed: (() {}),
+                        icon: Icon(
+                          LucideIcons.logOut,
+                          color: Colors.red[400],
                         ),
                       ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "John Doe",
-                            style: TextStyle(
-                              overflow: TextOverflow.ellipsis,
-                              fontSize: 25,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
+                    ),
+                  ],
+                )
+              ],
+            )
+          : Container(
+              padding: EdgeInsets.only(
+                top: 50,
+                bottom: 20,
+              ),
+              color: Theme.of(context).colorScheme.primaryContainer,
+              width: double.infinity,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "You're not logged in",
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                  Text(
+                    "Please Login to bookmark the posts",
+                    style: TextStyle(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onPrimaryContainer
+                          .withAlpha((0.5 * 255).toInt()),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: (() {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Register(),
                             ),
+                          );
+                        }),
+                        label: Text(
+                          "SignUp",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
-                          Text("johndoe@example.com",
-                              softWrap: true,
-                              style: TextStyle(
-                                overflow: TextOverflow.ellipsis,
-                                fontSize: 15,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer
-                                    .withAlpha((0.6 * 255).toInt()),
-                              )),
-                        ],
+                        ),
+                        icon: Icon(
+                          LucideIcons.squarePen,
+                          color: Colors.white,
+                        ),
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all(
+                            Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: (() {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const Login(),
+                            ),
+                          );
+                        }),
+                        label: Text(
+                          "LogIn",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        icon: Icon(
+                          LucideIcons.logIn,
+                          color: Colors.white,
+                        ),
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all(
+                            Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
                       ),
                     ],
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      debugPrint("Account Details");
-                    },
-                    icon: Icon(LucideIcons.chevronDown),
-                  ),
+                  )
                 ],
               ),
             ),
-          ),
-          Container(
-            padding: EdgeInsets.only(top: 20),
-            child: Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                children: [
-                  ListTile(
-                    title: Text(
-                      'Home',
-                      style: TextStyle(fontSize: 25),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    title: Text(
-                      'About',
-                      style: TextStyle(fontSize: 25),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    title: Text(
-                      'Contact',
-                      style: TextStyle(fontSize: 25),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
+      Expanded(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            ListTile(
+              leading: Icon(Icons.home),
+              title: Text(
+                'Home',
+                style: TextStyle(fontSize: 25),
               ),
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => Login()));
+              },
             ),
-          )
-        ],
+            ListTile(
+              leading: Icon(Icons.info),
+              title: Text(
+                'About',
+                style: TextStyle(fontSize: 25),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.contact_mail),
+              title: Text(
+                'Contact',
+                style: TextStyle(fontSize: 25),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
       ),
       Column(
         children: [
           Divider(
             color: Theme.of(context).colorScheme.primary,
           ),
-          Container(
-            padding: EdgeInsets.only(top: 20),
-            child: RichText(
-              text: TextSpan(children: [
-                WidgetSpan(child: Icon(LucideIcons.copyright, size: 15)),
-                TextSpan(
-                  text: ' 2024 Scientry',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: InkWell(
+              child: RichText(
+                text: TextSpan(
+                  children: [
+                    WidgetSpan(
+                      child: Icon(LucideIcons.copyright, size: 15),
+                    ),
+                    TextSpan(
+                      text: ' 2024 Scientry',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ],
                 ),
-              ]),
+              ),
+              onTap: () {
+                EasyLauncher.url(
+                  url: "https://scietry.vercel.app/",
+                  mode: Mode.platformDefault,
+                );
+              },
             ),
           ),
-          Container(
-            alignment: Alignment.center,
-            padding: EdgeInsets.only(
-              top: 5,
-            ),
+          InkWell(
             child: RichText(
-              text: TextSpan(children: [
-                TextSpan(
-                  text: 'Designed & Developed by ',
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+              text: TextSpan(
+                text: 'Designed & Developed by Nayan Kasturi',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
-                TextSpan(
-                  text: 'Nayan Kasturi',
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () async {
-                      try {
-                        await EasyLauncher.url(
-                          url: "https://nayankasturi.eu.org/",
-                          mode: Mode.platformDefault,
-                        );
-                      } catch (e) {
-                        debugPrint(e.toString());
-                      }
-                    },
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ]),
+              ),
             ),
+            onTap: () {
+              EasyLauncher.url(
+                url: "https://nayankasturi.eu.org/",
+                mode: Mode.platformDefault,
+              );
+            },
           ),
-          Container(
-            padding: EdgeInsets.only(
-              top: 20,
-              bottom: 50,
-            ),
+          Padding(
+            padding: const EdgeInsets.only(top: 20, bottom: 50),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -208,6 +294,19 @@ Column drawer(BuildContext context) {
                     color: Colors.red,
                   ),
                   onPressed: () {},
+                ),
+                IconButton(
+                  icon: Icon(
+                    LucideIcons.globe,
+                    size: 30,
+                    color: Colors.black,
+                  ),
+                  onPressed: () {
+                    EasyLauncher.url(
+                      url: "https://scientry.vercel.app/",
+                      mode: Mode.platformDefault,
+                    );
+                  },
                 ),
               ],
             ),
