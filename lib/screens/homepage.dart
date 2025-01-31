@@ -13,9 +13,14 @@ import 'package:scientry/front/categories_posts_list.dart';
 import 'package:scientry/front/latest_posts.dart';
 import 'dart:convert';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   Future<(List<Post>, List<Categories>)> getData() async {
     var response = await http.get(Uri.parse(
         "https://proxy.wafflehacker.io/?destination=https://thescientry.blogspot.com/feeds/posts/default?max-results=100"));

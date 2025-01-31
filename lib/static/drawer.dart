@@ -6,15 +6,19 @@ import 'package:scientry/screens/auth/login.dart';
 import 'package:scientry/screens/auth/register.dart';
 
 Column drawer(BuildContext context, isLoggedIn) {
-  late final email;
-  late final name;
-  late final image;
+  late final String? email;
+  late final String name;
+  late final String image;
 
   userData() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    email = user!.email;
-    name = user.displayName ?? "Add your name";
-    image = user.photoURL ?? "assets/images/john_doe.jpeg";
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      email = user!.email;
+      name = user.displayName ?? "Add your name";
+      image = user.photoURL ?? "assets/images/john_doe.jpeg";
+    } catch (e) {
+      isLoggedIn = false;
+    }
   }
 
   if (isLoggedIn) {
@@ -50,7 +54,7 @@ Column drawer(BuildContext context, isLoggedIn) {
                 ),
               ),
               subtitle: Text(
-                email,
+                email!,
                 softWrap: true,
                 style: TextStyle(
                   color: Theme.of(context)

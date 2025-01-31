@@ -68,19 +68,10 @@ class LoginState extends State<Login> {
       var userEmail = _loginFormKey.currentState?.fields['Email *']?.value;
       var userPassword =
           _loginFormKey.currentState?.fields['Password *']?.value;
-      FirebaseAuth.instance
-          .signInWithEmailAndPassword(
+      FirebaseAuth.instance.signInWithEmailAndPassword(
         email: userEmail,
         password: userPassword,
-      )
-          .then((value) {
-        if (mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => HomePage()),
-          );
-        }
-      });
+      );
       if (mounted) {
         Navigator.push(
           context,
