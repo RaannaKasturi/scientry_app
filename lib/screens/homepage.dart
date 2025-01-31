@@ -13,10 +13,8 @@ import 'package:scientry/front/categories_posts_list.dart';
 import 'package:scientry/front/latest_posts.dart';
 import 'dart:convert';
 
-class MyHomePage extends StatelessWidget {
-  final String title;
-
-  const MyHomePage({super.key, required this.title});
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   Future<(List<Post>, List<Categories>)> getData() async {
     var response = await http.get(Uri.parse(
@@ -89,7 +87,7 @@ class MyHomePage extends StatelessWidget {
           children: [
             Icon(LucideIcons.brainCircuit),
             SizedBox(width: 3.5),
-            Text(title,
+            Text("Scientry",
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
           ],
         ),
