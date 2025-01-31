@@ -1,10 +1,26 @@
 import 'package:easy_url_launcher/easy_url_launcher.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/screens/auth/login.dart';
 import 'package:scientry/screens/auth/register.dart';
 
 Column drawer(BuildContext context, isLoggedIn) {
+  late final email;
+  late final name;
+  late final image;
+
+  userData() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    email = user!.email;
+    name = user.displayName ?? "Add your name";
+    image = user.photoURL ?? "assets/images/john_doe.jpeg";
+  }
+
+  if (isLoggedIn) {
+    userData();
+  }
+
   return Column(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
     children: [
@@ -21,10 +37,12 @@ Column drawer(BuildContext context, isLoggedIn) {
               leading: CircleAvatar(
                 radius: 30,
                 backgroundColor: Theme.of(context).colorScheme.primary,
-                backgroundImage: AssetImage("assets/images/john_doe.jpeg"),
+                backgroundImage: image.toString().startsWith('assets')
+                    ? AssetImage("assets/images/john_doe.jpeg")
+                    : NetworkImage(image),
               ),
               title: Text(
-                "John Doe",
+                name,
                 softWrap: true,
                 style: TextStyle(
                   fontSize: 20,
@@ -32,7 +50,7 @@ Column drawer(BuildContext context, isLoggedIn) {
                 ),
               ),
               subtitle: Text(
-                "johndoe@example.com",
+                email,
                 softWrap: true,
                 style: TextStyle(
                   color: Theme.of(context)
@@ -68,7 +86,9 @@ Column drawer(BuildContext context, isLoggedIn) {
                       flex: 1,
                       child: IconButton(
                         iconSize: 30,
-                        onPressed: (() {}),
+                        onPressed: (() {
+                          FirebaseAuth.instance.signOut();
+                        }),
                         icon: Icon(
                           LucideIcons.logOut,
                           color: Colors.red[400],
@@ -315,4 +335,26 @@ Column drawer(BuildContext context, isLoggedIn) {
       ),
     ],
   );
+}
+
+class LoginState extends StatelessWidget {
+  const LoginState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (snapshot.hasData) {
+          return drawer(context, true);
+        } else {
+          return drawer(context, false);
+        }
+      },
+    );
+  }
 }

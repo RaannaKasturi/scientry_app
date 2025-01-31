@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:lottie/lottie.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/screens/auth/login.dart';
 import 'package:scientry/screens/homepage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -20,6 +22,122 @@ class RegisterState extends State<Register> {
   final TextEditingController confirmPasswordController =
       TextEditingController();
   bool _obscureText = true;
+
+  void _registerUser() async {
+    if (_registerFormKey.currentState!.saveAndValidate()) {
+      showDialog(
+        context: context,
+        builder: (context) => Scaffold(
+          body: Center(
+            child: Container(
+              height: double.infinity,
+              width: double.infinity,
+              color: Theme.of(context).colorScheme.primaryContainer,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Lottie.asset(
+                    "assets/lottie/processing.json",
+                    width: 300,
+                    height: 300,
+                    fit: BoxFit.contain,
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    "Registering...",
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    try {
+      var userEmail = _registerFormKey.currentState?.fields['Email *']?.value;
+      var userPassword =
+          _registerFormKey.currentState?.fields['Password *']?.value;
+      UserCredential? userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+              email: userEmail, password: userPassword);
+      FirebaseAuth.instance.signInWithCredential(userCredential.credential!);
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+      }
+    } catch (e) {
+      _registrationFailed();
+    }
+  }
+
+  void _registrationFailed() {
+    showDialog(
+      context: context,
+      builder: (context) => Scaffold(
+        body: Center(
+          child: Container(
+            height: double.infinity,
+            width: double.infinity,
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Lottie.asset(
+                  "assets/lottie/failed.json",
+                  width: 300,
+                  height: 300,
+                  fit: BoxFit.contain,
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Registration failed!",
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                ElevatedButton(
+                  onPressed: (() {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomePage()),
+                    );
+                  }),
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all<Color>(
+                        Theme.of(context).colorScheme.primary),
+                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    'Go to Home',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -95,26 +213,6 @@ class RegisterState extends State<Register> {
                 key: _registerFormKey,
                 child: Column(
                   children: [
-                    SizedBox(
-                      width: screenWidth * 0.8,
-                      child: FormBuilderTextField(
-                        name: "Name *",
-                        onTapOutside: (event) {
-                          FocusScope.of(context).unfocus();
-                        },
-                        decoration: InputDecoration(
-                          label: const Text("Name *",
-                              style: TextStyle(fontSize: 18)),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.grey),
-                          ),
-                        ),
-                        validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(),
-                        ]),
-                      ),
-                    ),
-                    SizedBox(height: 10),
                     // Email Field
                     SizedBox(
                       width: screenWidth * 0.8,
@@ -243,7 +341,13 @@ class RegisterState extends State<Register> {
                     SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: (() {
-                        _registerFormKey.currentState!.saveAndValidate();
+                        if (_registerFormKey.currentState!.saveAndValidate()) {
+                          try {
+                            _registerUser();
+                          } catch (e) {
+                            _registrationFailed();
+                          }
+                        }
                       }),
                       style: ButtonStyle(
                         backgroundColor: WidgetStateProperty.all<Color>(

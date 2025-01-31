@@ -93,7 +93,7 @@ class HomePage extends StatelessWidget {
         ),
       ),
       drawer: Drawer(
-        child: drawer(context, isLoggedIn),
+        child: LoginState(),
       ),
       body: FutureBuilder<bool>(
         future: checkConnection(),

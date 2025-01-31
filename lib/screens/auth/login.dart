@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:lottie/lottie.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/screens/auth/register.dart';
 import 'package:scientry/screens/homepage.dart';
@@ -25,6 +27,131 @@ class LoginState extends State<Login> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void _loginUser() async {
+    if (_loginFormKey.currentState!.saveAndValidate()) {
+      showDialog(
+        context: context,
+        builder: (context) => Scaffold(
+          body: Center(
+            child: Container(
+              height: double.infinity,
+              width: double.infinity,
+              color: Theme.of(context).colorScheme.primaryContainer,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Lottie.asset(
+                    "assets/lottie/processing.json",
+                    width: 300,
+                    height: 300,
+                    fit: BoxFit.contain,
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    "Logging you in...",
+                    style: TextStyle(
+                      fontSize: 24,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    try {
+      var userEmail = _loginFormKey.currentState?.fields['Email *']?.value;
+      var userPassword =
+          _loginFormKey.currentState?.fields['Password *']?.value;
+      FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+        email: userEmail,
+        password: userPassword,
+      )
+          .then((value) {
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => HomePage()),
+          );
+        }
+      });
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+      }
+    } catch (e) {
+      _loginFailed();
+    }
+  }
+
+  void _loginFailed() {
+    showDialog(
+      context: context,
+      builder: (context) => Scaffold(
+        body: Center(
+          child: Container(
+            height: double.infinity,
+            width: double.infinity,
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Lottie.asset(
+                  "assets/lottie/failed.json",
+                  width: 300,
+                  height: 300,
+                  fit: BoxFit.contain,
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Login failed!",
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                ElevatedButton(
+                  onPressed: (() {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomePage()),
+                    );
+                  }),
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all<Color>(
+                        Theme.of(context).colorScheme.primary),
+                    shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    'Go to Home',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -159,7 +286,13 @@ class LoginState extends State<Login> {
                     SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: (() {
-                        _loginFormKey.currentState!.saveAndValidate();
+                        if (_loginFormKey.currentState!.saveAndValidate()) {
+                          try {
+                            _loginUser();
+                          } catch (e) {
+                            _loginFailed();
+                          }
+                        }
                       }),
                       style: ButtonStyle(
                         backgroundColor: WidgetStateProperty.all<Color>(
