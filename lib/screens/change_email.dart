@@ -2,135 +2,177 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/screens/profile.dart';
-import 'package:scientry/static/processing_page.dart';
 
-class ChangeEmail extends StatefulWidget {
-  const ChangeEmail({super.key});
+class ChangeEmail extends StatelessWidget {
+  ChangeEmail({super.key});
 
-  @override
-  State<ChangeEmail> createState() => _ChangeEmailState();
-}
-
-class _ChangeEmailState extends State<ChangeEmail> {
-  final GlobalKey<FormBuilderState> _emailChangeKey =
+  final GlobalKey<FormBuilderState> _emailChangeFormKey =
       GlobalKey<FormBuilderState>();
 
-  Future<void> changeEmail() async {
-    ProcessingPage(processingText: "Changing Email...");
-    if (_emailChangeKey.currentState!.saveAndValidate()) {
-      final String emailChangeData =
-          _emailChangeKey.currentState!.value["New Email *"];
-      try {
-        await FirebaseAuth.instance.currentUser!.verifyBeforeUpdateEmail(
-          emailChangeData,
+  changeEmail(BuildContext context) async {
+    if (_emailChangeFormKey.currentState!.validate()) {
+      User? user = FirebaseAuth.instance.currentUser;
+
+      if (user == null) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Error"),
+            content: Text("No user is signed in. Please log in and try again."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("OK"),
+              ),
+            ],
+          ),
         );
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => Profile()),
-          );
-        }
-        debugPrint('Email changed Email to $emailChangeData');
+        return;
+      }
+
+      String newEmail =
+          _emailChangeFormKey.currentState!.fields['Email']!.value;
+
+      try {
+        // Prompt user to re-enter password
+        String? password = await showDialog<String>(
+          context: context,
+          builder: (context) {
+            TextEditingController passwordController = TextEditingController();
+            return AlertDialog(
+              title: Text("Re-authentication Required"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Please enter your password to continue."),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(labelText: "Password"),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, null),
+                  child: Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () =>
+                      Navigator.pop(context, passwordController.text),
+                  child: Text("Confirm"),
+                ),
+              ],
+            );
+          },
+        );
+
+        if (password == null || password.isEmpty) return; // User canceled
+
+        // Reauthenticate the user
+        AuthCredential credential = EmailAuthProvider.credential(
+          email: user.email!,
+          password: password,
+        );
+
+        await user.reauthenticateWithCredential(credential);
+
+        // After successful reauthentication, proceed with email change
+        await user.verifyBeforeUpdateEmail(newEmail);
+
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Success"),
+            content:
+                Text("A verification email has been sent to your new email."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Profile(),
+                    ),
+                  );
+                },
+                child: Text("OK"),
+              ),
+            ],
+          ),
+        );
       } catch (e) {
-        setState(() {
-          emailChangeFailed = true;
-        });
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Error"),
+            content: Text("An error occurred: ${e.toString()}"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("OK"),
+              ),
+            ],
+          ),
+        );
       }
     }
   }
-
-  bool emailChangeFailed = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text(
-          'Change Email',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 25,
-          ),
-        ),
         leading: IconButton(
-          onPressed: (() {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => Profile()),
-            );
-          }),
           icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              return Profile();
+            }));
+          },
         ),
+        title: Text("Change Email"),
+        actions: [
+          IconButton(
+            icon: Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: Icon(Icons.check),
+            ),
+            onPressed: () {
+              changeEmail(context);
+            },
+          ),
+        ],
       ),
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(20.0),
+          Container(
+            padding: EdgeInsets.all(20),
             child: FormBuilder(
-              key: _emailChangeKey,
+              key: _emailChangeFormKey,
               child: FormBuilderTextField(
                 keyboardType: TextInputType.emailAddress,
                 enableSuggestions: true,
-                name: "New Email *",
+                name: "Email *",
                 onTapOutside: (event) {
                   FocusScope.of(context).unfocus();
                 },
                 decoration: InputDecoration(
-                  label:
-                      const Text("New Email *", style: TextStyle(fontSize: 18)),
+                  label: const Text("Email *", style: TextStyle(fontSize: 18)),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.grey),
                   ),
                 ),
                 validator: FormBuilderValidators.compose([
                   FormBuilderValidators.required(),
+                  FormBuilderValidators.email(),
                 ]),
+                autovalidateMode: AutovalidateMode.onUnfocus,
               ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.all(5),
-            child: Text(emailChangeFailed
-                ? "Email change failed. Please try again."
-                : ""),
-          ),
-          ElevatedButton(
-            onPressed: (() {
-              if (_emailChangeKey.currentState!.saveAndValidate()) {
-                changeEmail();
-              }
-            }),
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all<Color>(
-                  Theme.of(context).colorScheme.primary),
-              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  LucideIcons.pen,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
-                SizedBox(width: 10),
-                Text(
-                  "Change Email",
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
-                ),
-              ],
             ),
           ),
         ],
