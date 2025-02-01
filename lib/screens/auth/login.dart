@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/screens/auth/register.dart';
 import 'package:scientry/screens/homepage.dart';
+import 'package:scientry/static/processing_page.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -29,56 +30,28 @@ class LoginState extends State<Login> {
     super.dispose();
   }
 
+  final processingText = "Logging in...";
   void _loginUser() async {
     if (_loginFormKey.currentState!.saveAndValidate()) {
-      showDialog(
-        context: context,
-        builder: (context) => Scaffold(
-          body: Center(
-            child: Container(
-              height: double.infinity,
-              width: double.infinity,
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Lottie.asset(
-                    "assets/lottie/processing.json",
-                    width: 300,
-                    height: 300,
-                    fit: BoxFit.contain,
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    "Logging you in...",
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-    try {
-      var userEmail = _loginFormKey.currentState?.fields['Email *']?.value;
-      var userPassword =
-          _loginFormKey.currentState?.fields['Password *']?.value;
-      FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: userEmail,
-        password: userPassword,
-      );
-      if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => HomePage()),
+      ProcessingPage(processingText: processingText);
+      try {
+        var userEmail = _loginFormKey.currentState?.fields['Email *']?.value;
+        var userPassword =
+            _loginFormKey.currentState?.fields['Password *']?.value;
+        FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: userEmail,
+          password: userPassword,
         );
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => HomePage()),
+          );
+        }
+      } catch (e) {
+        _loginFailed();
       }
-    } catch (e) {
+    } else {
       _loginFailed();
     }
   }

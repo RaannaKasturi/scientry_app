@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/screens/auth/login.dart';
 import 'package:scientry/screens/auth/register.dart';
+import 'package:scientry/screens/profile.dart';
 
 Column drawer(BuildContext context, isLoggedIn) {
   late final String? email;
@@ -14,8 +15,12 @@ Column drawer(BuildContext context, isLoggedIn) {
     try {
       User? user = FirebaseAuth.instance.currentUser;
       email = user!.email;
-      name = user.displayName ?? "Add your name";
-      image = user.photoURL ?? "assets/images/john_doe.jpeg";
+      name = user.displayName?.isNotEmpty == true
+          ? user.displayName!
+          : "Add your name";
+      image = user.photoURL?.isNotEmpty == true
+          ? user.photoURL!
+          : "assets/images/john_doe.jpeg";
     } catch (e) {
       isLoggedIn = false;
     }
@@ -74,7 +79,14 @@ Column drawer(BuildContext context, isLoggedIn) {
                       flex: 1,
                       child: IconButton(
                         iconSize: 30,
-                        onPressed: (() {}),
+                        onPressed: (() {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Profile(),
+                            ),
+                          );
+                        }),
                         icon: Icon(LucideIcons.circleUserRound),
                       ),
                     ),

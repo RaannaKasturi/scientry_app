@@ -5,7 +5,7 @@ import 'package:scientry/screens/homepage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -15,20 +15,21 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Scientry',
-        theme: ThemeData(
-          fontFamily: GoogleFonts.getFont("Syne").fontFamily,
-          buttonTheme: ButtonThemeData(
-            buttonColor: Theme.of(context).colorScheme.primary,
-            textTheme: ButtonTextTheme.primary,
-            shape: BeveledRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+      title: 'Scientry',
+      theme: ThemeData(
+        fontFamily: GoogleFonts.getFont("Syne").fontFamily,
+        buttonTheme: ButtonThemeData(
+          buttonColor: Theme.of(context).colorScheme.primary,
+          textTheme: ButtonTextTheme.primary,
+          shape: BeveledRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
           ),
-          colorScheme:
-              ColorScheme.fromSeed(seedColor: Color.fromRGBO(28, 35, 99, 100)),
-          useMaterial3: true,
         ),
-        home: HomePage());
+        colorScheme:
+            ColorScheme.fromSeed(seedColor: Color.fromRGBO(28, 35, 99, 100)),
+        useMaterial3: true,
+      ),
+      home: HomePage(),
+    );
   }
 }
