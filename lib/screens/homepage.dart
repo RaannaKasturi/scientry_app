@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:scientry/static/carousel.dart';
 import 'package:http/http.dart' as http;
 import 'package:scientry/static/drawer.dart';
@@ -25,6 +27,7 @@ class _HomePageState extends State<HomePage> {
   late SharedPreferences prefs;
   List<Post> cachedPosts = [];
   List<Categories> cachedCategories = [];
+  List<CarouselPost> cachedCarouselPosts = [];
   bool latestDataFound = false;
 
   @override
@@ -37,6 +40,7 @@ class _HomePageState extends State<HomePage> {
     prefs = await SharedPreferences.getInstance();
     _loadCachedData();
     fetchNewData();
+    showLatesPostsDialog;
   }
 
   void _loadCachedData() {
@@ -52,18 +56,27 @@ class _HomePageState extends State<HomePage> {
           .map((json) => Categories.fromJson(jsonDecode(json)))
           .toList();
     }
+    if (prefs.containsKey('cachedCarouselPosts')) {
+      List<String> carouselPostsJson =
+          prefs.getStringList('cachedCarouselPosts') ?? [];
+      cachedCarouselPosts = carouselPostsJson
+          .map((json) => CarouselPost.fromJson(jsonDecode(json)))
+          .toList();
+    }
     setState(() {});
   }
 
-  Future<(List<Post>, List<Categories>)> getData(bool forceFetchData) async {
+  Future<(List<Post>, List<Categories>, List<CarouselPost>)> getData(
+      bool forceFetchData) async {
     if (!forceFetchData &&
         cachedPosts.isNotEmpty &&
         cachedCategories.isNotEmpty) {
-      return (cachedPosts, cachedCategories);
+      return (cachedPosts, cachedCategories, cachedCarouselPosts);
     }
 
     List<Post> posts = [];
     List<Categories> categories = [];
+    List<CarouselPost> carouselPosts = [];
     dynamic jsondata;
 
     try {
@@ -75,6 +88,7 @@ class _HomePageState extends State<HomePage> {
       jsondata = json.decode(jsonData);
 
       var feed = jsondata["feed"]['entry'];
+      int i = 0, j = 1;
       for (var post in feed) {
         var imageData = extractImage(post['content']['\$t']) ?? '';
         posts.add(Post(
@@ -84,6 +98,20 @@ class _HomePageState extends State<HomePage> {
           link: post['link']
               .firstWhere((link) => link['rel'] == 'alternate')['href'],
         ));
+        if (i > 5 && i % 3 == 0 && j <= 7) {
+          if (Random().nextBool()) {
+            carouselPosts.add(CarouselPost(
+              id: j,
+              title: post['title']['\$t'],
+              image: imageData,
+              category: post['category'][0]['term'],
+              link: post['link']
+                  .firstWhere((link) => link['rel'] == 'alternate')['href'],
+            ));
+            j++;
+          }
+        }
+        i++;
       }
 
       for (var category in jsondata["feed"]['category']) {
@@ -101,6 +129,8 @@ class _HomePageState extends State<HomePage> {
           posts.map((post) => jsonEncode(post.toJson())).toList());
       prefs.setStringList('cachedCategories',
           categories.map((category) => jsonEncode(category.toJson())).toList());
+      prefs.setStringList('cachedCarouselPosts',
+          carouselPosts.map((post) => jsonEncode(post.toJson())).toList());
     } catch (e) {
       showDialog(
         context: context,
@@ -117,7 +147,7 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    return (posts, categories);
+    return (posts, categories, carouselPosts);
   }
 
   String? extractImage(String content) {
@@ -130,9 +160,37 @@ class _HomePageState extends State<HomePage> {
     var data = await getData(true);
     setState(() {
       latestDataFound = true;
-      cachedPosts = data.$1;
-      cachedCategories = data.$2;
     });
+    showLatesPostsDialog(data);
+  }
+
+  showLatesPostsDialog(data) {
+    if (latestDataFound) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Latest Posts"),
+          content: Text("Latest posts have been fetched. Refesh Feed?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: (() {
+                setState(() {
+                  latestDataFound = true;
+                  cachedPosts = data.$1;
+                  cachedCategories = data.$2;
+                });
+                Navigator.pop(context);
+              }),
+              child: Text("Refresh"),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
@@ -156,7 +214,8 @@ class _HomePageState extends State<HomePage> {
           if (!snapshot.hasData || !snapshot.data!) {
             return NoInternet();
           }
-          return FutureBuilder<(List<Post>, List<Categories>)>(
+          return FutureBuilder<
+              (List<Post>, List<Categories>, List<CarouselPost>)>(
             future: getData(false),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting &&
@@ -170,16 +229,17 @@ class _HomePageState extends State<HomePage> {
 
               var posts = snapshot.data!.$1;
               var categories = snapshot.data!.$2;
+              var carouselPosts = snapshot.data!.$3;
 
               return SingleChildScrollView(
                 padding: EdgeInsets.all(10),
                 child: Column(
                   children: [
                     Carousel(
-                        carouselPosts: posts
+                        carouselPosts: carouselPosts
                             .take(7)
                             .map((post) => CarouselPost(
-                                  id: posts.indexOf(post) + 1,
+                                  id: post.id,
                                   title: post.title,
                                   image: post.image,
                                   category: post.category,
