@@ -14,12 +14,54 @@ class DefaultDrawer extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.only(top: 50, bottom: 30),
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      LucideIcons.brainCircuit,
+                      size: 45,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    Text(
+                      'Scientry',
+                      style: TextStyle(
+                        fontSize: 40,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+                Divider(
+                  indent: 40,
+                  endIndent: 40,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                Text(
+                  'Science Simplified,\nKnowledge Amplified',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 10,
+          ),
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
                 ListTile(
-                  leading: Icon(Icons.home),
+                  leading: Icon(LucideIcons.house),
                   title: Text(
                     'Home',
                     style: TextStyle(fontSize: 25),
@@ -30,9 +72,9 @@ class DefaultDrawer extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.info),
+                  leading: Icon(LucideIcons.search),
                   title: Text(
-                    'About',
+                    'Search',
                     style: TextStyle(fontSize: 25),
                   ),
                   onTap: () {
@@ -40,9 +82,29 @@ class DefaultDrawer extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.contact_mail),
+                  leading: Icon(LucideIcons.settings),
                   title: Text(
-                    'Contact',
+                    'Settings',
+                    style: TextStyle(fontSize: 25),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(LucideIcons.send),
+                  title: Text(
+                    'Request Paper',
+                    style: TextStyle(fontSize: 25),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(LucideIcons.messageCirclePlus),
+                  title: Text(
+                    'Request Feature',
                     style: TextStyle(fontSize: 25),
                   ),
                   onTap: () {
@@ -70,7 +132,7 @@ class DefaultDrawer extends StatelessWidget {
                           text: ' 2024 Scientry',
                           style: TextStyle(
                             fontSize: 20,
-                            color: Theme.of(context).colorScheme.primary,
+                            color: Theme.of(context).colorScheme.tertiary,
                           ),
                         ),
                       ],
@@ -90,7 +152,7 @@ class DefaultDrawer extends StatelessWidget {
                     text: 'Designed & Developed by Nayan Kasturi',
                     style: TextStyle(
                       fontSize: 15,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: Theme.of(context).colorScheme.secondary,
                     ),
                   ),
                 ),
@@ -106,43 +168,28 @@ class DefaultDrawer extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    IconButton(
-                      icon: Icon(
-                        LucideIcons.instagram,
-                        size: 30,
-                        color: Colors.purple,
+                    ElevatedButton.icon(
+                      label: Text(
+                        'Visit Site',
+                        style: TextStyle(
+                          fontSize: 25,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      onPressed: () {},
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        LucideIcons.mail,
-                        size: 30,
-                        color: Colors.red,
-                      ),
-                      onPressed: () {},
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        LucideIcons.linkedin,
-                        size: 30,
-                        color: Colors.blue,
-                      ),
-                      onPressed: () {},
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        LucideIcons.youtube,
-                        size: 30,
-                        color: Colors.red,
-                      ),
-                      onPressed: () {},
-                    ),
-                    IconButton(
+                      style: ButtonStyle(
+                          padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+                              EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 10)),
+                          backgroundColor: WidgetStateProperty.all<Color>(
+                              Theme.of(context).colorScheme.primary),
+                          shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ))),
                       icon: Icon(
                         LucideIcons.globe,
                         size: 30,
-                        color: Colors.black,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
                       onPressed: () {
                         EasyLauncher.url(

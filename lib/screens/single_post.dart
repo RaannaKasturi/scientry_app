@@ -150,7 +150,7 @@ class SinglePost extends StatelessWidget {
                           ),
                           onPressed: (() async {
                             await Share.share(
-                              post.doilink,
+                              postURL,
                               subject: post.title,
                               sharePositionOrigin: Rect.fromCenter(
                                 width: 0.9 * MediaQuery.of(context).size.width,
