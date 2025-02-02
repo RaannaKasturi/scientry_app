@@ -97,9 +97,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      drawer: Drawer(
-        child: LoginState(),
-      ),
+      drawer: DefaultDrawer(),
       body: FutureBuilder<bool>(
         future: checkConnection(),
         builder: (context, snapshot) {
