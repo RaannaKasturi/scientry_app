@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:scientry/static/carousel.dart';
 import 'package:http/http.dart' as http;
 import 'package:scientry/static/drawer.dart';
@@ -40,7 +38,6 @@ class _HomePageState extends State<HomePage> {
     prefs = await SharedPreferences.getInstance();
     _loadCachedData();
     fetchNewData();
-    showLatesPostsDialog;
   }
 
   void _loadCachedData() {
@@ -70,7 +67,8 @@ class _HomePageState extends State<HomePage> {
       bool forceFetchData) async {
     if (!forceFetchData &&
         cachedPosts.isNotEmpty &&
-        cachedCategories.isNotEmpty) {
+        cachedCategories.isNotEmpty &&
+        cachedCarouselPosts.isNotEmpty) {
       return (cachedPosts, cachedCategories, cachedCarouselPosts);
     }
 
@@ -99,21 +97,18 @@ class _HomePageState extends State<HomePage> {
               .firstWhere((link) => link['rel'] == 'alternate')['href'],
         ));
         if (i > 5 && i % 3 == 0 && j <= 7) {
-          if (Random().nextBool()) {
-            carouselPosts.add(CarouselPost(
-              id: j,
-              title: post['title']['\$t'],
-              image: imageData,
-              category: post['category'][0]['term'],
-              link: post['link']
-                  .firstWhere((link) => link['rel'] == 'alternate')['href'],
-            ));
-            j++;
-          }
+          carouselPosts.add(CarouselPost(
+            id: j,
+            title: post['title']['\$t'],
+            image: imageData,
+            category: post['category'][0]['term'],
+            link: post['link']
+                .firstWhere((link) => link['rel'] == 'alternate')['href'],
+          ));
+          j++;
         }
         i++;
       }
-
       for (var category in jsondata["feed"]['category']) {
         if (category['term'] != "ZZZZZZZZZ") {
           categories.add(Categories(
@@ -124,7 +119,6 @@ class _HomePageState extends State<HomePage> {
         }
       }
 
-      // Cache the data
       prefs.setStringList('cachedPosts',
           posts.map((post) => jsonEncode(post.toJson())).toList());
       prefs.setStringList('cachedCategories',
@@ -158,10 +152,14 @@ class _HomePageState extends State<HomePage> {
 
   fetchNewData() async {
     var data = await getData(true);
-    setState(() {
-      latestDataFound = true;
-    });
-    showLatesPostsDialog(data);
+    var newPosts = data.$1;
+    if (newPosts.isNotEmpty &&
+        (cachedPosts.isEmpty || newPosts[0].title != cachedPosts[0].title)) {
+      setState(() {
+        latestDataFound = true;
+      });
+      showLatesPostsDialog(data);
+    }
   }
 
   showLatesPostsDialog(data) {
@@ -182,6 +180,7 @@ class _HomePageState extends State<HomePage> {
                   latestDataFound = true;
                   cachedPosts = data.$1;
                   cachedCategories = data.$2;
+                  cachedCarouselPosts = data.$3;
                 });
                 Navigator.pop(context);
               }),
@@ -206,6 +205,12 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {},
+          ),
+        ],
       ),
       drawer: DefaultDrawer(),
       body: FutureBuilder<bool>(
@@ -223,13 +228,11 @@ class _HomePageState extends State<HomePage> {
                 return LoadingPosts();
               } else if (snapshot.hasError) {
                 return Center(child: Text("Error loading data"));
-              } else if (!snapshot.hasData || snapshot.data!.$1.isEmpty) {
-                return Center(child: Text("No posts available"));
               }
 
-              var posts = snapshot.data!.$1;
-              var categories = snapshot.data!.$2;
-              var carouselPosts = snapshot.data!.$3;
+              var posts = snapshot.data?.$1 ?? [];
+              var categories = snapshot.data?.$2 ?? [];
+              var carouselPosts = snapshot.data?.$3 ?? [];
 
               return SingleChildScrollView(
                 padding: EdgeInsets.all(10),
