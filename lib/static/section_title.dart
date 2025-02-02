@@ -40,8 +40,7 @@ class SectionTitle extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
               softWrap: true,
-              overflow: TextOverflow
-                  .visible, // or TextOverflow.visible if you want no truncation
+              overflow: TextOverflow.visible,
             ),
           ),
           ElevatedButton(
