@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
+import 'package:scientry/screens/single_post.dart';
 
 class CarouselPost {
   final int id;
@@ -99,7 +99,12 @@ class _CarouselState extends State<Carousel> {
 
                   return InkWell(
                     onTap: () {
-                      EasyLauncher.url(url: item.link);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SinglePost(postURL: item.link),
+                        ),
+                      );
                     },
                     child: Stack(
                       children: [

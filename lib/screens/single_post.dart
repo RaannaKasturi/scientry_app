@@ -1,121 +1,56 @@
+import 'dart:convert';
+import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:latext/latext.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:scientry/screens/mindmap_view.dart';
 import 'package:scientry/static/no_internet.dart';
 import 'package:scientry/static/processing_page.dart';
 import 'package:simple_connection_checker/simple_connection_checker.dart';
 
-class SinglePost extends StatefulWidget {
+class SinglePost extends StatelessWidget {
   final String postURL;
   const SinglePost({super.key, required this.postURL});
 
-  @override
-  State<SinglePost> createState() => _SinglePostState();
-}
+  String extractCategory(pageContent) {
+    var categoryLinks = pageContent.querySelectorAll("a.label-link");
+    categoryLinks
+        .map((e) => e.text.trim())
+        .where((category) => category != 'ZZZZZZZZZ')
+        .toList();
+    return categoryLinks.isNotEmpty
+        ? categoryLinks.first.text.trim()
+        : 'Unknown';
+  }
 
-class PostData {
-  final String title;
-  final String image;
-  final String category;
-  final String summary;
-  final String mindmap;
-  final String citation;
-
-  PostData(
-      {required this.title,
-      required this.image,
-      required this.category,
-      required this.summary,
-      required this.mindmap,
-      required this.citation});
-
-  factory PostData.fromJson(Map<String, dynamic> json) {
+  Future<PostData> fetchPostData() async {
+    final response = await http.get(Uri.parse(postURL));
+    final doc = parser.parse(response.body);
     return PostData(
-      title: json['title'],
-      image: json['image'],
-      category: json['category'],
-      summary: json['summary'],
-      mindmap: json['mindmap'],
-      citation: json['citation'],
+      title: doc.querySelector('img#paper_image')!.attributes['alt']!,
+      image: doc.querySelector('img#paper_image')!.attributes['src']!,
+      category: extractCategory(doc),
+      summary: doc.querySelector('div#paper_summary')!.innerHtml.trim(),
+      mindmap: doc
+              .querySelector('div#paper_mindmap script[type="text/template"]')
+              ?.innerHtml
+              .trim() ??
+          '',
+      citation: doc.querySelector('div#paper_citation')!.text.trim(),
+      doilink: extractDOI(doc.querySelector('div#paper_citation')!.text.trim()),
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'title': title,
-        'image': image,
-        'category': category,
-        'summary': summary,
-        'mindmap': mindmap,
-        'citation': citation,
-      };
-}
-
-class _SinglePostState extends State<SinglePost> {
-  Future<PostData>? postDetails;
-
-  String? extractImage(String content) {
-    var imgRegex = '<img[^>]+id="paper_image"[^>]+src="([^"]+)';
-    var match = RegExp(imgRegex).firstMatch(content);
-    return match?.group(1);
+  static String extractDOI(String citation) {
+    var doi = citation.split("http")[1].split(" ")[0];
+    return "http$doi".trim();
   }
 
-  fetchPostData(BuildContext context) {
-    http.get(Uri.parse(widget.postURL)).then((response) {
-      var doc = parser.parse(response.body);
-      var title = doc.querySelector("h1")!.text;
-      var summary =
-          doc.querySelector('div#paper_summary')!.innerHtml.toString().trim();
-      var mindmap =
-          doc.querySelector('div#paper_mindmap')!.innerHtml.toString().trim();
-      var image = doc.querySelector('img#paper_image')!.innerHtml.toString();
-      debugPrint(image.toString());
-      var citation = doc.querySelector('div#paper_citation')!.text.trim();
-
-      setState(() {
-        postDetails = Future.value(
-          PostData(
-            title: title,
-            image: "https://i.ibb.co/xXbZNP6/e2d7a40ad097.jpg",
-            category: "Physics",
-            summary: summary,
-            mindmap: mindmap,
-            citation: citation,
-          ),
-        );
-      });
-    }).catchError((error) {
-      showDialog(
-        context: context,
-        builder: ((context) {
-          return AlertDialog(
-            title: Text("Error"),
-            content: Text("Failed to fetch post data"),
-            actions: [
-              TextButton(
-                onPressed: (() {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                }),
-                child: Text("OK"),
-              ),
-            ],
-          );
-        }),
-      );
-    });
-  }
-
-  checkInternet() async {
-    bool isConnected = await SimpleConnectionChecker.isConnectedToInternet();
-    return isConnected;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchPostData(context);
+  Future<bool> checkInternet() async {
+    return await SimpleConnectionChecker.isConnectedToInternet();
   }
 
   @override
@@ -129,121 +64,156 @@ class _SinglePostState extends State<SinglePost> {
         if (internetSnapshot.hasError || internetSnapshot.data == false) {
           return NoInternet();
         }
-        return FutureBuilder(
-          future: postDetails,
+        return FutureBuilder<PostData>(
+          future: fetchPostData(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return ProcessingPage(
                   processingText: "Loading Post. Please Wait...");
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else if (snapshot.hasData) {
-              return Scaffold(
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                body: CustomScrollView(
-                  slivers: [
-                    SliverAppBar(
-                      leading: IconButton(
-                        onPressed: (() {
-                          Navigator.pop(context);
-                        }),
-                        style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all(
-                            Theme.of(context).colorScheme.surface,
-                          ),
-                        ),
-                        icon: Icon(
-                          Icons.arrow_back,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      title: Text(
-                        snapshot.data!.title,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      backgroundColor: Theme.of(context).colorScheme.surface,
-                      expandedHeight: 250,
-                      flexibleSpace: FlexibleSpaceBar(
-                        background: Image.network(
-                          "https://i.ibb.co/xXbZNP6/e2d7a40ad097.jpg",
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      pinned: true,
-                    ),
-                    SliverToBoxAdapter(
-                      child: Container(
-                          padding: EdgeInsets.all(10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              LaTexT(
-                                laTeXCode: Text(
-                                  snapshot.data!.title,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 30,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(20.0),
-                                child: Divider(
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                ),
-                                child: HtmlWidget(
-                                  snapshot.data!.summary,
-                                  textStyle: TextStyle(
-                                    fontSize: 17,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(30),
-                                child: Divider(
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                ),
-                                child: HtmlWidget(
-                                  '''<h2>Citation</h2>''',
-                                  textStyle: TextStyle(
-                                    fontSize: 17,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: LaTexT(
-                                    laTeXCode: Text(snapshot.data!.citation)),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(20.0),
-                              )
-                            ],
-                          )),
-                    )
-                  ],
-                ),
-              );
-            } else {
+            }
+            if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            }
+            if (!snapshot.hasData) {
               return ProcessingPage(
                   processingText: "Loading Post. Please Wait...");
             }
+            final post = snapshot.data!;
+            return Scaffold(
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              body: CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    automaticallyImplyLeading: true,
+                    leading: IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(Icons.arrow_back,
+                          color: Theme.of(context).colorScheme.onSurface),
+                    ),
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    expandedHeight: 250,
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: post.image.startsWith('http')
+                          ? Image.network(post.image,
+                              fit: BoxFit.cover, width: double.infinity)
+                          : Image.memory(
+                              base64Decode(post.image.split(",")[1]),
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Text("Error loading image: $error"),
+                            ),
+                      title: InkWell(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Text(
+                            snapshot.data!.category,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                    pinned: true,
+                    actions: [
+                      IconButton(
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all(
+                              Theme.of(context).colorScheme.surface),
+                        ),
+                        onPressed: () => EasyLauncher.url(
+                            url: post.doilink, mode: Mode.platformDefault),
+                        icon: Icon(Icons.link,
+                            color: Theme.of(context).colorScheme.onSurface),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(Icons.share,
+                            color: Theme.of(context).colorScheme.onSurface),
+                      ),
+                    ],
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          LaTexT(
+                            laTeXCode: Text(post.title,
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                )),
+                          ),
+                          Divider(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              thickness: 1,
+                              height: 40),
+                          HtmlWidget(post.summary,
+                              textStyle: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w500,
+                              )),
+                          Divider(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              thickness: 1,
+                              height: 40),
+                          HtmlWidget('<h2>Citation</h2>',
+                              textStyle: TextStyle(
+                                  fontSize: 17, fontWeight: FontWeight.w500)),
+                          LaTexT(
+                              laTeXCode: Text(post.citation,
+                                  style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w500))),
+                          SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: (() {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MindmapView(
+                          mindmapData: '# ${post.title}\n${post.mindmap}'),
+                    ),
+                  );
+                }),
+                child: Icon(LucideIcons.listTree),
+              ),
+            );
           },
         );
       },
     );
   }
+}
+
+class PostData {
+  final String title, image, category, summary, mindmap, citation, doilink;
+
+  PostData(
+      {required this.title,
+      required this.image,
+      required this.category,
+      required this.summary,
+      required this.mindmap,
+      required this.citation,
+      required this.doilink});
 }

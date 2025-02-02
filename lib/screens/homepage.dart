@@ -126,19 +126,21 @@ class _HomePageState extends State<HomePage> {
       prefs.setStringList('cachedCarouselPosts',
           carouselPosts.map((post) => jsonEncode(post.toJson())).toList());
     } catch (e) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text("Error"),
-          content: Text("An error occurred while fetching data"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("OK"),
-            ),
-          ],
-        ),
-      );
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Error"),
+            content: Text("An error occurred while fetching data"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("OK"),
+              ),
+            ],
+          ),
+        );
+      }
     }
 
     return (posts, categories, carouselPosts);

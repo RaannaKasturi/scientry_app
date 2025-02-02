@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
+import 'package:scientry/screens/single_post.dart';
 
 class Post {
   final String title;
@@ -57,7 +57,14 @@ class PostCard extends StatelessWidget {
         ),
       ),
       child: InkWell(
-        onTap: () => EasyLauncher.url(url: link),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SinglePost(postURL: link),
+            ),
+          );
+        },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

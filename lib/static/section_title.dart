@@ -55,9 +55,7 @@ class SectionTitle extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              EasyLauncher.url(
-                url: link,
-              );
+              EasyLauncher.url(url: link, mode: Mode.platformDefault);
             },
             child: Text('View More'),
           ),
