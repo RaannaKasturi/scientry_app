@@ -97,6 +97,7 @@ class PostCard extends StatelessWidget {
             Expanded(
               flex: 7,
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   RichText(
@@ -129,8 +130,10 @@ class PostCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
+                        softWrap: true,
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: 18,
+                          overflow: TextOverflow.ellipsis,
                           fontWeight: FontWeight.bold,
                         ),
                         maxLines: 3,
