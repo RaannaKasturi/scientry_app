@@ -87,6 +87,10 @@ class SinglePost extends StatelessWidget {
                     automaticallyImplyLeading: true,
                     leading: IconButton(
                       onPressed: () => Navigator.pop(context),
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(
+                            Theme.of(context).colorScheme.surface),
+                      ),
                       icon: Icon(Icons.arrow_back,
                           color: Theme.of(context).colorScheme.onSurface),
                     ),
@@ -136,10 +140,17 @@ class SinglePost extends StatelessWidget {
                         icon: Icon(Icons.link,
                             color: Theme.of(context).colorScheme.onSurface),
                       ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: Icon(Icons.share,
-                            color: Theme.of(context).colorScheme.onSurface),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: IconButton(
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStateProperty.all(
+                                Theme.of(context).colorScheme.surface),
+                          ),
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(Icons.share,
+                              color: Theme.of(context).colorScheme.onSurface),
+                        ),
                       ),
                     ],
                   ),
@@ -149,13 +160,16 @@ class SinglePost extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          LaTexT(
-                            laTeXCode: Text(post.title,
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                )),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: LaTexT(
+                              laTeXCode: Text(post.title,
+                                  textAlign: TextAlign.start,
+                                  style: TextStyle(
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
+                                  )),
+                            ),
                           ),
                           Divider(
                               color: Theme.of(context).colorScheme.onSurface,
@@ -178,7 +192,56 @@ class SinglePost extends StatelessWidget {
                                   style: TextStyle(
                                       fontSize: 17,
                                       fontWeight: FontWeight.w500))),
-                          SizedBox(height: 20),
+                          SizedBox(height: 50),
+                          Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Column(
+                              children: [
+                                Text(
+                                  "Disclaimer",
+                                  softWrap: true,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 15,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                  maxLines: 5,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 50,
+                                  ),
+                                  child: Divider(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                                Text(
+                                  "Content is developed using Artificial Intelligence. May not be accurate. Please Read paper to verify.",
+                                  softWrap: true,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 15,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                  ),
+                                  maxLines: 5,
+                                ),
+                                SizedBox(height: 75),
+                                Text(
+                                  "Happy Researching!",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -186,6 +249,7 @@ class SinglePost extends StatelessWidget {
                 ],
               ),
               floatingActionButton: FloatingActionButton(
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 onPressed: (() {
                   Navigator.push(
                     context,
@@ -195,7 +259,10 @@ class SinglePost extends StatelessWidget {
                     ),
                   );
                 }),
-                child: Icon(LucideIcons.listTree),
+                child: Icon(
+                  LucideIcons.listTree,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
               ),
             );
           },
