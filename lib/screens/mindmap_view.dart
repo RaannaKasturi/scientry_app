@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:mind_map/mind_map.dart';
 
 class Node {
@@ -13,11 +18,16 @@ class Node {
   }) : children = children ?? [];
 }
 
-class MindmapView extends StatelessWidget {
-  const MindmapView({super.key, required this.mindmapData});
+class MindmapView extends StatefulWidget {
+  MindmapView({super.key, required this.mindmapData});
 
   final String mindmapData;
 
+  @override
+  State<MindmapView> createState() => _MindmapViewState();
+}
+
+class _MindmapViewState extends State<MindmapView> {
   Node parseMindmapData(String data) {
     final lines = data.split('\n').map((line) => line.trimRight()).toList();
     if (lines.isEmpty) return Node(title: '', depth: 0);
@@ -62,16 +72,48 @@ class MindmapView extends StatelessWidget {
     return root;
   }
 
-  Widget buildNode(Node node) {
+  final GlobalKey _globalKey = GlobalKey();
+
+  Future<Uint8List> _capturePng() async {
+    try {
+      print('inside');
+      RenderRepaintBoundary? boundary = _globalKey.currentContext
+          ?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) {
+        throw Exception('Failed to find render object');
+      }
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) {
+        throw Exception('Failed to convert image to byte data');
+      }
+      var pngBytes = byteData.buffer.asUint8List();
+      var bs64 = base64Encode(pngBytes);
+      print(pngBytes);
+      print(bs64);
+      setState(() {});
+      return pngBytes;
+    } catch (e) {
+      print(e);
+      throw Exception('Failed to capture PNG');
+    }
+  }
+
+  Widget buildNode(Node node, BuildContext context) {
     if (node.children.isEmpty) {
       return Container(
         decoration: BoxDecoration(
-          color: Colors.grey,
+          color: Theme.of(context).colorScheme.tertiary,
           borderRadius: BorderRadius.circular(10),
         ),
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-        child: Text(node.title),
+        child: Text(
+          node.title,
+          style: TextStyle(
+              fontSize: 16, color: Theme.of(context).colorScheme.onTertiary),
+        ),
       );
     } else {
       return Row(
@@ -79,17 +121,25 @@ class MindmapView extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Colors.grey,
+              color: Theme.of(context).colorScheme.secondary,
               borderRadius: BorderRadius.circular(10),
             ),
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
             margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10)
                 .copyWith(right: 0),
-            child: Text(node.title),
+            child: Padding(
+              padding: const EdgeInsets.all(2.0),
+              child: Text(node.title,
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).colorScheme.onSecondary)),
+            ),
           ),
           MindMap(
             dotRadius: 4,
-            children: node.children.map(buildNode).toList(),
+            children: node.children
+                .map((child) => buildNode(child, context))
+                .toList(),
           ),
         ],
       );
@@ -98,36 +148,64 @@ class MindmapView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rootNode = parseMindmapData(mindmapData);
+    final rootNode = parseMindmapData(widget.mindmapData);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mindmap'),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
+    return RepaintBoundary(
+      key: _globalKey,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Mindmap'),
+        ),
+        floatingActionButton: FloatingActionButton(
+            onPressed: (() {
+              _capturePng();
+            }),
+            child: Icon(Icons.save)),
+        body: SafeArea(
           child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: Column(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(10),
+            scrollDirection: Axis.horizontal,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Container(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(30.0),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 10)
+                              .copyWith(right: 0),
+                          margin: const EdgeInsets.only(left: 10),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Text(
+                              rootNode.title,
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      MindMap(
+                        padding: const EdgeInsets.only(left: 50),
+                        dotRadius: 4,
+                        children: rootNode.children
+                            .map((child) => buildNode(child, context))
+                            .toList(),
+                      ),
+                    ],
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 10)
-                          .copyWith(right: 0),
-                  margin: const EdgeInsets.only(left: 10),
-                  child: Text(rootNode.title),
                 ),
-                MindMap(
-                  padding: const EdgeInsets.only(left: 50),
-                  dotRadius: 4,
-                  children: rootNode.children.map(buildNode).toList(),
-                ),
-              ],
+              ),
             ),
           ),
         ),

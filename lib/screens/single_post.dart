@@ -9,6 +9,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/screens/mindmap_view.dart';
 import 'package:scientry/static/no_internet.dart';
 import 'package:scientry/static/processing_page.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:simple_connection_checker/simple_connection_checker.dart';
 
 class SinglePost extends StatelessWidget {
@@ -147,7 +148,18 @@ class SinglePost extends StatelessWidget {
                             backgroundColor: WidgetStateProperty.all(
                                 Theme.of(context).colorScheme.surface),
                           ),
-                          onPressed: () => Navigator.pop(context),
+                          onPressed: (() async {
+                            await Share.share(
+                              post.doilink,
+                              subject: post.title,
+                              sharePositionOrigin: Rect.fromCenter(
+                                width: 0.9 * MediaQuery.of(context).size.width,
+                                height:
+                                    0.7 * MediaQuery.of(context).size.height,
+                                center: Offset(100, 100),
+                              ),
+                            );
+                          }),
                           icon: Icon(Icons.share,
                               color: Theme.of(context).colorScheme.onSurface),
                         ),
@@ -163,12 +175,14 @@ class SinglePost extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.only(top: 10),
                             child: LaTexT(
-                              laTeXCode: Text(post.title,
-                                  textAlign: TextAlign.start,
-                                  style: TextStyle(
-                                    fontSize: 25,
-                                    fontWeight: FontWeight.bold,
-                                  )),
+                              laTeXCode: Text(
+                                post.title,
+                                textAlign: TextAlign.start,
+                                style: TextStyle(
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
                           Divider(
