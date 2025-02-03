@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:html_unescape/html_unescape.dart';
 import 'package:mind_map/mind_map.dart';
 
 class Node {
@@ -24,6 +25,7 @@ class MindmapView extends StatefulWidget {
 
 class _MindmapViewState extends State<MindmapView> {
   Node parseMindmapData(String data) {
+    data = unescapeHTMLContent(data);
     final lines = data.split('\n').map((line) => line.trimRight()).toList();
     if (lines.isEmpty) return Node(title: '', depth: 0);
 
@@ -63,6 +65,11 @@ class _MindmapViewState extends State<MindmapView> {
     }
 
     return root;
+  }
+
+  String unescapeHTMLContent(String htmlContent) {
+    var unescape = HtmlUnescape();
+    return unescape.convert(htmlContent).trim();
   }
 
   Widget buildNode(Node node, BuildContext context) {

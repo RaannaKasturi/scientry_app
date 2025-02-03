@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
+import 'package:html_unescape/html_unescape.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -52,6 +53,11 @@ class SinglePost extends StatelessWidget {
 
   Future<bool> checkInternet() async {
     return await SimpleConnectionChecker.isConnectedToInternet();
+  }
+
+  String unescapeHTMLContent(String htmlContent) {
+    var unescape = HtmlUnescape();
+    return unescape.convert(htmlContent).trim();
   }
 
   @override
@@ -202,7 +208,8 @@ class SinglePost extends StatelessWidget {
                               textStyle: TextStyle(
                                   fontSize: 17, fontWeight: FontWeight.w500)),
                           LaTexT(
-                              laTeXCode: Text(post.citation,
+                              laTeXCode: Text(
+                                  unescapeHTMLContent(post.citation),
                                   style: TextStyle(
                                       fontSize: 17,
                                       fontWeight: FontWeight.w500))),
