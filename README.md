@@ -1,16 +1,50 @@
-# scientry
+# Scientry App: Science Simplified, Knowledge Amplified
 
-A new Flutter project.
+**Note:** _This project is the part of final year dissertation/thesis project, It isn't meant for any financial gains apart for the ads that will be played to sponsor my other projects. This project is purely for educational purposes only._
 
-## Getting Started
+## 📖 Table of Contents
+- [About Scientry](#about-scientry)
+- [Aims and Objectives](#aims-and-objectives)
+- [Features](#features)
+- [License](#license)
+- [Contact](#contact)
+- [Acknowledgments and Credits](#acknowledgments-and-credits)
 
-This project is a starting point for a Flutter application.
+## About Scientry
+Scientry generates AI-powered summaries and mindmaps from research papers sourced from platforms like [ArXiv](https://arxiv.org/) and [PubMed Central](https://pmc.ncbi.nlm.nih.gov/). The Android and iOS applications are built using Dart & Flutter, ensuring a seamless cross-platform experience.
 
-A few resources to get you started if this is your first Flutter project:
+## Aims and Objectives
+- **Global Accessibility:** Democratize research by making scholarly data available to everyone, everywhere.
+- **On-the-Go Convenience:** Provide quick, mobile-friendly access to research information anytime, anywhere.
+- **Simplified Insights:** Transform complex research data into intuitive, visually engaging mindmaps that facilitate easier understanding.
+- **Enhanced Engagement:** Encourage active exploration and comprehension of research papers among users.
+- **Continuous Updates:** Keep users informed with the latest advancements and breakthroughs across diverse fields of study.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Features
+- [x] Cross-platform support (Android & iOS)
+- [x] AI-generated summaries of research papers
+- [x] Interactive mindmaps for better understanding
+- [x] Research papers sourced from [ArXiv](https://arxiv.org/) & [PubMed Central](https://pmc.ncbi.nlm.nih.gov/)
+- [x] Cached resources for faster access
+- [x] Share content across multiple applications
+- [x] Direct links to full research papers
+- [ ] Built-in bookmarking for easy access using local storage
+- [ ] Dark mode support
+- [ ] User Register, Login and Management using Firebase/Supabase/Appwrite
+- [ ] Storing bookmarks in dtabase instead of local storage
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## License  
+This project is licensed under the AGPL License - see the [LICENSE](LICENSE) file for details.  
+
+## Contact
+For any queries, feel free to reach out:
+- **Email:** raannakasturi@gmail.com
+
+## Acknowledgments and Credits
+- Special thanks to [ArXiv](https://arxiv.org/) and [PubMed Central](https://pmc.ncbi.nlm.nih.gov/) for making research papers accessible.
+- Mrs. Sermarani Saravanan (Asst. Prof. Dept. of Bioinformatics, Khalsa College of Arts, Science & Commerce, Mumbai) for their guidance and supporting the cause.
+
+![GitHub repo size](https://img.shields.io/github/repo-size/raannakasturi/scientry)
+![GitHub stars](https://img.shields.io/github/stars/raannakasturi/scientry?style=social)
+![GitHub forks](https://img.shields.io/github/forks/raannakasturi/scientry?style=social)
+![License](https://img.shields.io/github/license/raannakasturi/scientry)
