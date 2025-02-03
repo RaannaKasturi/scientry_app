@@ -42,7 +42,7 @@ For any queries, feel free to reach out:
 - **Email:** raannakasturi@gmail.com
 
 ## Citation
-Kasturi, N. (2025). Scientry App [Mobile Application]. https://github.com/RaannaKasturi/scientry_app
+Kasturi, N. (2025). Scientry App [Computer software]. https://github.com/RaannaKasturi/scientry_app
 
 ## Acknowledgments and Credits
 - Special thanks to [ArXiv](https://arxiv.org/) and [PubMed Central](https://pmc.ncbi.nlm.nih.gov/) for making research papers accessible.
