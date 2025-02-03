@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Kasturi"
+  given-names: "Nayan"
+  orcid: "https://orcid.org/0009-0005-4775-4197"
+title: "Scientry App"
+// version: 1.0.0
+// doi: 10.5281/zenodo.1234
+date-released: 2025-02-02
+url: "https://github.com/RaannaKasturi/scientry_app"
