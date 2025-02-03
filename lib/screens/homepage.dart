@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:http/http.dart' as http;
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/front/categories_posts_list.dart';
@@ -16,43 +17,26 @@ import 'package:xml2json/xml2json.dart';
 import 'package:simple_connection_checker/simple_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// ---------------------------------------------------------------------------
-/// TOP‑LEVEL FUNCTION TO PERFORM ALL HEAVY WORK IN AN ISOLATE
-///
-/// This function does the following:
-///  1. Makes an HTTP GET request to the feed URL.
-///  2. Parses the returned XML using xml2json.
-///  3. Converts the XML to JSON and extracts the feed data.
-///  4. Iterates through the feed to extract posts, carousel posts, and categories.
-///  5. Sends the result back via the provided SendPort.
-/// ---------------------------------------------------------------------------
 void fetchAndProcessData(Map message) async {
   final SendPort sendPort = message['sendPort'];
   const String url =
       "https://proxy.wafflehacker.io/?destination=https://thescientry.blogspot.com/feeds/posts/default?max-results=100";
-
   try {
     final response = await http.get(Uri.parse(url));
     if (response.statusCode != 200) {
       throw Exception("HTTP error: ${response.statusCode}");
     }
-
     final Xml2Json xml2json = Xml2Json();
     xml2json.parse(response.body);
     final String gdata = xml2json.toGData();
     final Map<String, dynamic> jsondata = json.decode(gdata);
-
     List<Map<String, dynamic>> postsList = [];
     List<Map<String, dynamic>> carouselPostsList = [];
     List<Map<String, dynamic>> categoriesList = [];
-
-    // RegExp to extract image URL from the post content.
     final RegExp imgRegex = RegExp(
       r'<img[^>]+id="paper_image"[^>]+src="([^"]+)',
       caseSensitive: false,
     );
-
-    // Process posts.
     var feed = jsondata["feed"]['entry'];
     int i = 0, j = 1;
     for (var post in feed) {
@@ -69,7 +53,6 @@ void fetchAndProcessData(Map message) async {
         'link': (post['link'] as List)
             .firstWhere((link) => link['rel'] == 'alternate')['href'],
       });
-      // Choose some posts for the carousel.
       if (i > 5 && i % 3 == 0 && j <= 7) {
         carouselPostsList.add({
           'id': j,
@@ -83,8 +66,6 @@ void fetchAndProcessData(Map message) async {
       }
       i++;
     }
-
-    // Process categories.
     for (var category in jsondata["feed"]['category']) {
       if (category['term'] != "ZZZZZZZZZ") {
         categoriesList.add({
@@ -95,21 +76,16 @@ void fetchAndProcessData(Map message) async {
       }
     }
 
-    // Send the processed data back to the main isolate.
     sendPort.send({
       'posts': postsList,
       'carouselPosts': carouselPostsList,
       'categories': categoriesList,
     });
   } catch (e) {
-    // Send back an error message.
     sendPort.send({'error': e.toString()});
   }
 }
 
-/// ---------------------------------------------------------------------------
-/// MAIN WIDGET CODE
-/// ---------------------------------------------------------------------------
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -127,6 +103,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    splashScreen();
     _initPrefs();
   }
 
@@ -134,6 +111,11 @@ class _HomePageState extends State<HomePage> {
     prefs = await SharedPreferences.getInstance();
     _loadCachedData();
     fetchNewData();
+  }
+
+  void splashScreen() async {
+    await Future.delayed(const Duration(seconds: 5));
+    FlutterNativeSplash.remove();
   }
 
   void _loadCachedData() {
@@ -159,11 +141,8 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
-  /// This function uses Isolate.spawn() to offload the HTTP request,
-  /// XML parsing, JSON conversion, and feed processing.
   Future<(List<Post>, List<Categories>, List<CarouselPost>)> getData(
       bool forceFetchData) async {
-    // Use cached data if available and not forcing a refresh.
     if (!forceFetchData &&
         cachedPosts.isNotEmpty &&
         cachedCategories.isNotEmpty &&
@@ -176,16 +155,13 @@ class _HomePageState extends State<HomePage> {
     List<CarouselPost> carouselPosts = [];
 
     try {
-      // Set up the ReceivePort to get data back from the spawned isolate.
       final receivePort = ReceivePort();
       await Isolate.spawn(fetchAndProcessData, {
         'sendPort': receivePort.sendPort,
       });
 
-      // Wait for the isolate to send back the processed data.
       final result = await receivePort.first;
 
-      // Check if an error occurred.
       if (result is Map && result.containsKey('error')) {
         throw Exception(result['error']);
       }
@@ -193,7 +169,6 @@ class _HomePageState extends State<HomePage> {
       final Map<String, List<Map<String, dynamic>>> data =
           result as Map<String, List<Map<String, dynamic>>>;
 
-      // Convert the map data into your custom objects.
       posts =
           data['posts']!.map((postJson) => Post.fromJson(postJson)).toList();
       carouselPosts = data['carouselPosts']!
@@ -203,7 +178,6 @@ class _HomePageState extends State<HomePage> {
           .map((catJson) => Categories.fromJson(catJson))
           .toList();
 
-      // Cache the fetched data.
       prefs.setStringList('cachedPosts',
           posts.map((post) => jsonEncode(post.toJson())).toList());
       prefs.setStringList('cachedCategories',
@@ -259,7 +233,6 @@ class _HomePageState extends State<HomePage> {
             TextButton(
               onPressed: () {
                 setState(() {
-                  // Update with the new data.
                   cachedPosts = data.$1;
                   cachedCategories = data.$2;
                   cachedCarouselPosts = data.$3;
