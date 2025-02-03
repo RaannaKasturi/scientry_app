@@ -2,7 +2,7 @@
 
 **Note:** _This project is the part of final year dissertation/thesis project, It isn't meant for any financial gains apart for the ads that will be played to sponsor my other projects. This project is purely for educational purposes only._
 
-## 📖 Table of Contents
+## Table of Contents
 - [About Scientry](#about-scientry)
 - [Aims and Objectives](#aims-and-objectives)
 - [Features](#features)
@@ -25,7 +25,7 @@ Scientry generates AI-powered summaries and mindmaps from research papers source
 - [x] AI-generated summaries of research papers
 - [x] Interactive mindmaps for better understanding
 - [x] Research papers sourced from [ArXiv](https://arxiv.org/) & [PubMed Central](https://pmc.ncbi.nlm.nih.gov/)
-- [x] Cached resources for faster access
+- [x] Serve cached resources for faster access
 - [x] Share content across multiple applications
 - [x] Direct links to full research papers
 - [ ] Built-in bookmarking for easy access using local storage
