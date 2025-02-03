@@ -1,4 +1,10 @@
-# Scientry App: Science Simplified, Knowledge Amplified
+# Scientry App: Science Simplified, Knowledge Amplified ![GitHub Release](https://img.shields.io/github/v/release/raannakasturi/scientry_app?include_prereleases&sort=date&display_name=release&label=Latest%20Release&color=%23545A92)
+
+![GitHub repo size](https://img.shields.io/github/repo-size/raannakasturi/scientry)
+![GitHub stars](https://img.shields.io/github/stars/raannakasturi/scientry?style=social)
+![GitHub forks](https://img.shields.io/github/forks/raannakasturi/scientry?style=social)
+![License](https://img.shields.io/github/license/raannakasturi/scientry)
+
 
 **Note:** _This project is the part of final year dissertation/thesis project, It isn't meant for any financial gains apart for the ads that will be played to sponsor my other projects. This project is purely for educational purposes only._
 
@@ -49,8 +55,3 @@ Nayan Kasturi, N. Scientry App [Computer software]. https://github.com/RaannaKas
 ## Acknowledgments and Credits
 - Special thanks to [ArXiv](https://arxiv.org/) and [PubMed Central](https://pmc.ncbi.nlm.nih.gov/) for making research papers accessible.
 - Mrs. Sermarani Saravanan (Asst. Prof. Dept. of Bioinformatics, Khalsa College of Arts, Science & Commerce, Mumbai) for their guidance and supporting the cause.
-
-![GitHub repo size](https://img.shields.io/github/repo-size/raannakasturi/scientry)
-![GitHub stars](https://img.shields.io/github/stars/raannakasturi/scientry?style=social)
-![GitHub forks](https://img.shields.io/github/forks/raannakasturi/scientry?style=social)
-![License](https://img.shields.io/github/license/raannakasturi/scientry)
