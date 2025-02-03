@@ -51,6 +51,7 @@ dependencies:
   mind_map: ^1.0.5
   markdown: ^7.3.0
   share_plus: ^10.1.4
+  flutter_animate: ^4.5.2
 
 dev_dependencies:
   flutter_test:
@@ -124,3 +125,11 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+# 
+# flutter_native_splash
+# flutter_native_splash:
+#   android: true
+#   ios: true
+#   web: false
+#   # background color
+#   color: "#545A92"

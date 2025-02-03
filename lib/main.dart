@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:scientry/screens/homepage.dart';
+import 'package:scientry/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,10 +24,10 @@ class MyApp extends StatelessWidget {
           ),
         ),
         colorScheme:
-            ColorScheme.fromSeed(seedColor: Color.fromRGBO(28, 35, 99, 100)),
+            ColorScheme.fromSeed(seedColor: Color.fromRGBO(28, 35, 99, 1)),
         useMaterial3: true,
       ),
-      home: HomePage(),
+      home: SplashScreen(),
     );
   }
 }
