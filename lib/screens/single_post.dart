@@ -1,16 +1,16 @@
 import 'dart:convert';
 import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:latext/latext.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:scientry/info_pages/error_page.dart';
 import 'package:scientry/screens/mindmap_view.dart';
-import 'package:scientry/static/no_internet.dart';
-import 'package:scientry/static/processing_page.dart';
+import 'package:scientry/info_pages/no_internet.dart';
+import 'package:scientry/info_pages/processing_page.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:simple_connection_checker/simple_connection_checker.dart';
 
@@ -80,7 +80,8 @@ class SinglePost extends StatelessWidget {
                   processingText: "Loading Post. Please Wait...");
             }
             if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
+              return ErrorPage(
+                  errorPageText: "An Error Occurred. Please Retry");
             }
             if (!snapshot.hasData) {
               return ProcessingPage(
@@ -88,7 +89,7 @@ class SinglePost extends StatelessWidget {
             }
             final post = snapshot.data!;
             return Scaffold(
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              backgroundColor: Theme.of(context).colorScheme.surface,
               body: CustomScrollView(
                 slivers: [
                   SliverAppBar(
@@ -102,7 +103,8 @@ class SinglePost extends StatelessWidget {
                       icon: Icon(Icons.arrow_back,
                           color: Theme.of(context).colorScheme.onSurface),
                     ),
-                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.inversePrimary,
                     expandedHeight: 250,
                     flexibleSpace: FlexibleSpaceBar(
                       background: post.image.startsWith('http')
@@ -180,14 +182,18 @@ class SinglePost extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Padding(
-                              padding: const EdgeInsets.only(top: 10),
-                              child: Math.tex(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: LaTexT(
+                              laTeXCode: Text(
                                 post.title,
-                                textStyle: TextStyle(
+                                softWrap: true,
+                                style: TextStyle(
                                   fontSize: 25,
                                   fontWeight: FontWeight.bold,
                                 ),
-                              )),
+                              ),
+                            ),
+                          ),
                           Divider(
                               color: Theme.of(context).colorScheme.onSurface,
                               thickness: 1,

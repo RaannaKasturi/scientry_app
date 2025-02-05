@@ -2,6 +2,8 @@ import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/screens/homepage.dart';
+import 'package:scientry/screens/search_page.dart';
+import 'package:scientry/screens/settings_page.dart';
 
 class DefaultDrawer extends StatelessWidget {
   const DefaultDrawer({
@@ -78,7 +80,8 @@ class DefaultDrawer extends StatelessWidget {
                     style: TextStyle(fontSize: 25),
                   ),
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => SearchPage()));
                   },
                 ),
                 ListTile(
@@ -88,7 +91,10 @@ class DefaultDrawer extends StatelessWidget {
                     style: TextStyle(fontSize: 25),
                   ),
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => SettingsPage()));
                   },
                 ),
                 ListTile(

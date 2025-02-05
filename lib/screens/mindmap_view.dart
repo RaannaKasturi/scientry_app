@@ -124,6 +124,7 @@ class _MindmapViewState extends State<MindmapView> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Mindmap'),
       ),
       floatingActionButton: FloatingActionButton(
@@ -136,7 +137,7 @@ class _MindmapViewState extends State<MindmapView> {
           child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: Container(
-              color: Theme.of(context).colorScheme.primaryContainer,
+              color: Theme.of(context).colorScheme.surface,
               child: Padding(
                 padding: const EdgeInsets.all(30.0),
                 child: Column(
