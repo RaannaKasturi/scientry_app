@@ -63,6 +63,7 @@ class LatestPosts extends StatelessWidget {
                   bottom: 15,
                 ),
                 child: PostList(
+                  postsToShow: 5,
                   posts: snapshot.data!,
                 ),
               ),

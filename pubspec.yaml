@@ -54,6 +54,7 @@ dependencies:
   flutter_animate: ^4.5.2
   flutter_native_splash: ^2.4.4
   html_unescape: ^2.0.0
+  flutter_math_fork: ^0.7.3
 
 dev_dependencies:
   flutter_test:

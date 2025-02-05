@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
@@ -179,18 +180,14 @@ class SinglePost extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: LaTexT(
-                              laTeXCode: Text(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Math.tex(
                                 post.title,
-                                textAlign: TextAlign.start,
-                                style: TextStyle(
+                                textStyle: TextStyle(
                                   fontSize: 25,
                                   fontWeight: FontWeight.bold,
                                 ),
-                              ),
-                            ),
-                          ),
+                              )),
                           Divider(
                               color: Theme.of(context).colorScheme.onSurface,
                               thickness: 1,

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:latext/latext.dart';
 import 'package:scientry/screens/single_post.dart';
 
 class Post {
@@ -135,15 +136,17 @@ class PostCard extends StatelessWidget {
                   ),
                   Wrap(
                     children: [
-                      Text(
-                        title,
-                        softWrap: true,
-                        style: TextStyle(
-                          fontSize: 18,
-                          overflow: TextOverflow.ellipsis,
-                          fontWeight: FontWeight.bold,
+                      LaTexT(
+                        laTeXCode: Text(
+                          title.replaceAll(r"\(", r"$").replaceAll(r"\)", r"$"),
+                          softWrap: true,
+                          style: TextStyle(
+                            fontSize: 18,
+                            overflow: TextOverflow.ellipsis,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 3,
                         ),
-                        maxLines: 3,
                       ),
                     ],
                   ),
@@ -159,14 +162,15 @@ class PostCard extends StatelessWidget {
 
 class PostList extends StatelessWidget {
   final List<Post> posts;
+  final int postsToShow;
 
-  const PostList({super.key, required this.posts});
+  const PostList({super.key, required this.posts, required this.postsToShow});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: posts
-          .take(5)
+          .take(postsToShow)
           .map((post) => PostCard(
                 title: post.title,
                 image: post.image,

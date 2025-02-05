@@ -22,6 +22,7 @@ class CategoryPosts extends StatelessWidget {
           return Column(
             children: [
               PostList(
+                  postsToShow: 3,
                   posts: snapshot.data!
                       .where((posts) => posts.category == category)
                       .take(numPosts)

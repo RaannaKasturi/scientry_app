@@ -7,29 +7,27 @@ import 'package:http/http.dart' as http;
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/front/categories_posts_list.dart';
 import 'package:scientry/front/latest_posts.dart';
+import 'package:scientry/screens/search_page.dart';
 import 'package:scientry/static/carousel.dart';
 import 'package:scientry/static/drawer.dart';
 import 'package:scientry/static/loading_posts.dart';
 import 'package:scientry/static/no_internet.dart';
 import 'package:scientry/static/post_list.dart';
 import 'package:scientry/static/section_title.dart';
-import 'package:xml2json/xml2json.dart';
 import 'package:simple_connection_checker/simple_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void fetchAndProcessData(Map message) async {
   final SendPort sendPort = message['sendPort'];
   const String url =
-      "https://proxy.wafflehacker.io/?destination=https://thescientry.blogspot.com/feeds/posts/default?max-results=100";
+      "https://thescientry.blogspot.com/feeds/posts/default?alt=json-in-script&callback=myFunc&max-results=100";
   try {
     final response = await http.get(Uri.parse(url));
     if (response.statusCode != 200) {
       throw Exception("HTTP error: ${response.statusCode}");
     }
-    final Xml2Json xml2json = Xml2Json();
-    xml2json.parse(response.body);
-    final String gdata = xml2json.toGData();
-    final Map<String, dynamic> jsondata = json.decode(gdata);
+    var data = response.body.split("myFunc(")[1];
+    var jsondata = json.decode(data.substring(0, data.length - 2));
     List<Map<String, dynamic>> postsList = [];
     List<Map<String, dynamic>> carouselPostsList = [];
     List<Map<String, dynamic>> categoriesList = [];
@@ -263,7 +261,14 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SearchPage(),
+                ),
+              );
+            },
           ),
         ],
       ),
