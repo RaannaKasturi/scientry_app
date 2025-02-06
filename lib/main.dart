@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:scientry/screens/splashscreen.dart';
+import 'package:scientry/theme/theme_provider.dart';
 
 void main() async {
   // WidgetsFlutterBinding.ensureInitialized();
   WidgetsBinding widgetBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetBinding);
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeProvider(context),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -17,19 +23,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Scientry',
-      theme: ThemeData(
-        fontFamily: GoogleFonts.getFont("Syne").fontFamily,
-        buttonTheme: ButtonThemeData(
-          buttonColor: Theme.of(context).colorScheme.primary,
-          textTheme: ButtonTextTheme.primary,
-          shape: BeveledRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        colorScheme:
-            ColorScheme.fromSeed(seedColor: Color.fromRGBO(28, 35, 99, 1)),
-        useMaterial3: true,
-      ),
+      theme: Provider.of<ThemeProvider>(context).themeData,
       home: SplashScreen(),
     );
   }

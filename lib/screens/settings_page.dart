@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
+import 'package:scientry/screens/bookmarks_page.dart';
+import 'package:scientry/theme/theme_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -21,6 +25,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
   String _userName = "Set Name";
   String _userEmail = "Set Email";
+  bool _darkTheme = false;
+  bool _notifications = false;
 
   @override
   void initState() {
@@ -28,9 +34,53 @@ class _SettingsPageState extends State<SettingsPage> {
     _loadPreferences();
   }
 
+  Future<void> _handleNotificationPermission() async {
+    PermissionStatus status = await Permission.notification.status;
+
+    if (status.isGranted) {
+      setState(() {
+        _notifications = !_notifications;
+      });
+    } else {
+      PermissionStatus newStatus = await Permission.notification.request();
+      if (newStatus.isGranted) {
+        setState(() {
+          _notifications = true;
+        });
+      } else {
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              title: const Text("Permission Required"),
+              content: const Text(
+                  "Notifications are disabled. Please enable them in settings."),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("OK"),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<bool> getNotificationStatus() async {
+    var status = await Permission.notification.status;
+    return status.isGranted;
+  }
+
   Future<void> _loadPreferences() async {
     _prefs = await SharedPreferences.getInstance();
+    bool notificationGranted = await getNotificationStatus();
     setState(() {
+      _notifications = notificationGranted;
+      _darkTheme = _prefs?.getBool('darkTheme') ?? false;
       _userName = _prefs?.getString('userName') ?? "Set Name";
       _userEmail = _prefs?.getString('userEmail') ?? "Set Email";
     });
@@ -41,7 +91,7 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Change Name"),
+          title: const Text("Change Name"),
           content: FormBuilder(
             key: _nameFormKey,
             child: FormBuilderTextField(
@@ -50,10 +100,10 @@ class _SettingsPageState extends State<SettingsPage> {
               decoration: InputDecoration(
                 labelText: "Name",
                 suffixIcon: IconButton(
-                  onPressed: (() {
+                  onPressed: () {
                     _nameFormKey.currentState!.fields["name"]!.didChange("");
-                  }),
-                  icon: Icon(
+                  },
+                  icon: const Icon(
                     Icons.clear,
                   ),
                 ),
@@ -69,7 +119,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text("Cancel"),
+              child: const Text("Cancel"),
             ),
             TextButton(
               onPressed: () {
@@ -82,7 +132,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   Navigator.pop(context);
                 }
               },
-              child: Text("Save"),
+              child: const Text("Save"),
             ),
           ],
         );
@@ -95,7 +145,7 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Change Email"),
+          title: const Text("Change Email"),
           content: FormBuilder(
             key: _emailFormKey,
             child: FormBuilderTextField(
@@ -104,10 +154,10 @@ class _SettingsPageState extends State<SettingsPage> {
               decoration: InputDecoration(
                 labelText: "Email",
                 suffixIcon: IconButton(
-                  onPressed: (() {
+                  onPressed: () {
                     _emailFormKey.currentState!.fields["email"]!.didChange("");
-                  }),
-                  icon: Icon(
+                  },
+                  icon: const Icon(
                     Icons.clear,
                   ),
                 ),
@@ -123,7 +173,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text("Cancel"),
+              child: const Text("Cancel"),
             ),
             TextButton(
               onPressed: () {
@@ -137,7 +187,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   Navigator.pop(context);
                 }
               },
-              child: Text("Save"),
+              child: const Text("Save"),
             ),
           ],
         );
@@ -155,14 +205,14 @@ class _SettingsPageState extends State<SettingsPage> {
           "Settings",
           style: TextStyle(
             fontSize: 25,
-            color: Colors.black,
+            color: Theme.of(context).colorScheme.inverseSurface,
           ),
         ),
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           tooltip: "Back",
         ),
         actions: [
@@ -188,7 +238,7 @@ class _SettingsPageState extends State<SettingsPage> {
             alignment: Alignment.center,
             child: Column(
               children: [
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Stack(
                   alignment: Alignment.center,
                   children: [
@@ -196,7 +246,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       radius: 62,
                       backgroundColor: Theme.of(context).colorScheme.primary,
                     ),
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 60,
                       backgroundImage: AssetImage("assets/images/person.png"),
                     ),
@@ -214,7 +264,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         child: IconButton(
                           onPressed: () {},
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.camera_alt,
                             color: Colors.white,
                           ),
@@ -223,7 +273,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ],
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 InkWell(
                   child: Text(
                     _userName,
@@ -248,61 +298,130 @@ class _SettingsPageState extends State<SettingsPage> {
                     _changeEmail(context);
                   },
                 ),
-                SizedBox(
-                  height: 10,
-                ),
+                const SizedBox(height: 10),
                 Divider(
                   color: Theme.of(context).colorScheme.onSurface,
                   thickness: 1,
                   indent: 35,
                   endIndent: 35,
                 ),
-                SizedBox(
-                  height: 25,
-                ),
+                const SizedBox(height: 10),
+                ListBody(
+                  children: [
+                    ListTile(
+                      leading: Icon(
+                        LucideIcons.sunMoon,
+                        size: 30,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      title: Text(
+                        "Dark Theme",
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      trailing: Switch.adaptive(
+                        value: _darkTheme,
+                        onChanged: (_) {
+                          bool value = !_darkTheme;
+                          setState(() {
+                            _prefs?.setBool('darkTheme', value);
+                            _darkTheme = value;
+                            Provider.of<ThemeProvider>(context, listen: false)
+                                .toggleTheme();
+                          });
+                        },
+                      ),
+                    ),
+                    ListTile(
+                      leading: Icon(
+                        LucideIcons.bellPlus,
+                        size: 30,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      title: Text(
+                        "Get Notifications",
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      trailing: Switch.adaptive(
+                        value: _notifications,
+                        onChanged: (_) => _handleNotificationPermission(),
+                      ),
+                    ),
+                    ListTile(
+                      leading: Icon(
+                        LucideIcons.bookMarked,
+                        size: 30,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      title: Text(
+                        "Bookmarks",
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      trailing: Icon(
+                        LucideIcons.chevronsRight,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BookmarksPage(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                )
               ],
             ),
           ),
           Container(
-              alignment: Alignment.center,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  InkWell(
-                    child: TextButton(
-                      onPressed: (() {}),
-                      child: Text(
-                        "Made with 💖 by Nayan Kasturi",
-                      ),
-                    ),
-                    onTap: () {
-                      EasyLauncher.url(
-                        url: "https://nayankasturi.eu.org",
-                        mode: Mode.platformDefault,
-                      );
-                    },
-                  ),
-                  OutlinedButton.icon(
-                    onPressed: (() {
-                      EasyLauncher.url(
-                        url: "https://scientry.raannakasturi.eu.org",
-                        mode: Mode.platformDefault,
-                      );
-                    }),
-                    icon: Icon(LucideIcons.globe),
-                    label: Text(
-                      "Visit Us on the Web",
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                InkWell(
+                  child: TextButton(
+                    onPressed: () {},
+                    child: const Text(
+                      "Made with 💖 by Nayan Kasturi",
                     ),
                   ),
-                  SizedBox(
-                    height: 35,
-                  )
-                ],
-              ))
+                  onTap: () {
+                    EasyLauncher.url(
+                      url: "https://nayankasturi.eu.org",
+                      mode: Mode.platformDefault,
+                    );
+                  },
+                ),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    EasyLauncher.url(
+                      url: "https://scientry.raannakasturi.eu.org",
+                      mode: Mode.platformDefault,
+                    );
+                  },
+                  icon: const Icon(LucideIcons.globe),
+                  label: Text(
+                    "Visit Us on the Web",
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 35),
+              ],
+            ),
+          ),
         ],
       ),
     );

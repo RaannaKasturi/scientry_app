@@ -12,25 +12,38 @@ import 'package:scientry/screens/mindmap_view.dart';
 import 'package:scientry/info_pages/no_internet.dart';
 import 'package:scientry/info_pages/processing_page.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_connection_checker/simple_connection_checker.dart';
 
-class SinglePost extends StatelessWidget {
+class SinglePost extends StatefulWidget {
   final String postURL;
   const SinglePost({super.key, required this.postURL});
 
+  // Extract DOI from the citation string.
+  static String extractDOI(String citation) {
+    var doi = citation.split("http")[1].split(" ")[0];
+    return "http$doi".trim();
+  }
+
+  @override
+  State<SinglePost> createState() => _SinglePostState();
+}
+
+class _SinglePostState extends State<SinglePost> {
+  late SharedPreferences prefs;
+  bool _isBookmarked = false;
+
   String extractCategory(pageContent) {
     var categoryLinks = pageContent.querySelectorAll("a.label-link");
-    categoryLinks
+    var categories = categoryLinks
         .map((e) => e.text.trim())
         .where((category) => category != 'ZZZZZZZZZ')
         .toList();
-    return categoryLinks.isNotEmpty
-        ? categoryLinks.first.text.trim()
-        : 'Unknown';
+    return categories.isNotEmpty ? categories.first : 'Unknown';
   }
 
   Future<PostData> fetchPostData() async {
-    final response = await http.get(Uri.parse(postURL));
+    final response = await http.get(Uri.parse(widget.postURL));
     final doc = parser.parse(response.body);
     return PostData(
       title: doc.querySelector('img#paper_image')!.attributes['alt']!,
@@ -43,13 +56,9 @@ class SinglePost extends StatelessWidget {
               .trim() ??
           '',
       citation: doc.querySelector('div#paper_citation')!.text.trim(),
-      doilink: extractDOI(doc.querySelector('div#paper_citation')!.text.trim()),
+      doilink: SinglePost.extractDOI(
+          doc.querySelector('div#paper_citation')!.text.trim()),
     );
-  }
-
-  static String extractDOI(String citation) {
-    var doi = citation.split("http")[1].split(" ")[0];
-    return "http$doi".trim();
   }
 
   Future<bool> checkInternet() async {
@@ -59,6 +68,23 @@ class SinglePost extends StatelessWidget {
   String unescapeHTMLContent(String htmlContent) {
     var unescape = HtmlUnescape();
     return unescape.convert(htmlContent).trim();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((instance) {
+      prefs = instance;
+      List<String> bookmarkedPosts =
+          prefs.getStringList('bookmarkedPosts') ?? [];
+      bool bookmarked = bookmarkedPosts.any((element) {
+        var bookmark = jsonDecode(element);
+        return bookmark['link'] == widget.postURL;
+      });
+      setState(() {
+        _isBookmarked = bookmarked;
+      });
+    });
   }
 
   @override
@@ -126,7 +152,7 @@ class SinglePost extends StatelessWidget {
                             borderRadius: BorderRadius.circular(5),
                           ),
                           child: Text(
-                            snapshot.data!.category,
+                            post.category,
                             style: const TextStyle(
                               fontSize: 10,
                               color: Colors.white,
@@ -157,18 +183,18 @@ class SinglePost extends StatelessWidget {
                             backgroundColor: WidgetStateProperty.all(
                                 Theme.of(context).colorScheme.surface),
                           ),
-                          onPressed: (() async {
+                          onPressed: () async {
                             await Share.share(
-                              postURL,
+                              widget.postURL,
                               subject: post.title,
                               sharePositionOrigin: Rect.fromCenter(
                                 width: 0.9 * MediaQuery.of(context).size.width,
                                 height:
                                     0.7 * MediaQuery.of(context).size.height,
-                                center: Offset(100, 100),
+                                center: const Offset(100, 100),
                               ),
                             );
-                          }),
+                          },
                           icon: Icon(Icons.share,
                               color: Theme.of(context).colorScheme.onSurface),
                         ),
@@ -177,29 +203,39 @@ class SinglePost extends StatelessWidget {
                   ),
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: LaTexT(
-                              laTeXCode: Text(
-                                post.title,
-                                softWrap: true,
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: LaTexT(
+                                  laTeXCode: Text(
+                                    post.title,
+                                    softWrap: true,
+                                    style: const TextStyle(
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                              BookmarkButton(
+                                post: post,
+                                postURL: widget.postURL,
+                                prefs: prefs,
+                                initialBookmarked: _isBookmarked,
+                              ),
+                            ],
                           ),
                           Divider(
                               color: Theme.of(context).colorScheme.onSurface,
                               thickness: 1,
                               height: 40),
                           HtmlWidget(post.summary,
-                              textStyle: TextStyle(
+                              textStyle: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w500,
                               )),
@@ -208,28 +244,26 @@ class SinglePost extends StatelessWidget {
                               thickness: 1,
                               height: 40),
                           HtmlWidget('<h2>Citation</h2>',
-                              textStyle: TextStyle(
+                              textStyle: const TextStyle(
                                   fontSize: 17, fontWeight: FontWeight.w500)),
                           LaTexT(
                               laTeXCode: Text(
                                   unescapeHTMLContent(post.citation),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                       fontSize: 17,
                                       fontWeight: FontWeight.w500))),
-                          SizedBox(height: 50),
+                          const SizedBox(height: 50),
                           Padding(
                             padding: const EdgeInsets.all(15.0),
                             child: Column(
                               children: [
-                                Text(
+                                const Text(
                                   "Disclaimer",
                                   softWrap: true,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontStyle: FontStyle.italic,
                                     fontSize: 15,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
                                   ),
                                   maxLines: 5,
                                 ),
@@ -243,7 +277,7 @@ class SinglePost extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  "Content is developed using Artificial Intelligence. May not be accurate. Please Read paper to verify.",
+                                  "Content is developed using Artificial Intelligence. May not be accurate. Please read the paper to verify.",
                                   softWrap: true,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
@@ -254,7 +288,7 @@ class SinglePost extends StatelessWidget {
                                   ),
                                   maxLines: 5,
                                 ),
-                                SizedBox(height: 75),
+                                const SizedBox(height: 75),
                                 Text(
                                   "Happy Researching!",
                                   style: TextStyle(
@@ -274,15 +308,16 @@ class SinglePost extends StatelessWidget {
               ),
               floatingActionButton: FloatingActionButton(
                 backgroundColor: Theme.of(context).colorScheme.primary,
-                onPressed: (() {
+                onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => MindmapView(
-                          mindmapData: '# ${post.title}\n${post.mindmap}'),
+                        mindmapData: '# ${post.title}\n${post.mindmap}',
+                      ),
                     ),
                   );
-                }),
+                },
                 child: Icon(
                   LucideIcons.listTree,
                   color: Theme.of(context).colorScheme.onPrimary,
@@ -296,15 +331,84 @@ class SinglePost extends StatelessWidget {
   }
 }
 
+class BookmarkButton extends StatefulWidget {
+  final PostData post;
+  final String postURL;
+  final SharedPreferences prefs;
+  final bool initialBookmarked;
+
+  const BookmarkButton({
+    super.key,
+    required this.post,
+    required this.postURL,
+    required this.prefs,
+    required this.initialBookmarked,
+  });
+
+  @override
+  BookmarkButtonState createState() => BookmarkButtonState();
+}
+
+class BookmarkButtonState extends State<BookmarkButton> {
+  late bool isBookmarked;
+
+  @override
+  void initState() {
+    super.initState();
+    isBookmarked = widget.initialBookmarked;
+  }
+
+  void _toggleBookmark() {
+    List<String> bookmarkedPosts =
+        widget.prefs.getStringList('bookmarkedPosts') ?? [];
+
+    int indexFound = bookmarkedPosts.indexWhere((element) {
+      var bookmark = jsonDecode(element);
+      return bookmark['link'] == widget.postURL;
+    });
+
+    if (indexFound != -1) {
+      bookmarkedPosts.removeAt(indexFound);
+      setState(() {
+        isBookmarked = false;
+      });
+    } else {
+      var bookmarkData = {
+        'title': widget.post.title,
+        'link': widget.postURL,
+        'image': widget.post.image,
+        'category': widget.post.category,
+      };
+      bookmarkedPosts.add(jsonEncode(bookmarkData));
+      setState(() {
+        isBookmarked = true;
+      });
+    }
+    widget.prefs.setStringList('bookmarkedPosts', bookmarkedPosts);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: _toggleBookmark,
+      icon: Icon(
+        isBookmarked ? LucideIcons.bookmarkCheck : LucideIcons.bookmarkPlus,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+    );
+  }
+}
+
 class PostData {
   final String title, image, category, summary, mindmap, citation, doilink;
 
-  PostData(
-      {required this.title,
-      required this.image,
-      required this.category,
-      required this.summary,
-      required this.mindmap,
-      required this.citation,
-      required this.doilink});
+  PostData({
+    required this.title,
+    required this.image,
+    required this.category,
+    required this.summary,
+    required this.mindmap,
+    required this.citation,
+    required this.doilink,
+  });
 }

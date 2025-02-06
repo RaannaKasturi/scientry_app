@@ -54,6 +54,8 @@ dependencies:
   flutter_native_splash: ^2.4.4
   html_unescape: ^2.0.0
   flutter_animate: ^4.5.2
+  provider: ^6.1.2
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:
@@ -101,6 +103,7 @@ flutter:
     - assets/brand/
     - assets/images/
     - assets/lottie/
+    - assets/splash_screen/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
