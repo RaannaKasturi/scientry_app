@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:http/http.dart' as http;
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/front/categories_posts_list.dart';
@@ -101,7 +100,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    splashScreen();
     _initPrefs();
   }
 
@@ -109,11 +107,6 @@ class _HomePageState extends State<HomePage> {
     prefs = await SharedPreferences.getInstance();
     _loadCachedData();
     fetchNewData();
-  }
-
-  void splashScreen() async {
-    await Future.delayed(const Duration(seconds: 2));
-    FlutterNativeSplash.remove();
   }
 
   void _loadCachedData() {

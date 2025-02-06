@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:scientry/screens/homepage.dart';
+import 'package:scientry/screens/splashscreen.dart';
 
 void main() async {
+  // WidgetsFlutterBinding.ensureInitialized();
   WidgetsBinding widgetBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetBinding);
   runApp(const MyApp());
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
             ColorScheme.fromSeed(seedColor: Color.fromRGBO(28, 35, 99, 1)),
         useMaterial3: true,
       ),
-      home: HomePage(),
+      home: SplashScreen(),
     );
   }
 }
