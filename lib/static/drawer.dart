@@ -1,6 +1,7 @@
 import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:scientry/screens/bookmarks_page.dart';
 import 'package:scientry/screens/homepage.dart';
 import 'package:scientry/screens/search_page.dart';
 import 'package:scientry/screens/settings_page.dart';
@@ -27,28 +28,29 @@ class DefaultDrawer extends StatelessWidget {
                   children: [
                     Icon(
                       LucideIcons.brainCircuit,
-                      size: 45,
+                      size: 35,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                     Text(
                       'Scientry',
                       style: TextStyle(
-                        fontSize: 40,
+                        fontSize: 30,
                         color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ],
                 ),
-                Divider(
-                  indent: 40,
-                  endIndent: 40,
-                  color: Theme.of(context).colorScheme.primary,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 75),
+                  child: Divider(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
                 Text(
                   'Science Simplified,\nKnowledge Amplified',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 15,
                     color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
@@ -71,6 +73,19 @@ class DefaultDrawer extends StatelessWidget {
                   onTap: () {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => HomePage()));
+                  },
+                ),
+                ListTile(
+                  leading: Icon(LucideIcons.bookmark),
+                  title: Text(
+                    'Bookmarks',
+                    style: TextStyle(fontSize: 25),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => BookmarksPage()));
                   },
                 ),
                 ListTile(
@@ -104,7 +119,10 @@ class DefaultDrawer extends StatelessWidget {
                     style: TextStyle(fontSize: 25),
                   ),
                   onTap: () {
-                    Navigator.pop(context);
+                    EasyLauncher.url(
+                      url: 'https://scietry.vercel.app/',
+                      mode: Mode.platformDefault,
+                    );
                   },
                 ),
                 ListTile(
@@ -169,43 +187,8 @@ class DefaultDrawer extends StatelessWidget {
                   );
                 },
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 20, bottom: 50),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton.icon(
-                      label: Text(
-                        'Visit Site',
-                        style: TextStyle(
-                          fontSize: 25,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      style: ButtonStyle(
-                          padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
-                              EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 10)),
-                          backgroundColor: WidgetStateProperty.all<Color>(
-                              Theme.of(context).colorScheme.primary),
-                          shape: WidgetStateProperty.all(RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ))),
-                      icon: Icon(
-                        LucideIcons.globe,
-                        size: 30,
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
-                      onPressed: () {
-                        EasyLauncher.url(
-                          url: "https://scientry.vercel.app/",
-                          mode: Mode.platformDefault,
-                        );
-                      },
-                    ),
-                  ],
-                ),
+              SizedBox(
+                height: 40,
               ),
             ],
           ),

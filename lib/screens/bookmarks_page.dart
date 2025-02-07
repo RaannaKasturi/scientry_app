@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:scientry/info_pages/no_data_found.dart';
-import 'package:scientry/static/post_list.dart'; // This file defines the Post class.
+import 'package:scientry/static/post_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BookmarksPage extends StatefulWidget {
@@ -47,9 +47,11 @@ class _BookmarksPageState extends State<BookmarksPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Bookmarks'),
       ),
-      body: prefs == null
+      body: prefs == null || getPosts().isEmpty
           ? const Center(
-              child: NoDataFound(noDataFoundText: "No Bookmarked Posts Found"),
+              child: NoDataFound(
+                noDataFoundText: "No Bookmarked Posts Found",
+              ),
             )
           : PostList(
               posts: getPosts(),

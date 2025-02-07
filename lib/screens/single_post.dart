@@ -19,7 +19,6 @@ class SinglePost extends StatefulWidget {
   final String postURL;
   const SinglePost({super.key, required this.postURL});
 
-  // Extract DOI from the citation string.
   static String extractDOI(String citation) {
     var doi = citation.split("http")[1].split(" ")[0];
     return "http$doi".trim();

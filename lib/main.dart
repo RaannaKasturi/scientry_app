@@ -5,7 +5,6 @@ import 'package:scientry/screens/splashscreen.dart';
 import 'package:scientry/theme/theme_provider.dart';
 
 void main() async {
-  // WidgetsFlutterBinding.ensureInitialized();
   WidgetsBinding widgetBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetBinding);
   runApp(
