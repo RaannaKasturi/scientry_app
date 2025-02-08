@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/screens/bookmarks_page.dart';
 import 'package:scientry/screens/homepage.dart';
+import 'package:scientry/screens/request_paper.dart';
 import 'package:scientry/screens/search_page.dart';
 import 'package:scientry/screens/settings_page.dart';
 
@@ -119,9 +120,13 @@ class DefaultDrawer extends StatelessWidget {
                     style: TextStyle(fontSize: 25),
                   ),
                   onTap: () {
-                    EasyLauncher.url(
-                      url: 'https://scietry.vercel.app/',
-                      mode: Mode.platformDefault,
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return RequestPaper();
+                        },
+                      ),
                     );
                   },
                 ),
