@@ -27,29 +27,25 @@ class RequestPaperState extends State<RequestPaper> {
 
       if (result != null && result.files.isNotEmpty) {
         final PlatformFile file = result.files.first;
-
         if (file.path == null) {
           throw Exception("File path is null");
         }
-
         setState(() {
           _isUploading = true;
         });
-
         final request = http.MultipartRequest(
             'POST', Uri.parse('https://tmpfiles.org/api/v1/upload'));
         request.files
             .add(await http.MultipartFile.fromPath('file', file.path!));
-
         final response = await request.send();
         final responseBody = await response.stream.bytesToString();
-
+        debugPrint("Log: File upload response: $responseBody");
+        final fileData = jsonDecode(responseBody);
+        final fileURL = fileData['data']['url']
+            .toString()
+            .replaceAll("tmpfiles.org/", "tmpfiles.org/dl/");
         if (response.statusCode == 200) {
-          final jsonResponse = jsonDecode(responseBody);
-          final pdfURL = jsonResponse['data']['url']
-              .toString()
-              .replaceAll("https://tmpfiles.org/", "https://tmpfiles.org/dl/");
-          _doiFormKey.currentState?.fields['pdfurl']?.didChange(pdfURL);
+          _doiFormKey.currentState?.fields['pdfurl']?.didChange(fileURL);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("File uploaded successfully")),
           );
@@ -110,11 +106,155 @@ class RequestPaperState extends State<RequestPaper> {
     return _doiFormKey.currentState?.saveAndValidate() ?? false;
   }
 
-  generateSummaryMindmap() {
+  generateSummaryMindmap() async {
+    // Save form values.
     _doiFormKey.currentState?.save();
-    final doi = _doiFormKey.currentState?.fields['doi']?.value;
-    final pdfURL = _doiFormKey.currentState?.fields['pdfurl']?.value;
-    debugPrint("Log: DOI: $doi, PDF URL: $pdfURL");
+
+    // Process DOI (removing unwanted characters) and retrieve the PDF URL.
+    final doi = _doiFormKey.currentState?.fields['doi']?.value
+        .toString()
+        .replaceAll(r'/', '')
+        .replaceAll(':', '')
+        .replaceAll('.', '');
+    final pdfURL = _doiFormKey.currentState?.fields['pdfurl']?.value.toString();
+    debugPrint("Log: Processing DOI: $doi and PDF URL: $pdfURL");
+
+    // Send the POST request.
+    final postResponse = await http.post(
+      Uri.parse(
+          'https://raannakasturi-scientryapi.hf.space/gradio_api/call/rexplore_summarizer'),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(<String, List<dynamic>>{
+        'data': [pdfURL, doi, 'scientry']
+      }),
+    );
+
+    if (postResponse.statusCode == 200) {
+      final postData = jsonDecode(postResponse.body);
+      final eventId = postData['event_id'];
+      final url =
+          'https://raannakasturi-scientryapi.hf.space/gradio_api/call/rexplore_summarizer/$eventId';
+      debugPrint('Log: $url');
+
+      // Poll the GET endpoint until the response contains "event: complete".
+      http.Response getResponse;
+      do {
+        await Future.delayed(const Duration(seconds: 2));
+        getResponse = await http.get(Uri.parse(url));
+        debugPrint("Log: Polling, response: ${getResponse.body}");
+      } while (!getResponse.body.contains("event: complete"));
+
+      debugPrint("Log: Event completed.");
+
+      // Sometimes the final response that triggers "complete" may not have the "data:" line
+      // immediately. Retry a few times if necessary.
+      int retryCount = 0;
+      while (!getResponse.body.contains("data:") && retryCount < 5) {
+        debugPrint("Log: 'data:' not found; retrying (${retryCount + 1})...");
+        await Future.delayed(const Duration(seconds: 2));
+        getResponse = await http.get(Uri.parse(url));
+        retryCount++;
+      }
+
+      // Extract the "data:" line.
+      final lines = getResponse.body.split('\n');
+      String dataLine = "";
+      for (var line in lines) {
+        if (line.startsWith("data:")) {
+          dataLine = line.substring(5).trim();
+          break;
+        }
+      }
+
+      if (dataLine.isNotEmpty) {
+        try {
+          // Decode the data. It might be "null" or not a list.
+          final dynamic decodedData = jsonDecode(dataLine);
+          debugPrint("Log: Decoded data: ${decodedData.toString()}");
+          if (decodedData == null || decodedData is! List) {
+            debugPrint("Log: Decoded data is null or not a list: $decodedData");
+            showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: const Text("Error"),
+                content: const Text(
+                    "No valid data found in response. Please try again later."),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("OK"),
+                  ),
+                ],
+              ),
+            );
+            return;
+          }
+          final List<dynamic> dataList = decodedData;
+          if (dataList.isNotEmpty) {
+            final extractedJsonString = dataList[0] as String;
+            final extractedJson =
+                jsonDecode(extractedJsonString) as Map<String, dynamic>;
+            debugPrint(
+                "Log: Extracted JSON data: ${jsonEncode(extractedJson)}");
+            debugPrint("Log: Summary: ${extractedJson['summary'].toString()}");
+            debugPrint("Log: Mindmap: ${extractedJson['mindmap'].toString()}");
+          } else {
+            debugPrint("Log: Data list is empty.");
+            showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: const Text("Error"),
+                content: const Text(
+                    "No data found in response. Please try again later."),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("OK"),
+                  ),
+                ],
+              ),
+            );
+          }
+        } catch (e) {
+          debugPrint("Log: Error parsing JSON: $e");
+        }
+      } else {
+        debugPrint("Log: No data line found in response.");
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text("Error"),
+            content: const Text(
+                "No data found in response. Please try again later."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+      }
+    } else {
+      debugPrint(
+          "Log: POST request failed with status: ${postResponse.statusCode}");
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Error"),
+          content: const Text(
+              "Failed to generate summary and mindmap. Please try again later."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
@@ -168,7 +308,6 @@ class RequestPaperState extends State<RequestPaper> {
                     FormBuilderTextField(
                       name: 'pdfurl',
                       enableSuggestions: true,
-                      // Removed autofocus since this field is not user-editable.
                       enabled: false,
                       decoration: InputDecoration(
                         labelText: "Uploaded PDF's temporary URL",
@@ -242,6 +381,7 @@ class RequestPaperState extends State<RequestPaper> {
                 ),
                 onPressed: () {
                   if (_validateForm()) {
+                    debugPrint("Log: Form is valid");
                     generateSummaryMindmap();
                   } else {
                     debugPrint("Log: Form is invalid");
