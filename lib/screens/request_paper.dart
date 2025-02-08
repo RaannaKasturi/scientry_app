@@ -1,11 +1,121 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class RequestPaper extends StatelessWidget {
-  RequestPaper({super.key});
+class RequestPaper extends StatefulWidget {
+  const RequestPaper({super.key});
 
+  @override
+  RequestPaperState createState() => RequestPaperState();
+}
+
+class RequestPaperState extends State<RequestPaper> {
   final GlobalKey<FormBuilderState> _doiFormKey = GlobalKey<FormBuilderState>();
+  bool _isUploading = false;
+
+  Future<void> _handleFileUpload(BuildContext context) async {
+    try {
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        allowedExtensions: ['pdf'],
+        type: FileType.custom,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final PlatformFile file = result.files.first;
+
+        if (file.path == null) {
+          throw Exception("File path is null");
+        }
+
+        setState(() {
+          _isUploading = true;
+        });
+
+        final request = http.MultipartRequest(
+            'POST', Uri.parse('https://tmpfiles.org/api/v1/upload'));
+        request.files
+            .add(await http.MultipartFile.fromPath('file', file.path!));
+
+        final response = await request.send();
+        final responseBody = await response.stream.bytesToString();
+
+        if (response.statusCode == 200) {
+          final jsonResponse = jsonDecode(responseBody);
+          final pdfURL = jsonResponse['data']['url']
+              .toString()
+              .replaceAll("https://tmpfiles.org/", "https://tmpfiles.org/dl/");
+          _doiFormKey.currentState?.fields['pdfurl']?.didChange(pdfURL);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("File uploaded successfully")),
+          );
+        } else {
+          _doiFormKey.currentState?.fields['pdfurl']?.didChange("");
+          showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              title: const Text("Error"),
+              content: const Text("Failed to upload file"),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("OK"),
+                ),
+              ],
+            ),
+          );
+        }
+      } else {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text("Error"),
+            content: const Text("No file selected"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (error) {
+      debugPrint("File upload error: $error");
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Error"),
+          content: Text("An unexpected error occurred: $error"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+    } finally {
+      setState(() {
+        _isUploading = false;
+      });
+    }
+  }
+
+  bool _validateForm() {
+    return _doiFormKey.currentState?.saveAndValidate() ?? false;
+  }
+
+  generateSummaryMindmap() {
+    _doiFormKey.currentState?.save();
+    final doi = _doiFormKey.currentState?.fields['doi']?.value;
+    final pdfURL = _doiFormKey.currentState?.fields['pdfurl']?.value;
+    debugPrint("Log: DOI: $doi, PDF URL: $pdfURL");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,12 +124,10 @@ class RequestPaper extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         leading: IconButton(
-          onPressed: (() {
+          onPressed: () {
             Navigator.pop(context);
-          }),
-          icon: Icon(
-            Icons.arrow_back,
-          ),
+          },
+          icon: const Icon(Icons.arrow_back),
         ),
       ),
       body: Center(
@@ -36,32 +144,31 @@ class RequestPaper extends StatelessWidget {
                       name: 'doi',
                       autofocus: true,
                       enableSuggestions: true,
-                      onTapOutside: (event) {
-                        FocusScope.of(context).unfocus();
-                      },
+                      onTapOutside: (event) => FocusScope.of(context).unfocus(),
                       decoration: InputDecoration(
                         labelText: "Enter DOI ID or URL *",
-                        helper: Text(
-                            "https://doi.org/10.1145/2470654.2470728 or\n10.1145/2470654.2470728"),
+                        helperText:
+                            "https://doi.org/10.1145/2470654.2470728 or\n10.1145/2470654.2470728",
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                         suffixIcon: IconButton(
-                          onPressed: (() {
+                          onPressed: () {
                             _doiFormKey.currentState?.fields['doi']
                                 ?.didChange("");
-                          }),
-                          icon: Icon(Icons.close),
+                          },
+                          icon: const Icon(Icons.close),
                         ),
                       ),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(),
+                      ]),
                     ),
-                    SizedBox(
-                      height: 15,
-                    ),
+                    const SizedBox(height: 15),
                     FormBuilderTextField(
                       name: 'pdfurl',
-                      autofocus: true,
                       enableSuggestions: true,
+                      // Removed autofocus since this field is not user-editable.
                       enabled: false,
                       decoration: InputDecoration(
                         labelText: "Uploaded PDF's temporary URL",
@@ -69,49 +176,80 @@ class RequestPaper extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(),
+                        FormBuilderValidators.url(),
+                      ]),
                     ),
                   ],
                 ),
               ),
-              SizedBox(
-                height: 25,
+              const SizedBox(height: 25),
+              InkWell(
+                onTap: _isUploading
+                    ? null
+                    : () {
+                        _handleFileUpload(context);
+                      },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .secondary
+                        .withAlpha((0.5 * 255).toInt()),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 2,
+                      style: BorderStyle.solid,
+                    ),
+                  ),
+                  width: 0.8 * MediaQuery.of(context).size.width,
+                  child: Padding(
+                    padding: const EdgeInsets.all(30.0),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(
+                            LucideIcons.file,
+                            size: 30,
+                            color: _isUploading
+                                ? Colors.grey
+                                : Theme.of(context).iconTheme.color,
+                          ),
+                        ),
+                        Text(
+                          _isUploading
+                              ? "Uploading..."
+                              : "Upload Research Paper PDF",
+                          style: const TextStyle(fontStyle: FontStyle.italic),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.rectangle,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .secondary
-                      .withAlpha((0.5 * 255).toInt()),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.primary,
-                    width: 2,
-                    style: BorderStyle.solid,
+              const SizedBox(height: 25),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  iconColor: Theme.of(context).colorScheme.onPrimary,
                 ),
-                width: 0.8 * MediaQuery.of(context).size.width,
-                child: Padding(
-                  padding: const EdgeInsets.all(30.0),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Icon(
-                          LucideIcons.file,
-                          size: 30,
-                        ),
-                      ),
-                      Text(
-                        "Upload Research Paper PDF",
-                        style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              )
+                onPressed: () {
+                  if (_validateForm()) {
+                    generateSummaryMindmap();
+                  } else {
+                    debugPrint("Log: Form is invalid");
+                  }
+                },
+                label: const Text("Generate Summary & Mindmap"),
+                icon: const Icon(LucideIcons.send),
+              ),
             ],
           ),
         ),
