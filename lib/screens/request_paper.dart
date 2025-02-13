@@ -5,6 +5,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:scientry/screens/requested_post.dart';
 
 class RequestPaper extends StatefulWidget {
   const RequestPaper({super.key});
@@ -104,157 +105,6 @@ class RequestPaperState extends State<RequestPaper> {
 
   bool _validateForm() {
     return _doiFormKey.currentState?.saveAndValidate() ?? false;
-  }
-
-  generateSummaryMindmap() async {
-    // Save form values.
-    _doiFormKey.currentState?.save();
-
-    // Process DOI (removing unwanted characters) and retrieve the PDF URL.
-    final doi = _doiFormKey.currentState?.fields['doi']?.value
-        .toString()
-        .replaceAll(r'/', '')
-        .replaceAll(':', '')
-        .replaceAll('.', '');
-    final pdfURL = _doiFormKey.currentState?.fields['pdfurl']?.value.toString();
-    debugPrint("Log: Processing DOI: $doi and PDF URL: $pdfURL");
-
-    // Send the POST request.
-    final postResponse = await http.post(
-      Uri.parse(
-          'https://raannakasturi-scientryapi.hf.space/gradio_api/call/rexplore_summarizer'),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(<String, List<dynamic>>{
-        'data': [pdfURL, doi, 'scientry']
-      }),
-    );
-
-    if (postResponse.statusCode == 200) {
-      final postData = jsonDecode(postResponse.body);
-      final eventId = postData['event_id'];
-      final url =
-          'https://raannakasturi-scientryapi.hf.space/gradio_api/call/rexplore_summarizer/$eventId';
-      debugPrint('Log: $url');
-
-      // Poll the GET endpoint until the response contains "event: complete".
-      http.Response getResponse;
-      do {
-        await Future.delayed(const Duration(seconds: 2));
-        getResponse = await http.get(Uri.parse(url));
-        debugPrint("Log: Polling, response: ${getResponse.body}");
-      } while (!getResponse.body.contains("event: complete"));
-
-      debugPrint("Log: Event completed.");
-
-      // Sometimes the final response that triggers "complete" may not have the "data:" line
-      // immediately. Retry a few times if necessary.
-      int retryCount = 0;
-      while (!getResponse.body.contains("data:") && retryCount < 5) {
-        debugPrint("Log: 'data:' not found; retrying (${retryCount + 1})...");
-        await Future.delayed(const Duration(seconds: 2));
-        getResponse = await http.get(Uri.parse(url));
-        retryCount++;
-      }
-
-      // Extract the "data:" line.
-      final lines = getResponse.body.split('\n');
-      String dataLine = "";
-      for (var line in lines) {
-        if (line.startsWith("data:")) {
-          dataLine = line.substring(5).trim();
-          break;
-        }
-      }
-
-      if (dataLine.isNotEmpty) {
-        try {
-          // Decode the data. It might be "null" or not a list.
-          final dynamic decodedData = jsonDecode(dataLine);
-          debugPrint("Log: Decoded data: ${decodedData.toString()}");
-          if (decodedData == null || decodedData is! List) {
-            debugPrint("Log: Decoded data is null or not a list: $decodedData");
-            showDialog(
-              context: context,
-              builder: (_) => AlertDialog(
-                title: const Text("Error"),
-                content: const Text(
-                    "No valid data found in response. Please try again later."),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("OK"),
-                  ),
-                ],
-              ),
-            );
-            return;
-          }
-          final List<dynamic> dataList = decodedData;
-          if (dataList.isNotEmpty) {
-            final extractedJsonString = dataList[0] as String;
-            final extractedJson =
-                jsonDecode(extractedJsonString) as Map<String, dynamic>;
-            debugPrint(
-                "Log: Extracted JSON data: ${jsonEncode(extractedJson)}");
-            debugPrint("Log: Summary: ${extractedJson['summary'].toString()}");
-            debugPrint("Log: Mindmap: ${extractedJson['mindmap'].toString()}");
-          } else {
-            debugPrint("Log: Data list is empty.");
-            showDialog(
-              context: context,
-              builder: (_) => AlertDialog(
-                title: const Text("Error"),
-                content: const Text(
-                    "No data found in response. Please try again later."),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("OK"),
-                  ),
-                ],
-              ),
-            );
-          }
-        } catch (e) {
-          debugPrint("Log: Error parsing JSON: $e");
-        }
-      } else {
-        debugPrint("Log: No data line found in response.");
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: const Text("Error"),
-            content: const Text(
-                "No data found in response. Please try again later."),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("OK"),
-              ),
-            ],
-          ),
-        );
-      }
-    } else {
-      debugPrint(
-          "Log: POST request failed with status: ${postResponse.statusCode}");
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text("Error"),
-          content: const Text(
-              "Failed to generate summary and mindmap. Please try again later."),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("OK"),
-            ),
-          ],
-        ),
-      );
-    }
   }
 
   @override
@@ -381,10 +231,33 @@ class RequestPaperState extends State<RequestPaper> {
                 ),
                 onPressed: () {
                   if (_validateForm()) {
-                    debugPrint("Log: Form is valid");
-                    generateSummaryMindmap();
+                    final doi = _doiFormKey.currentState?.fields['doi']?.value;
+                    final pdfURL =
+                        _doiFormKey.currentState?.fields['pdfurl']?.value;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RequestedPost(
+                          inputDOI: doi,
+                          inputpdfURL: pdfURL,
+                        ),
+                      ),
+                    );
                   } else {
-                    debugPrint("Log: Form is invalid");
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text("Error"),
+                        content:
+                            const Text("Please enter a valid DOI ID or URL"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("OK"),
+                          ),
+                        ],
+                      ),
+                    );
                   }
                 },
                 label: const Text("Generate Summary & Mindmap"),

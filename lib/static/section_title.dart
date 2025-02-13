@@ -36,7 +36,7 @@ class SectionTitle extends StatelessWidget {
             child: Text(
               title,
               style: TextStyle(
-                fontSize: 30,
+                fontSize: 25,
                 fontWeight: FontWeight.bold,
               ),
               softWrap: true,
@@ -48,7 +48,7 @@ class SectionTitle extends StatelessWidget {
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
               backgroundColor: Theme.of(context).colorScheme.primary,
               textStyle: TextStyle(
-                fontSize: 17,
+                fontSize: 15,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),

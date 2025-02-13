@@ -69,7 +69,7 @@ class DefaultDrawer extends StatelessWidget {
                   leading: Icon(LucideIcons.house),
                   title: Text(
                     'Home',
-                    style: TextStyle(fontSize: 25),
+                    style: TextStyle(fontSize: 20),
                   ),
                   onTap: () {
                     Navigator.push(context,
@@ -80,7 +80,7 @@ class DefaultDrawer extends StatelessWidget {
                   leading: Icon(LucideIcons.bookmark),
                   title: Text(
                     'Bookmarks',
-                    style: TextStyle(fontSize: 25),
+                    style: TextStyle(fontSize: 20),
                   ),
                   onTap: () {
                     Navigator.push(
@@ -93,7 +93,7 @@ class DefaultDrawer extends StatelessWidget {
                   leading: Icon(LucideIcons.search),
                   title: Text(
                     'Search',
-                    style: TextStyle(fontSize: 25),
+                    style: TextStyle(fontSize: 20),
                   ),
                   onTap: () {
                     Navigator.push(context,
@@ -104,7 +104,7 @@ class DefaultDrawer extends StatelessWidget {
                   leading: Icon(LucideIcons.settings),
                   title: Text(
                     'Settings',
-                    style: TextStyle(fontSize: 25),
+                    style: TextStyle(fontSize: 20),
                   ),
                   onTap: () {
                     Navigator.push(
@@ -117,24 +117,20 @@ class DefaultDrawer extends StatelessWidget {
                   leading: Icon(LucideIcons.send),
                   title: Text(
                     'Request Paper',
-                    style: TextStyle(fontSize: 25),
+                    style: TextStyle(fontSize: 20),
                   ),
                   onTap: () {
                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return RequestPaper();
-                        },
-                      ),
-                    );
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => RequestPaper()));
                   },
                 ),
                 ListTile(
                   leading: Icon(LucideIcons.messageCirclePlus),
                   title: Text(
                     'Request Feature',
-                    style: TextStyle(fontSize: 25),
+                    style: TextStyle(fontSize: 20),
                   ),
                   onTap: () {
                     Navigator.pop(context);

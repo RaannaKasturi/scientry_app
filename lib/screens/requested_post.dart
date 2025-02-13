@@ -1,118 +1,189 @@
 import 'dart:convert';
-import 'package:easy_url_launcher/easy_url_launcher.dart';
+import 'dart:isolate';
 import 'package:flutter/material.dart';
-import 'package:html_unescape/html_unescape.dart';
 import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' as parser;
+import 'package:markdown/markdown.dart' as md;
+import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:html_unescape/html_unescape.dart';
 import 'package:latext/latext.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:scientry/api/fetch_data.dart';
 import 'package:scientry/info_pages/error_page.dart';
+import 'package:scientry/info_pages/loading_posts.dart';
+import 'package:scientry/info_pages/no_data_found.dart';
 import 'package:scientry/screens/mindmap_view.dart';
-import 'package:scientry/info_pages/no_internet.dart';
-import 'package:scientry/info_pages/processing_page.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:simple_connection_checker/simple_connection_checker.dart';
 
-class SinglePost extends StatefulWidget {
-  final String postURL;
-  const SinglePost({super.key, required this.postURL});
+class PostData {
+  final String title, image, category, summary, mindmap, citation, doilink;
 
-  static String extractDOI(String citation) {
-    var doi = citation.split("http")[1].split(" ")[0];
-    return "http$doi".trim();
-  }
-
-  @override
-  State<SinglePost> createState() => _SinglePostState();
+  PostData({
+    required this.title,
+    required this.image,
+    required this.category,
+    required this.summary,
+    required this.mindmap,
+    required this.citation,
+    required this.doilink,
+  });
 }
 
-class _SinglePostState extends State<SinglePost> {
-  late SharedPreferences prefs;
-  bool _isBookmarked = false;
+class RequestedPost extends StatefulWidget {
+  final dynamic inputDOI;
+  final dynamic inputpdfURL;
 
-  String extractCategory(pageContent) {
-    var categoryLinks = pageContent.querySelectorAll("a.label-link");
-    var categories = categoryLinks
-        .map((e) => e.text.trim())
-        .where((category) => category != 'ZZZZZZZZZ')
-        .toList();
-    return categories.isNotEmpty ? categories.first : 'Unknown';
+  static Future<void> generateSummaryMindmap(message) async {
+    final SendPort sendPort = message['sendPort'];
+    final String inputDOI = message['inputDOI'];
+    final String inputpdfURL = message['inputpdfURL'];
+    late final PostData? sendingData;
+    try {
+      var doiString = inputDOI.toString();
+      if (!doiString.contains(".org/")) {
+        doiString = "https://doi.org/$doiString";
+      }
+      final parts = doiString.split(".org/");
+      if (parts.length < 2) {
+        debugPrint("Log: Unexpected DOI format.");
+        sendingData = null;
+      }
+      final doiID = parts[1];
+      final doi = doiString
+          .replaceAll(r'/', '')
+          .replaceAll(':', '')
+          .replaceAll('.', '');
+      final pdfURL = inputpdfURL.toString();
+      debugPrint("Log: Processing DOI: $doi and PDF URL: $pdfURL");
+
+      var data = await fetchData(pdfURL, doi);
+      if (data == null) {
+        debugPrint("Log: fetchData returned null.");
+        sendingData = null;
+      }
+      debugPrint("Log: fetchData returned: ${data.toString()}");
+
+      var summary = data['summary'];
+      var mindmap = data['mindmap'];
+      debugPrint(
+          "Log: Summary: ${summary != null ? summary.substring(0, summary.length < 50 ? summary.length : 50) : 'null'}");
+      debugPrint(
+          "Log: Mindmap: ${mindmap != null ? mindmap.substring(0, mindmap.length < 50 ? mindmap.length : 50) : 'null'}");
+
+      var citation = "";
+      var title = "";
+
+      final citationData =
+          await http.get(Uri.parse("https://api.citeas.org/product/$doiID"));
+      debugPrint("Log: Citation API status code: ${citationData.statusCode}");
+      if (citationData.statusCode == 200) {
+        final citationDataJson = jsonDecode(citationData.body);
+        debugPrint(
+            "Log: Citation API response: ${citationDataJson.toString()}");
+        if (citationDataJson['citations'] != null &&
+            citationDataJson['citations'].isNotEmpty) {
+          citation = citationDataJson['citations'][0]['citation']
+              .toString()
+              .replaceAll("<i>", "")
+              .replaceAll("</i>", "");
+        } else {
+          debugPrint("Log: No citations found in response.");
+        }
+        title = citationDataJson['name'] ?? "";
+      } else {
+        debugPrint(
+            "Log: Citation API call failed with status: ${citationData.statusCode}");
+      }
+      debugPrint(
+          "Log: Final Values - summary: ${summary != null}, mindmap: ${mindmap != null}, citation: '$citation', title: '$title'");
+
+      if (summary != null && mindmap != null) {
+        summary = md.markdownToHtml(summary);
+        debugPrint(
+            "Log: Processed summary (HTML): ${summary.substring(0, summary.length < 50 ? summary.length : 50)}");
+        sendingData = PostData(
+          title: title,
+          image:
+              "https://www.shutterstock.com/shutterstock/photos/2210022425/display_1500/stock-vector-set-different-thermometer-with-hot-sun-cold-snowflake-and-warning-sign-vector-illustration-2210022425.jpg",
+          category: "Requested",
+          summary: summary,
+          mindmap: mindmap,
+          citation: citation,
+          doilink: doiString,
+        );
+      } else {
+        debugPrint("Log: Data condition not met, returning null.");
+        sendingData = null;
+      }
+    } catch (e, stackTrace) {
+      debugPrint("Error in generateSummaryMindmap: $e");
+      debugPrint("StackTrace: $stackTrace");
+      sendingData = null;
+    }
+    sendPort.send({'posts': sendingData});
   }
 
-  Future<PostData> fetchPostData() async {
-    final response = await http.get(Uri.parse(widget.postURL));
-    final doc = parser.parse(response.body);
-    return PostData(
-      title: doc.querySelector('img#paper_image')!.attributes['alt']!,
-      image: doc.querySelector('img#paper_image')!.attributes['src']!,
-      category: extractCategory(doc),
-      summary: doc.querySelector('div#paper_summary')!.innerHtml.trim(),
-      mindmap: doc
-              .querySelector('div#paper_mindmap script[type="text/template"]')
-              ?.innerHtml
-              .trim() ??
-          '',
-      citation: doc.querySelector('div#paper_citation')!.text.trim(),
-      doilink: SinglePost.extractDOI(
-          doc.querySelector('div#paper_citation')!.text.trim()),
-    );
-  }
+  const RequestedPost({
+    super.key,
+    required this.inputDOI,
+    required this.inputpdfURL,
+  });
 
-  Future<bool> checkInternet() async {
-    return await SimpleConnectionChecker.isConnectedToInternet();
-  }
+  @override
+  State<RequestedPost> createState() => _RequestedPostState();
+}
 
+class _RequestedPostState extends State<RequestedPost> {
   String unescapeHTMLContent(String htmlContent) {
     var unescape = HtmlUnescape();
     return unescape.convert(htmlContent).trim();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    SharedPreferences.getInstance().then((instance) {
-      prefs = instance;
-      List<String> bookmarkedPosts =
-          prefs.getStringList('bookmarkedPosts') ?? [];
-      bool bookmarked = bookmarkedPosts.any((element) {
-        var bookmark = jsonDecode(element);
-        return bookmark['link'] == widget.postURL;
-      });
-      setState(() {
-        _isBookmarked = bookmarked;
-      });
+  Future<PostData?> getData(inputDOI, inputpdfURL) async {
+    ReceivePort receivePort = ReceivePort();
+    final isolate = await Isolate.spawn(RequestedPost.generateSummaryMindmap, {
+      'sendPort': receivePort.sendPort,
+      'inputDOI': inputDOI,
+      'inputpdfURL': inputpdfURL
     });
+    final message = await receivePort.first as Map;
+    isolate.kill(priority: Isolate.immediate);
+    if (message.isNotEmpty) {
+      return message['posts'];
+    } else {
+      return null;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: checkInternet(),
-      builder: (context, internetSnapshot) {
-        if (internetSnapshot.connectionState == ConnectionState.waiting) {
-          return ProcessingPage(processingText: "Checking Internet...");
+    Future<PostData?> post = getData(widget.inputDOI, widget.inputpdfURL);
+    return FutureBuilder<PostData?>(
+      future: post,
+      builder: (context, snapshot) {
+        debugPrint("Log: FutureBuilder snapshot: ${snapshot.connectionState}");
+        if (snapshot.hasError) {
+          debugPrint("Log: FutureBuilder error: ${snapshot.error}");
         }
-        if (internetSnapshot.hasError || internetSnapshot.data == false) {
-          return NoInternet();
-        }
-        return FutureBuilder<PostData>(
-          future: fetchPostData(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return ProcessingPage(
-                  processingText: "Loading Post. Please Wait...");
-            }
-            if (snapshot.hasError) {
-              return ErrorPage(
-                  errorPageText: "An Error Occurred. Please Retry");
-            }
-            if (!snapshot.hasData) {
-              return ProcessingPage(
-                  processingText: "Loading Post. Please Wait...");
-            }
-            final post = snapshot.data!;
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            body: const Center(child: LoadingPosts()),
+          );
+        } else if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(
+              child:
+                  ErrorPage(errorPageText: "An error occurred while searching"),
+            ),
+          );
+        } else if (snapshot.hasData) {
+          if (snapshot.data == null) {
+            debugPrint("Log: snapshot.data is null");
+            return NoDataFound(
+                noDataFoundText: "Error Generating Summary & Mindmap");
+          } else {
+            final post = snapshot.data;
+            debugPrint("Log: Received post data: ${post.toString()}");
             return Scaffold(
               backgroundColor: Theme.of(context).colorScheme.surface,
               body: CustomScrollView(
@@ -132,7 +203,7 @@ class _SinglePostState extends State<SinglePost> {
                         Theme.of(context).colorScheme.inversePrimary,
                     expandedHeight: 250,
                     flexibleSpace: FlexibleSpaceBar(
-                      background: post.image.startsWith('http')
+                      background: post!.image.startsWith('http')
                           ? Image.network(post.image,
                               fit: BoxFit.cover, width: double.infinity)
                           : Image.memory(
@@ -152,9 +223,9 @@ class _SinglePostState extends State<SinglePost> {
                           ),
                           child: Text(
                             post.category,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 10,
-                              color: Theme.of(context).colorScheme.onPrimary,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -184,7 +255,7 @@ class _SinglePostState extends State<SinglePost> {
                           ),
                           onPressed: () async {
                             await Share.share(
-                              widget.postURL,
+                              post.doilink,
                               subject: post.title,
                               sharePositionOrigin: Rect.fromCenter(
                                 width: 0.9 * MediaQuery.of(context).size.width,
@@ -221,12 +292,6 @@ class _SinglePostState extends State<SinglePost> {
                                   ),
                                 ),
                               ),
-                              BookmarkButton(
-                                post: post,
-                                postURL: widget.postURL,
-                                prefs: prefs,
-                                initialBookmarked: _isBookmarked,
-                              ),
                             ],
                           ),
                           Divider(
@@ -235,18 +300,22 @@ class _SinglePostState extends State<SinglePost> {
                               height: 40),
                           HtmlWidget(post.summary,
                               textStyle: const TextStyle(
-                                fontSize: 18,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w500,
                               )),
                           Divider(
                               color: Theme.of(context).colorScheme.onSurface,
                               thickness: 1,
                               height: 40),
                           HtmlWidget('<h2>Citation</h2>',
-                              textStyle: const TextStyle(fontSize: 18)),
+                              textStyle: const TextStyle(
+                                  fontSize: 17, fontWeight: FontWeight.w500)),
                           LaTexT(
                               laTeXCode: Text(
                                   unescapeHTMLContent(post.citation),
-                                  style: const TextStyle(fontSize: 17))),
+                                  style: const TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w500))),
                           const SizedBox(height: 50),
                           Padding(
                             padding: const EdgeInsets.all(15.0),
@@ -319,91 +388,17 @@ class _SinglePostState extends State<SinglePost> {
                 ),
               ),
             );
-          },
-        );
+          }
+        } else {
+          debugPrint("Log: No data available in snapshot.");
+          return Scaffold(
+            body: Center(
+              child: NoDataFound(
+                  noDataFoundText: "Error Generating Summary & Mindmap"),
+            ),
+          );
+        }
       },
     );
   }
-}
-
-class BookmarkButton extends StatefulWidget {
-  final PostData post;
-  final String postURL;
-  final SharedPreferences prefs;
-  final bool initialBookmarked;
-
-  const BookmarkButton({
-    super.key,
-    required this.post,
-    required this.postURL,
-    required this.prefs,
-    required this.initialBookmarked,
-  });
-
-  @override
-  BookmarkButtonState createState() => BookmarkButtonState();
-}
-
-class BookmarkButtonState extends State<BookmarkButton> {
-  late bool isBookmarked;
-
-  @override
-  void initState() {
-    super.initState();
-    isBookmarked = widget.initialBookmarked;
-  }
-
-  void _toggleBookmark() {
-    List<String> bookmarkedPosts =
-        widget.prefs.getStringList('bookmarkedPosts') ?? [];
-
-    int indexFound = bookmarkedPosts.indexWhere((element) {
-      var bookmark = jsonDecode(element);
-      return bookmark['link'] == widget.postURL;
-    });
-
-    if (indexFound != -1) {
-      bookmarkedPosts.removeAt(indexFound);
-      setState(() {
-        isBookmarked = false;
-      });
-    } else {
-      var bookmarkData = {
-        'title': widget.post.title,
-        'link': widget.postURL,
-        'image': widget.post.image,
-        'category': widget.post.category,
-      };
-      bookmarkedPosts.add(jsonEncode(bookmarkData));
-      setState(() {
-        isBookmarked = true;
-      });
-    }
-    widget.prefs.setStringList('bookmarkedPosts', bookmarkedPosts);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: _toggleBookmark,
-      icon: Icon(
-        isBookmarked ? LucideIcons.bookmarkCheck : LucideIcons.bookmarkPlus,
-        color: Theme.of(context).colorScheme.primary,
-      ),
-    );
-  }
-}
-
-class PostData {
-  final String title, image, category, summary, mindmap, citation, doilink;
-
-  PostData({
-    required this.title,
-    required this.image,
-    required this.category,
-    required this.summary,
-    required this.mindmap,
-    required this.citation,
-    required this.doilink,
-  });
 }

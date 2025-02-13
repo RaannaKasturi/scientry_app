@@ -101,13 +101,17 @@ class _MindmapViewState extends State<MindmapView> {
                 .copyWith(right: 0),
             child: Padding(
               padding: const EdgeInsets.all(2.0),
-              child: Text(node.title,
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).colorScheme.onSecondary)),
+              child: Text(
+                node.title,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).colorScheme.onSecondary,
+                ),
+              ),
             ),
           ),
           MindMap(
+            lineColor: Theme.of(context).colorScheme.onSurface,
             dotRadius: 4,
             children: node.children
                 .map((child) => buildNode(child, context))
@@ -168,6 +172,7 @@ class _MindmapViewState extends State<MindmapView> {
                     MindMap(
                       padding: const EdgeInsets.only(left: 50),
                       dotRadius: 4,
+                      lineColor: Theme.of(context).colorScheme.onSurface,
                       children: rootNode.children
                           .map((child) => buildNode(child, context))
                           .toList(),
