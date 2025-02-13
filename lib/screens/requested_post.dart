@@ -103,8 +103,7 @@ class RequestedPost extends StatefulWidget {
             "Log: Processed summary (HTML): ${summary.substring(0, summary.length < 50 ? summary.length : 50)}");
         sendingData = PostData(
           title: title,
-          image:
-              "https://www.shutterstock.com/shutterstock/photos/2210022425/display_1500/stock-vector-set-different-thermometer-with-hot-sun-cold-snowflake-and-warning-sign-vector-illustration-2210022425.jpg",
+          image: "assets/images/requested_post_image.jpg",
           category: "Requested",
           summary: summary,
           mindmap: mindmap,
@@ -203,16 +202,8 @@ class _RequestedPostState extends State<RequestedPost> {
                         Theme.of(context).colorScheme.inversePrimary,
                     expandedHeight: 250,
                     flexibleSpace: FlexibleSpaceBar(
-                      background: post!.image.startsWith('http')
-                          ? Image.network(post.image,
-                              fit: BoxFit.cover, width: double.infinity)
-                          : Image.memory(
-                              base64Decode(post.image.split(",")[1]),
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Text("Error loading image: $error"),
-                            ),
+                      background: Image.asset(post!.image,
+                          fit: BoxFit.cover, width: double.infinity),
                       title: InkWell(
                         child: Container(
                           padding: const EdgeInsets.symmetric(
