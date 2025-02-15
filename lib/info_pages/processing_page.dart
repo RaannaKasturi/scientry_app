@@ -28,11 +28,15 @@ class ProcessingPage extends StatelessWidget {
                 fit: BoxFit.contain,
               ),
               SizedBox(height: 20),
-              Text(
-                processingText,
-                style: TextStyle(
-                  fontSize: 24,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text(
+                  processingText,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
                 ),
               ),
             ],

@@ -10,8 +10,8 @@ import 'package:latext/latext.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/api/fetch_data.dart';
 import 'package:scientry/info_pages/error_page.dart';
-import 'package:scientry/info_pages/loading_posts.dart';
 import 'package:scientry/info_pages/no_data_found.dart';
+import 'package:scientry/info_pages/processing_page.dart';
 import 'package:scientry/screens/mindmap_view.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -166,7 +166,12 @@ class _RequestedPostState extends State<RequestedPost> {
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
-            body: const Center(child: LoadingPosts()),
+            body: const Center(
+              child: ProcessingPage(
+                processingText:
+                    "Generating Summary & Mindmap for Requested Paper",
+              ),
+            ),
           );
         } else if (snapshot.hasError) {
           return Scaffold(

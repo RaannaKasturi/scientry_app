@@ -217,7 +217,7 @@ class RequestPaperState extends State<RequestPaper> {
                     color: Theme.of(context)
                         .colorScheme
                         .secondary
-                        .withAlpha((0.5 * 255).toInt()),
+                        .withAlpha((0.25 * 255).toInt()),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: Theme.of(context).colorScheme.primary,
