@@ -4,6 +4,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:http/http.dart' as http;
+import 'package:scientry/api/fetch_pdf_data.dart';
 import 'dart:convert';
 import 'package:scientry/screens/requested_post.dart';
 
@@ -17,6 +18,7 @@ class RequestPaper extends StatefulWidget {
 class RequestPaperState extends State<RequestPaper> {
   final GlobalKey<FormBuilderState> _doiFormKey = GlobalKey<FormBuilderState>();
   bool _isUploading = false;
+  bool _doiDataFetched = false;
 
   Future<void> _handleFileUpload(BuildContext context) async {
     try {
@@ -45,10 +47,37 @@ class RequestPaperState extends State<RequestPaper> {
         final fileURL = fileData['data']['url']
             .toString()
             .replaceAll("tmpfiles.org/", "tmpfiles.org/dl/");
+        try {
+          var pdfData = await fetchPDFData(fileURL);
+          var pdfDatas = await jsonDecode(jsonEncode(pdfData));
+          String doi = pdfDatas['doi'].toString();
+          debugPrint("Log: RPPDFData: DOI: $doi");
+          if (doi.isNotEmpty && doi != "null") {
+            if (doi.contains(".org/")) {
+              _doiFormKey.currentState?.fields['doi']
+                  ?.didChange(doi.split(".org/")[1]);
+            } else {
+              _doiFormKey.currentState?.fields['doi']?.didChange(doi);
+            }
+            setState(() {
+              _doiDataFetched = true;
+            });
+          } else {
+            setState(() {
+              _doiFormKey.currentState?.fields['doi']?.didChange("");
+              _doiDataFetched = false;
+            });
+          }
+        } catch (error) {
+          setState(() {
+            _doiDataFetched = false;
+          });
+          debugPrint("Log: RPPDFData: Error: $error");
+        }
         if (response.statusCode == 200) {
           _doiFormKey.currentState?.fields['pdfurl']?.didChange(fileURL);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("File uploaded successfully")),
+            const SnackBar(content: Text("File uploaded successfully")),
           );
         } else {
           _doiFormKey.currentState?.fields['pdfurl']?.didChange("");
@@ -132,8 +161,8 @@ class RequestPaperState extends State<RequestPaper> {
                   children: [
                     FormBuilderTextField(
                       name: 'doi',
-                      autofocus: true,
                       enableSuggestions: true,
+                      enabled: !_doiDataFetched,
                       onTapOutside: (event) => FocusScope.of(context).unfocus(),
                       decoration: InputDecoration(
                         labelText: "Enter DOI ID or URL *",
@@ -146,6 +175,9 @@ class RequestPaperState extends State<RequestPaper> {
                           onPressed: () {
                             _doiFormKey.currentState?.fields['doi']
                                 ?.didChange("");
+                            setState(() {
+                              _doiDataFetched = false;
+                            });
                           },
                           icon: const Icon(Icons.close),
                         ),
