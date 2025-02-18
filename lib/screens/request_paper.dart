@@ -21,6 +21,7 @@ class RequestPaperState extends State<RequestPaper> {
   bool _doiDataFetched = false;
 
   Future<void> _handleFileUpload(BuildContext context) async {
+    _doiFormKey.currentState?.fields['doi']?.didChange("");
     try {
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
         allowMultiple: false,
