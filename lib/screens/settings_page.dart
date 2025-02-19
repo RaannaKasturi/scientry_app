@@ -6,6 +6,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:scientry/screens/bookmarks_page.dart';
@@ -477,6 +478,15 @@ class _SettingsPageState extends State<SettingsPage> {
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
+                      onTap: () {
+                        bool value = !_darkTheme;
+                        setState(() {
+                          _prefs?.setBool('darkTheme', value);
+                          _darkTheme = value;
+                          Provider.of<ThemeProvider>(context, listen: false)
+                              .toggleTheme();
+                        });
+                      },
                       trailing: Switch.adaptive(
                         value: _darkTheme,
                         onChanged: (_) {
@@ -490,24 +500,29 @@ class _SettingsPageState extends State<SettingsPage> {
                         },
                       ),
                     ),
-                    ListTile(
-                      leading: Icon(
-                        LucideIcons.bellPlus,
-                        size: 30,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      title: Text(
-                        "Get Notifications",
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      trailing: Switch.adaptive(
-                        value: _notifications,
-                        onChanged: (_) => _handleNotificationPermission(),
-                      ),
-                    ),
+                    _notifications
+                        ? const SizedBox()
+                        : ListTile(
+                            leading: Icon(
+                              LucideIcons.bellPlus,
+                              size: 30,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                            title: Text(
+                              "Get Notifications",
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                            onTap: () {
+                              _handleNotificationPermission();
+                            },
+                            trailing: Switch.adaptive(
+                              value: _notifications,
+                              onChanged: (_) => _handleNotificationPermission(),
+                            ),
+                          ),
                     ListTile(
                       leading: Icon(
                         LucideIcons.bookMarked,
@@ -544,11 +559,67 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Divider(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                FutureBuilder<PackageInfo>(
+                  future: PackageInfo.fromPlatform(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: InkWell(
+                          child: RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              children: [
+                                WidgetSpan(
+                                  child: Icon(LucideIcons.copyright, size: 15),
+                                ),
+                                TextSpan(
+                                  text: ' 2024 Scientry',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color:
+                                        Theme.of(context).colorScheme.tertiary,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text:
+                                          '\nv${snapshot.data!.version}+${snapshot.data!.buildNumber}',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .secondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          onTap: () {
+                            EasyLauncher.url(
+                              url: "https://scietry.vercel.app/",
+                              mode: Mode.platformDefault,
+                            );
+                          },
+                        ),
+                      );
+                    }
+                    return const SizedBox();
+                  },
+                ),
                 InkWell(
                   child: TextButton(
                     onPressed: () {},
-                    child: const Text(
+                    child: Text(
                       "Made with 💖 by Nayan Kasturi",
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ),
                   onTap: () {
@@ -558,22 +629,22 @@ class _SettingsPageState extends State<SettingsPage> {
                     );
                   },
                 ),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    EasyLauncher.url(
-                      url: "https://scientry.raannakasturi.eu.org",
-                      mode: Mode.platformDefault,
-                    );
-                  },
-                  icon: const Icon(LucideIcons.globe),
-                  label: Text(
-                    "Visit Us on the Web",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                ),
+                // OutlinedButton.icon(
+                //   onPressed: () {
+                //     EasyLauncher.url(
+                //       url: "https://scientry.raannakasturi.eu.org",
+                //       mode: Mode.platformDefault,
+                //     );
+                //   },
+                //   icon: const Icon(LucideIcons.globe),
+                //   label: Text(
+                //     "Visit Us on the Web",
+                //     style: TextStyle(
+                //       fontSize: 20,
+                //       color: Theme.of(context).colorScheme.onSurface,
+                //     ),
+                //   ),
+                // ),
                 const SizedBox(height: 35),
               ],
             ),

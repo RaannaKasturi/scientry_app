@@ -53,9 +53,12 @@ class _BookmarksPageState extends State<BookmarksPage> {
                 noDataFoundText: "No Bookmarked Posts Found",
               ),
             )
-          : PostList(
-              posts: getPosts(),
-              postsToShow: 10000,
+          : Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: PostList(
+                posts: getPosts(),
+                postsToShow: 10000,
+              ),
             ),
     );
   }
