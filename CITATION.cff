@@ -8,6 +8,7 @@ type: software
 authors:
   - given-names: Nayan
     family-names: Kasturi
+    name-particle: RaannaKasturi
     email: raannakasturi@gmail.com
     orcid: 'https://orcid.org/0009-0005-4775-4197'
     affiliation: >-
