@@ -5,7 +5,7 @@
 ![GitHub forks](https://img.shields.io/github/forks/raannakasturi/scientry?style=social)
 ![License](https://img.shields.io/github/license/raannakasturi/scientry)
 
-**Note:** _This project is the part of final year dissertation/thesis project, It isn't meant for any financial gains apart for the ads that will be played to sponsor my other projects. This project is purely for educational purposes only._
+**Note:** _This project is the part of final year dissertation/thesis project, It isn't meant for any financial gains apart for the ads that will be played to sponsor my other projects. This project is purely for educational purposes only. After v1.0.0, no App Bundles will be released via GitHub._
 
 ## Table of Contents
 
@@ -41,7 +41,7 @@ Scientry generates AI-powered summaries and mindmaps from research papers source
 - [x] Built-in bookmarking for easy access using local storage
 - [x] Dark mode support
 - [ ] User Register, Login and Management using Firebase/Supabase/Appwrite
-- [ ] Storing bookmarks in dtabase instead of local storage
+- [ ] Storing bookmarks in database instead of local storage
 
 ## License
 
@@ -56,7 +56,7 @@ For any queries, feel free to reach out:
 ## Citation
 
 ```
-Nayan Kasturi, N. Scientry App [Computer software]. https://github.com/RaannaKasturi/scientry_app
+Kasturi, N. Scientry App [Computer software]. https://github.com/RaannaKasturi/scientry_app
 ```
 
 ## Acknowledgments and Credits
