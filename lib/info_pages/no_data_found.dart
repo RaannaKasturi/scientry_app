@@ -16,7 +16,7 @@ class NoDataFound extends StatelessWidget {
         child: Container(
           height: double.infinity,
           width: double.infinity,
-          color: Theme.of(context).colorScheme.primaryContainer,
+          color: Theme.of(context).colorScheme.surface,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,

@@ -82,9 +82,12 @@ class _MindmapViewState extends State<MindmapView> {
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         child: Text(
-          node.title,
+          " ${node.title}  ",
           style: TextStyle(
-              fontSize: 16, color: Theme.of(context).colorScheme.onTertiary),
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Theme.of(context).colorScheme.onTertiaryFixed,
+          ),
         ),
       );
     } else {
@@ -101,13 +104,18 @@ class _MindmapViewState extends State<MindmapView> {
                 .copyWith(right: 0),
             child: Padding(
               padding: const EdgeInsets.all(2.0),
-              child: Text(node.title,
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).colorScheme.onSecondary)),
+              child: Text(
+                " ${node.title}  ",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context).colorScheme.onSecondaryFixed,
+                ),
+              ),
             ),
           ),
           MindMap(
+            lineColor: Theme.of(context).colorScheme.onSurface,
             dotRadius: 4,
             children: node.children
                 .map((child) => buildNode(child, context))
@@ -156,10 +164,12 @@ class _MindmapViewState extends State<MindmapView> {
                         child: Padding(
                           padding: const EdgeInsets.all(4.0),
                           child: Text(
-                            rootNode.title,
+                            "  ${rootNode.title}    ",
                             style: TextStyle(
                               fontSize: 18,
-                              color: Theme.of(context).colorScheme.onPrimary,
+                              fontWeight: FontWeight.w700,
+                              color:
+                                  Theme.of(context).colorScheme.onPrimaryFixed,
                             ),
                           ),
                         ),
@@ -168,6 +178,7 @@ class _MindmapViewState extends State<MindmapView> {
                     MindMap(
                       padding: const EdgeInsets.only(left: 50),
                       dotRadius: 4,
+                      lineColor: Theme.of(context).colorScheme.onSurface,
                       children: rootNode.children
                           .map((child) => buildNode(child, context))
                           .toList(),

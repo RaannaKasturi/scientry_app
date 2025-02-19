@@ -123,7 +123,7 @@ class PostCard extends StatelessWidget {
                             child: Text(
                               category,
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onPrimary,
                               ),
                             ),
                           ),
@@ -141,7 +141,7 @@ class PostCard extends StatelessWidget {
                           title.replaceAll(r"\(", r"$").replaceAll(r"\)", r"$"),
                           softWrap: true,
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 15,
                             overflow: TextOverflow.ellipsis,
                             fontWeight: FontWeight.bold,
                           ),

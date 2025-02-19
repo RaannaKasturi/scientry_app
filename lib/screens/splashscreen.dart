@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 import 'package:scientry/screens/homepage.dart';
+import 'package:scientry/theme/theme_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -16,11 +18,23 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     splashScreen();
+    setTheme();
   }
 
-  void splashScreen() async {
-    await Future.delayed(const Duration(milliseconds: 700));
+  void splashScreen() {
     FlutterNativeSplash.remove();
+  }
+
+  void setTheme() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isDark = prefs.getBool('darkTheme') ?? false;
+    if (!mounted) return;
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    if (isDark) {
+      themeProvider.themeData = ThemeData.dark();
+    } else {
+      themeProvider.themeData = ThemeData.light();
+    }
   }
 
   @override
@@ -29,89 +43,81 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Lottie.asset('assets/lottie/splashscreen.json',
-                width: 0.25 * screenWidth,
-                fit: BoxFit.cover,
-                repeat: false,
-                animate: true,
-                alignment: Alignment.center,
-                renderCache: RenderCache.raster,
-                filterQuality: FilterQuality.high,
-                options: LottieOptions(enableMergePaths: true),
-                frameRate: FrameRate(120)),
-            Animate(
-              onComplete: (controller) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return HomePage();
-                    },
-                  ),
-                );
-              },
-              autoPlay: true,
-              effects: [
-                ScaleEffect(
-                  duration: Duration(seconds: 1),
-                  curve: Curves.easeInOut,
+        child: Animate(
+          onComplete: (controller) async {
+            await Future.delayed(Duration(milliseconds: 800));
+            Navigator.pushReplacement(
+              // ignore: use_build_context_synchronously
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return HomePage();
+                },
+              ),
+            );
+          },
+          autoPlay: true,
+          effects: [
+            ScaleEffect(
+              delay: Duration(milliseconds: 800),
+              duration: Duration(seconds: 2),
+              curve: Curves.easeInOut,
+            ),
+            FadeEffect(
+              delay: Duration(milliseconds: 800),
+              duration: Duration(seconds: 2),
+              curve: Curves.easeInOut,
+            ),
+          ],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset(
+                "assets/splash_screen/brandlogo.png",
+                width: 0.5 * screenWidth,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Text(
+                "Scientry",
+                style: TextStyle(
+                  fontSize: 50,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  letterSpacing: 5,
                 ),
-                FadeEffect(
-                  duration: Duration(seconds: 1),
-                  curve: Curves.easeInOut,
-                ),
-              ],
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+              ),
+              Divider(
+                color: Theme.of(context).colorScheme.onPrimary,
+                thickness: 2,
+                indent: 0.3 * screenWidth,
+                endIndent: 0.3 * screenWidth,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Column(
                 children: [
-                  SizedBox(
-                    height: 20,
-                  ),
                   Text(
-                    "Scientry",
+                    "Science Simplified,",
                     style: TextStyle(
-                      fontSize: 50,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 25,
                       color: Theme.of(context).colorScheme.onPrimary,
-                      letterSpacing: 5,
                     ),
                   ),
-                  Divider(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    thickness: 2,
-                    indent: 0.3 * screenWidth,
-                    endIndent: 0.3 * screenWidth,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Column(
-                    children: [
-                      Text(
-                        "Science Simplified,",
-                        style: TextStyle(
-                          fontSize: 25,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                      ),
-                      Text(
-                        "Knowledge Amplified",
-                        style: TextStyle(
-                          fontSize: 25,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                      )
-                    ],
+                  Text(
+                    "Knowledge Amplified",
+                    style: TextStyle(
+                      fontSize: 25,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
                   )
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

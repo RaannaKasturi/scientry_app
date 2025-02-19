@@ -141,15 +141,17 @@ class _CarouselState extends State<Carousel> {
                                 ),
                                 child: Text(
                                   item.category,
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
                                   ),
                                 ),
                               ),
                               Text(
                                 item.title,
                                 style: const TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   color: Colors.white,
                                 ),
                               ),

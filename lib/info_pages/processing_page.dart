@@ -16,7 +16,7 @@ class ProcessingPage extends StatelessWidget {
         child: Container(
           height: double.infinity,
           width: double.infinity,
-          color: Theme.of(context).colorScheme.primaryContainer,
+          color: Theme.of(context).colorScheme.surface,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -28,11 +28,15 @@ class ProcessingPage extends StatelessWidget {
                 fit: BoxFit.contain,
               ),
               SizedBox(height: 20),
-              Text(
-                processingText,
-                style: TextStyle(
-                  fontSize: 24,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text(
+                  processingText,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
                 ),
               ),
             ],

@@ -146,12 +146,16 @@ class _SearchPageState extends State<SearchPage> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: LoadingPosts());
               } else if (snapshot.hasError) {
-                return ErrorPage(
-                    errorPageText: "An error occurred while searching");
+                return const Center(
+                  child: ErrorPage(
+                      errorPageText: "An error occurred while searching"),
+                );
               } else if (snapshot.hasData) {
                 if (snapshot.data == null || snapshot.data!.isEmpty) {
-                  return NoDataFound(
-                      noDataFoundText: "No papers found for search");
+                  return const Center(
+                    child: NoDataFound(
+                        noDataFoundText: "No papers found for search"),
+                  );
                 } else {
                   return PostList(
                     postsToShow: 100,
@@ -159,8 +163,10 @@ class _SearchPageState extends State<SearchPage> {
                   );
                 }
               } else {
-                return NoDataFound(
-                    noDataFoundText: "No papers found for search");
+                return const Center(
+                  child: ErrorPage(
+                      errorPageText: "An error occurred while searching"),
+                );
               }
             },
           ),

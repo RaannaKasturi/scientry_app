@@ -5,10 +5,10 @@
 ![GitHub forks](https://img.shields.io/github/forks/raannakasturi/scientry?style=social)
 ![License](https://img.shields.io/github/license/raannakasturi/scientry)
 
-
 **Note:** _This project is the part of final year dissertation/thesis project, It isn't meant for any financial gains apart for the ads that will be played to sponsor my other projects. This project is purely for educational purposes only._
 
 ## Table of Contents
+
 - [About Scientry](#about-scientry)
 - [Aims and Objectives](#aims-and-objectives)
 - [Features](#features)
@@ -18,9 +18,11 @@
 - [Acknowledgments and Credits](#acknowledgments-and-credits)
 
 ## About Scientry
+
 Scientry generates AI-powered summaries and mindmaps from research papers sourced from platforms like [ArXiv](https://arxiv.org/) and [PubMed Central](https://pmc.ncbi.nlm.nih.gov/). The Android and iOS applications are built using Dart & Flutter, ensuring a seamless cross-platform experience.
 
 ## Aims and Objectives
+
 - **Global Accessibility:** Democratize research by making scholarly data available to everyone, everywhere.
 - **On-the-Go Convenience:** Provide quick, mobile-friendly access to research information anytime, anywhere.
 - **Simplified Insights:** Transform complex research data into intuitive, visually engaging mindmaps that facilitate easier understanding.
@@ -28,6 +30,7 @@ Scientry generates AI-powered summaries and mindmaps from research papers source
 - **Continuous Updates:** Keep users informed with the latest advancements and breakthroughs across diverse fields of study.
 
 ## Features
+
 - [x] Cross-platform support (Android & iOS)
 - [x] AI-generated summaries of research papers
 - [x] Interactive mindmaps for better understanding
@@ -35,23 +38,28 @@ Scientry generates AI-powered summaries and mindmaps from research papers source
 - [x] Serve cached resources for faster access
 - [x] Share content across multiple applications
 - [x] Direct links to full research papers
-- [ ] Built-in bookmarking for easy access using local storage
-- [ ] Dark mode support
+- [x] Built-in bookmarking for easy access using local storage
+- [x] Dark mode support
 - [ ] User Register, Login and Management using Firebase/Supabase/Appwrite
 - [ ] Storing bookmarks in dtabase instead of local storage
 
-## License  
-This project is licensed under the AGPL License - see the [LICENSE](LICENSE) file for details.  
+## License
+
+This project is licensed under the AGPL License - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
+
 For any queries, feel free to reach out:
+
 - **Email:** raannakasturi@gmail.com
 
 ## Citation
+
 ```
 Nayan Kasturi, N. Scientry App [Computer software]. https://github.com/RaannaKasturi/scientry_app
 ```
 
 ## Acknowledgments and Credits
+
 - Special thanks to [ArXiv](https://arxiv.org/) and [PubMed Central](https://pmc.ncbi.nlm.nih.gov/) for making research papers accessible.
 - Mrs. Sermarani Saravanan (Asst. Prof. Dept. of Bioinformatics, Khalsa College of Arts, Science & Commerce, Mumbai) for their guidance and supporting the cause.
