@@ -219,9 +219,9 @@ class _RequestedPostState extends State<RequestedPost> {
                           ),
                           child: Text(
                             post.category,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
                           ),
                         ),
