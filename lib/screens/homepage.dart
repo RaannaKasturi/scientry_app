@@ -287,31 +287,40 @@ class _HomePageState extends State<HomePage> {
               var categories = snapshot.data?.$2 ?? [];
               var carouselPosts = snapshot.data?.$3 ?? [];
 
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  children: [
-                    Carousel(
-                      carouselPosts: carouselPosts
-                          .take(7)
-                          .map((post) => CarouselPost(
-                                id: post.id,
-                                title: post.title,
-                                image: post.image,
-                                category: post.category,
-                                link: post.link,
-                              ))
-                          .toList(),
-                    ),
-                    SectionTitle(
-                        title: "Latest Posts",
-                        link: "https://thescientry.blogspot.com/",
-                        context: context),
-                    LatestPosts(data: Future.value(posts)),
-                    CategoriesPostsList(
-                        fetchedCategories: Future.value(categories),
-                        fetchedPosts: Future.value(posts)),
-                  ],
+              return RawScrollbar(
+                thumbColor: Theme.of(context).colorScheme.primary,
+                thickness: 5,
+                radius: Radius.circular(10),
+                trackVisibility: true,
+                child: SingleChildScrollView(
+                  physics: ScrollPhysics(
+                    parent: PageScrollPhysics(),
+                  ),
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    children: [
+                      Carousel(
+                        carouselPosts: carouselPosts
+                            .take(7)
+                            .map((post) => CarouselPost(
+                                  id: post.id,
+                                  title: post.title,
+                                  image: post.image,
+                                  category: post.category,
+                                  link: post.link,
+                                ))
+                            .toList(),
+                      ),
+                      SectionTitle(
+                          title: "Latest Posts",
+                          link: "https://thescientry.blogspot.com/",
+                          context: context),
+                      LatestPosts(data: Future.value(posts)),
+                      CategoriesPostsList(
+                          fetchedCategories: Future.value(categories),
+                          fetchedPosts: Future.value(posts)),
+                    ],
+                  ),
                 ),
               );
             },

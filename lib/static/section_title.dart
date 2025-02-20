@@ -1,5 +1,5 @@
-import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
+import 'package:scientry/static/paginated_post_list.dart';
 
 class SectionTitle extends StatelessWidget {
   const SectionTitle({
@@ -55,7 +55,14 @@ class SectionTitle extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              EasyLauncher.url(url: link, mode: Mode.platformDefault);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    return PaginatedPostList(categoryLink: link);
+                  },
+                ),
+              );
             },
             child: Text('View More'),
           ),

@@ -30,6 +30,7 @@ class ErrorPage extends StatelessWidget {
               SizedBox(height: 20),
               Text(
                 errorPageText,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 24,
                   color: Theme.of(context).colorScheme.onPrimaryContainer,

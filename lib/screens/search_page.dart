@@ -139,36 +139,45 @@ class _SearchPageState extends State<SearchPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: SingleChildScrollView(
-          child: FutureBuilder<List<Post>>(
-            future: _searchFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: LoadingPosts());
-              } else if (snapshot.hasError) {
-                return const Center(
-                  child: ErrorPage(
-                      errorPageText: "An error occurred while searching"),
-                );
-              } else if (snapshot.hasData) {
-                if (snapshot.data == null || snapshot.data!.isEmpty) {
+        child: RawScrollbar(
+          thumbColor: Theme.of(context).colorScheme.primary,
+          thickness: 5,
+          radius: Radius.circular(10),
+          trackVisibility: true,
+          child: SingleChildScrollView(
+            physics: ScrollPhysics(
+              parent: PageScrollPhysics(),
+            ),
+            child: FutureBuilder<List<Post>>(
+              future: _searchFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: LoadingPosts());
+                } else if (snapshot.hasError) {
                   return const Center(
-                    child: NoDataFound(
-                        noDataFoundText: "No papers found for search"),
+                    child: ErrorPage(
+                        errorPageText: "An error occurred while searching"),
                   );
+                } else if (snapshot.hasData) {
+                  if (snapshot.data == null || snapshot.data!.isEmpty) {
+                    return const Center(
+                      child: NoDataFound(
+                          noDataFoundText: "No papers found for search"),
+                    );
+                  } else {
+                    return PostList(
+                      postsToShow: 100,
+                      posts: snapshot.data!,
+                    );
+                  }
                 } else {
-                  return PostList(
-                    postsToShow: 100,
-                    posts: snapshot.data!,
+                  return const Center(
+                    child: ErrorPage(
+                        errorPageText: "An error occurred while searching"),
                   );
                 }
-              } else {
-                return const Center(
-                  child: ErrorPage(
-                      errorPageText: "An error occurred while searching"),
-                );
-              }
-            },
+              },
+            ),
           ),
         ),
       ),
