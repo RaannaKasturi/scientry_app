@@ -142,9 +142,6 @@ class _MindmapViewState extends State<MindmapView> {
           radius: Radius.circular(10),
           trackVisibility: true,
           child: SingleChildScrollView(
-            physics: ScrollPhysics(
-              parent: PageScrollPhysics(),
-            ),
             scrollDirection: Axis.horizontal,
             child: RawScrollbar(
               thumbColor: Theme.of(context).colorScheme.primary,
@@ -152,9 +149,6 @@ class _MindmapViewState extends State<MindmapView> {
               radius: Radius.circular(10),
               trackVisibility: true,
               child: SingleChildScrollView(
-                physics: ScrollPhysics(
-                  parent: PageScrollPhysics(),
-                ),
                 scrollDirection: Axis.vertical,
                 child: Container(
                   color: Theme.of(context).colorScheme.surface,

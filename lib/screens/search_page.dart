@@ -145,9 +145,6 @@ class _SearchPageState extends State<SearchPage> {
           radius: Radius.circular(10),
           trackVisibility: true,
           child: SingleChildScrollView(
-            physics: ScrollPhysics(
-              parent: PageScrollPhysics(),
-            ),
             child: FutureBuilder<List<Post>>(
               future: _searchFuture,
               builder: (context, snapshot) {

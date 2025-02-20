@@ -164,7 +164,6 @@ class _CarouselState extends State<Carousel> {
                 }).toList(),
                 carouselController: carouselController,
                 options: CarouselOptions(
-                  scrollPhysics: const BouncingScrollPhysics(),
                   autoPlay: true,
                   aspectRatio: 3 / 2,
                   viewportFraction: 1,

@@ -293,9 +293,6 @@ class _HomePageState extends State<HomePage> {
                 radius: Radius.circular(10),
                 trackVisibility: true,
                 child: SingleChildScrollView(
-                  physics: ScrollPhysics(
-                    parent: PageScrollPhysics(),
-                  ),
                   padding: const EdgeInsets.all(10),
                   child: Column(
                     children: [

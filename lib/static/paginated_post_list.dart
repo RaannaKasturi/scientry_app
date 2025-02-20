@@ -179,9 +179,6 @@ class _PaginatedPostListState extends State<PaginatedPostList> {
               radius: Radius.circular(10),
               trackVisibility: true,
               child: SingleChildScrollView(
-                physics: ScrollPhysics(
-                  parent: PageScrollPhysics(),
-                ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Column(
