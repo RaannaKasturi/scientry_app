@@ -135,10 +135,6 @@ class _MindmapViewState extends State<MindmapView> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Mindmap'),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: (() {}),
-        child: Icon(Icons.save),
-      ),
       body: SafeArea(
         child: RawScrollbar(
           thumbColor: Theme.of(context).colorScheme.primary,
