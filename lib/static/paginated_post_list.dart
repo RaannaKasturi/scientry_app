@@ -189,7 +189,7 @@ class _PaginatedPostListState extends State<PaginatedPostList> {
                     children: [
                       PostList(
                         posts: postsList,
-                        postsToShow: 30000,
+                        postsToShow: 55,
                       ),
                       const SizedBox(height: 20),
                       Row(
