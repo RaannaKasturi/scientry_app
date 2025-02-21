@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:isolate';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:http/http.dart' as http;
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:scientry/ad_helper.dart';
 import 'package:scientry/front/categories_posts_list.dart';
 import 'package:scientry/front/latest_posts.dart';
 import 'package:scientry/screens/search_page.dart';
@@ -97,6 +99,7 @@ class _HomePageState extends State<HomePage> {
   List<CarouselPost> cachedCarouselPosts = [];
   bool latestDataFound = false;
   bool _snackbarShown = false;
+  BannerAd? _bannerAd;
 
   @override
   void initState() {
@@ -105,6 +108,24 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _initPrefs() async {
+    BannerAd(
+      adUnitId: AdHelper.footerAdUnitID,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(
+            () {
+              _bannerAd = ad as BannerAd;
+            },
+          );
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint("Failed to load ad: $error");
+          ad.dispose();
+        },
+      ),
+    ).load();
     prefs = await SharedPreferences.getInstance();
     _loadCachedData();
     fetchNewData();
@@ -240,7 +261,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  /// Helper method to build the posts UI given the data.
   Widget buildPostsUI(List<Post> posts, List<Categories> categories,
       List<CarouselPost> carouselPosts) {
     return RawScrollbar(
@@ -305,6 +325,12 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      bottomSheet: _bannerAd != null
+          ? SizedBox(
+              height: _bannerAd!.size.height.toDouble(),
+              child: AdWidget(ad: _bannerAd!),
+            )
+          : null,
       drawer: const DefaultDrawer(),
       body: FutureBuilder<bool>(
         future: SimpleConnectionChecker.isConnectedToInternet(),
@@ -312,7 +338,6 @@ class _HomePageState extends State<HomePage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const LoadingPosts();
           }
-          // When there is an error or no internet connection:
           if (snapshot.hasError ||
               (snapshot.hasData && snapshot.data == false)) {
             if (!_snackbarShown) {
