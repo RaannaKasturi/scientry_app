@@ -115,191 +115,199 @@ class _SinglePostState extends State<SinglePost> {
             final post = snapshot.data!;
             return Scaffold(
               backgroundColor: Theme.of(context).colorScheme.surface,
-              body: CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    automaticallyImplyLeading: true,
-                    leading: IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all(
-                            Theme.of(context).colorScheme.surface),
-                      ),
-                      icon: Icon(Icons.arrow_back,
-                          color: Theme.of(context).colorScheme.onSurface),
-                    ),
-                    backgroundColor:
-                        Theme.of(context).colorScheme.inversePrimary,
-                    expandedHeight: 250,
-                    flexibleSpace: FlexibleSpaceBar(
-                      background: post.image.startsWith('http')
-                          ? Image.network(post.image,
-                              fit: BoxFit.cover, width: double.infinity)
-                          : Image.memory(
-                              base64Decode(post.image.split(",")[1]),
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  Text("Error loading image: $error"),
-                            ),
-                      title: InkWell(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: Text(
-                            post.category,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
-                    pinned: true,
-                    actions: [
-                      IconButton(
+              body: RawScrollbar(
+                thumbColor: Theme.of(context).colorScheme.primary,
+                thickness: 5,
+                radius: Radius.circular(10),
+                trackVisibility: true,
+                child: CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      automaticallyImplyLeading: true,
+                      leading: IconButton(
+                        onPressed: () => Navigator.pop(context),
                         style: ButtonStyle(
                           backgroundColor: WidgetStateProperty.all(
                               Theme.of(context).colorScheme.surface),
                         ),
-                        onPressed: () => EasyLauncher.url(
-                            url: post.doilink, mode: Mode.platformDefault),
-                        icon: Icon(Icons.link,
+                        icon: Icon(Icons.arrow_back,
                             color: Theme.of(context).colorScheme.onSurface),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: IconButton(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.inversePrimary,
+                      expandedHeight: 250,
+                      flexibleSpace: FlexibleSpaceBar(
+                        background: post.image.startsWith('http')
+                            ? Image.network(post.image,
+                                fit: BoxFit.cover, width: double.infinity)
+                            : Image.memory(
+                                base64Decode(post.image.split(",")[1]),
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Text("Error loading image: $error"),
+                              ),
+                        title: InkWell(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Text(
+                              post.category,
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                      pinned: true,
+                      actions: [
+                        IconButton(
                           style: ButtonStyle(
                             backgroundColor: WidgetStateProperty.all(
                                 Theme.of(context).colorScheme.surface),
                           ),
-                          onPressed: () async {
-                            await Share.share(
-                              widget.postURL,
-                              subject: post.title,
-                              sharePositionOrigin: Rect.fromCenter(
-                                width: 0.9 * MediaQuery.of(context).size.width,
-                                height:
-                                    0.7 * MediaQuery.of(context).size.height,
-                                center: const Offset(100, 100),
-                              ),
-                            );
-                          },
-                          icon: Icon(Icons.share,
+                          onPressed: () => EasyLauncher.url(
+                              url: post.doilink, mode: Mode.platformDefault),
+                          icon: Icon(Icons.link,
                               color: Theme.of(context).colorScheme.onSurface),
                         ),
-                      ),
-                    ],
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: LaTexT(
-                                  laTeXCode: Text(
-                                    post.title,
-                                    softWrap: true,
-                                    style: const TextStyle(
-                                      fontSize: 25,
-                                      fontWeight: FontWeight.bold,
+                        Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: IconButton(
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.all(
+                                  Theme.of(context).colorScheme.surface),
+                            ),
+                            onPressed: () async {
+                              await Share.share(
+                                widget.postURL,
+                                subject: post.title,
+                                sharePositionOrigin: Rect.fromCenter(
+                                  width:
+                                      0.9 * MediaQuery.of(context).size.width,
+                                  height:
+                                      0.7 * MediaQuery.of(context).size.height,
+                                  center: const Offset(100, 100),
+                                ),
+                              );
+                            },
+                            icon: Icon(Icons.share,
+                                color: Theme.of(context).colorScheme.onSurface),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: LaTexT(
+                                    laTeXCode: Text(
+                                      post.title,
+                                      softWrap: true,
+                                      style: const TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              BookmarkButton(
-                                post: post,
-                                postURL: widget.postURL,
-                                prefs: prefs,
-                                initialBookmarked: _isBookmarked,
-                              ),
-                            ],
-                          ),
-                          Divider(
-                              color: Theme.of(context).colorScheme.onSurface,
-                              thickness: 1,
-                              height: 40),
-                          HtmlWidget(post.summary,
-                              textStyle: const TextStyle(
-                                fontSize: 18,
-                              )),
-                          Divider(
-                              color: Theme.of(context).colorScheme.onSurface,
-                              thickness: 1,
-                              height: 40),
-                          HtmlWidget('<h2>Citation</h2>',
-                              textStyle: const TextStyle(fontSize: 18)),
-                          LaTexT(
-                              laTeXCode: Text(
-                                  unescapeHTMLContent(post.citation),
-                                  style: const TextStyle(fontSize: 17))),
-                          const SizedBox(height: 50),
-                          Padding(
-                            padding: const EdgeInsets.all(15.0),
-                            child: Column(
-                              children: [
-                                const Text(
-                                  "Disclaimer",
-                                  softWrap: true,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontStyle: FontStyle.italic,
-                                    fontSize: 15,
-                                  ),
-                                  maxLines: 5,
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 50,
-                                  ),
-                                  child: Divider(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                ),
-                                Text(
-                                  "Content is developed using Artificial Intelligence. May not be accurate. Please read the paper to verify.",
-                                  softWrap: true,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontStyle: FontStyle.italic,
-                                    fontSize: 15,
-                                    color:
-                                        Theme.of(context).colorScheme.onSurface,
-                                  ),
-                                  maxLines: 5,
-                                ),
-                                const SizedBox(height: 75),
-                                Text(
-                                  "Happy Researching!",
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
+                                BookmarkButton(
+                                  post: post,
+                                  postURL: widget.postURL,
+                                  prefs: prefs,
+                                  initialBookmarked: _isBookmarked,
                                 ),
                               ],
                             ),
-                          ),
-                        ],
+                            Divider(
+                                color: Theme.of(context).colorScheme.onSurface,
+                                thickness: 1,
+                                height: 40),
+                            HtmlWidget(post.summary,
+                                textStyle: const TextStyle(
+                                  fontSize: 18,
+                                )),
+                            Divider(
+                                color: Theme.of(context).colorScheme.onSurface,
+                                thickness: 1,
+                                height: 40),
+                            HtmlWidget('<h2>Citation</h2>',
+                                textStyle: const TextStyle(fontSize: 18)),
+                            LaTexT(
+                                laTeXCode: Text(
+                                    unescapeHTMLContent(post.citation),
+                                    style: const TextStyle(fontSize: 17))),
+                            const SizedBox(height: 50),
+                            Padding(
+                              padding: const EdgeInsets.all(15.0),
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    "Disclaimer",
+                                    softWrap: true,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontSize: 15,
+                                    ),
+                                    maxLines: 5,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 50,
+                                    ),
+                                    child: Divider(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Content is developed using Artificial Intelligence. May not be accurate. Please read the paper to verify.",
+                                    softWrap: true,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontStyle: FontStyle.italic,
+                                      fontSize: 15,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                    ),
+                                    maxLines: 5,
+                                  ),
+                                  const SizedBox(height: 75),
+                                  Text(
+                                    "Happy Researching!",
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               floatingActionButton: FloatingActionButton(
                 backgroundColor: Theme.of(context).colorScheme.primary,

@@ -53,11 +53,19 @@ class _BookmarksPageState extends State<BookmarksPage> {
                 noDataFoundText: "No Bookmarked Posts Found",
               ),
             )
-          : Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: PostList(
-                posts: getPosts(),
-                postsToShow: 10000,
+          : RawScrollbar(
+              thumbColor: Theme.of(context).colorScheme.primary,
+              thickness: 5,
+              radius: Radius.circular(10),
+              trackVisibility: true,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: PostList(
+                    posts: getPosts(),
+                    postsToShow: 100000,
+                  ),
+                ),
               ),
             ),
     );

@@ -137,13 +137,13 @@ class _SearchPageState extends State<SearchPage> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: RawScrollbar(
-          thumbColor: Theme.of(context).colorScheme.primary,
-          thickness: 5,
-          radius: Radius.circular(10),
-          trackVisibility: true,
+      body: RawScrollbar(
+        thumbColor: Theme.of(context).colorScheme.primary,
+        thickness: 5,
+        radius: Radius.circular(10),
+        trackVisibility: true,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: SingleChildScrollView(
             child: FutureBuilder<List<Post>>(
               future: _searchFuture,

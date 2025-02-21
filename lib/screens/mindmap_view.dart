@@ -86,7 +86,7 @@ class _MindmapViewState extends State<MindmapView> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.onTertiaryFixed,
+            color: Theme.of(context).colorScheme.onTertiary,
           ),
         ),
       );
@@ -109,7 +109,7 @@ class _MindmapViewState extends State<MindmapView> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: Theme.of(context).colorScheme.onSecondaryFixed,
+                  color: Theme.of(context).colorScheme.onSecondary,
                 ),
               ),
             ),
@@ -174,9 +174,8 @@ class _MindmapViewState extends State<MindmapView> {
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onPrimaryFixed,
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
                                 ),
                               ),
                             ),
