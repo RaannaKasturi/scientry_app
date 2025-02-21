@@ -94,7 +94,7 @@ class _SinglePostState extends State<SinglePost> {
         if (internetSnapshot.connectionState == ConnectionState.waiting) {
           return ProcessingPage(processingText: "Checking Internet...");
         }
-        if (internetSnapshot.hasError || internetSnapshot.data == false) {
+        if (internetSnapshot.hasError || !internetSnapshot.data!) {
           return NoInternet();
         }
         return FutureBuilder<PostData>(
@@ -189,7 +189,7 @@ class _SinglePostState extends State<SinglePost> {
                             ),
                             onPressed: () async {
                               await Share.share(
-                                widget.postURL,
+                                "Check out this paper: ${post.doilink} at Scientry: Science Simplified, Knowledge Amplified.\n\nJust upload the Research Paper PDF and read the Summary and Mindmap of Research Paper or Checkout our Collection of Pre-processed Research Papers for Free!\n\nDownload App: https://scientry.vercel.app/download\nVisit Web: https://scientry.vercel.app",
                                 subject: post.title,
                                 sharePositionOrigin: Rect.fromCenter(
                                   width:

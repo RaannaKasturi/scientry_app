@@ -6,7 +6,9 @@ import 'package:http/http.dart' as http;
 import 'package:scientry/info_pages/error_page.dart';
 import 'package:scientry/info_pages/loading_posts.dart';
 import 'package:scientry/info_pages/no_data_found.dart';
+import 'package:scientry/info_pages/no_internet.dart';
 import 'package:scientry/static/post_list.dart';
+import 'package:simple_connection_checker/simple_connection_checker.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -87,6 +89,10 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
+  Future<bool> checkInternet() async {
+    return await SimpleConnectionChecker.isConnectedToInternet();
+  }
+
   @override
   void initState() {
     _searchFuture = getData("");
@@ -95,89 +101,105 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: FormBuilder(
-          key: _searchKeywordFormKey,
-          child: Row(
-            children: [
-              Expanded(
-                child: FormBuilderTextField(
-                  name: "search",
-                  enableInteractiveSelection: true,
-                  enableSuggestions: true,
-                  autocorrect: true,
-                  onTapOutside: (event) {
-                    FocusScope.of(context).unfocus();
-                  },
-                  onSubmitted: (_) {
-                    _onSearchPressed();
-                  },
-                  decoration: InputDecoration(
-                    labelText: "Search",
-                    hintText: "Enter your search term",
-                    suffixIcon: IconButton(
-                      onPressed: (() {
-                        setState(() {
-                          _searchFuture = getData("");
-                        });
-                      }),
-                      icon: Icon(Icons.clear),
+    return FutureBuilder(
+      future: checkInternet(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!) {
+          return const NoInternet();
+        }
+        if (snapshot.hasError) {
+          return NoInternet();
+        }
+        return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            title: FormBuilder(
+              key: _searchKeywordFormKey,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: FormBuilderTextField(
+                      name: "search",
+                      enableInteractiveSelection: true,
+                      enableSuggestions: true,
+                      autocorrect: true,
+                      onTapOutside: (event) {
+                        FocusScope.of(context).unfocus();
+                      },
+                      onSubmitted: (_) {
+                        _onSearchPressed();
+                      },
+                      decoration: InputDecoration(
+                        labelText: "Search",
+                        hintText: "Enter your search term",
+                        suffixIcon: IconButton(
+                          onPressed: (() {
+                            setState(() {
+                              _searchFuture = getData("");
+                            });
+                          }),
+                          icon: Icon(Icons.clear),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  IconButton(
+                    onPressed: _onSearchPressed,
+                    icon: const Icon(Icons.search),
+                  ),
+                ],
               ),
-              IconButton(
-                onPressed: _onSearchPressed,
-                icon: const Icon(Icons.search),
-              ),
-            ],
-          ),
-        ),
-      ),
-      body: RawScrollbar(
-        thumbColor: Theme.of(context).colorScheme.primary,
-        thickness: 5,
-        radius: Radius.circular(10),
-        trackVisibility: true,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: SingleChildScrollView(
-            child: FutureBuilder<List<Post>>(
-              future: _searchFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: LoadingPosts());
-                } else if (snapshot.hasError) {
-                  return const Center(
-                    child: ErrorPage(
-                        errorPageText: "An error occurred while searching"),
-                  );
-                } else if (snapshot.hasData) {
-                  if (snapshot.data == null || snapshot.data!.isEmpty) {
-                    return const Center(
-                      child: NoDataFound(
-                          noDataFoundText: "No papers found for search"),
-                    );
-                  } else {
-                    return PostList(
-                      postsToShow: 100,
-                      posts: snapshot.data!,
-                    );
-                  }
-                } else {
-                  return const Center(
-                    child: ErrorPage(
-                        errorPageText: "An error occurred while searching"),
-                  );
-                }
-              },
             ),
           ),
-        ),
-      ),
+          body: RawScrollbar(
+            thumbColor: Theme.of(context).colorScheme.primary,
+            thickness: 5,
+            radius: Radius.circular(10),
+            trackVisibility: true,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: SingleChildScrollView(
+                child: FutureBuilder<List<Post>>(
+                  future: _searchFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return SizedBox(
+                        height: MediaQuery.of(context).size.height,
+                        child: const Center(
+                          child: LoadingPosts(),
+                        ),
+                      );
+                    } else if (snapshot.hasError) {
+                      return const Center(
+                        child: ErrorPage(
+                            errorPageText: "An error occurred while searching"),
+                      );
+                    } else if (snapshot.hasData) {
+                      if (snapshot.data == null || snapshot.data!.isEmpty) {
+                        return const Center(
+                          child: NoDataFound(
+                              noDataFoundText: "No papers found for search"),
+                        );
+                      } else {
+                        return PostList(
+                          postsToShow: 100,
+                          posts: snapshot.data!,
+                        );
+                      }
+                    } else {
+                      return const Center(
+                        child: ErrorPage(
+                            errorPageText: "An error occurred while searching"),
+                      );
+                    }
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -5,8 +5,10 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:http/http.dart' as http;
 import 'package:scientry/api/fetch_pdf_data.dart';
+import 'package:scientry/info_pages/no_internet.dart';
 import 'dart:convert';
 import 'package:scientry/screens/requested_post.dart';
+import 'package:simple_connection_checker/simple_connection_checker.dart';
 
 class RequestPaper extends StatefulWidget {
   const RequestPaper({super.key});
@@ -137,169 +139,187 @@ class RequestPaperState extends State<RequestPaper> {
     return _doiFormKey.currentState?.saveAndValidate() ?? false;
   }
 
+  Future<bool> checkInternet() async {
+    return await SimpleConnectionChecker.isConnectedToInternet();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(Icons.arrow_back),
-        ),
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FormBuilder(
-                key: _doiFormKey,
-                child: Column(
-                  children: [
-                    FormBuilderTextField(
-                      name: 'doi',
-                      enableSuggestions: true,
-                      enabled: !_doiDataFetched,
-                      onTapOutside: (event) => FocusScope.of(context).unfocus(),
-                      decoration: InputDecoration(
-                        labelText: "Enter DOI ID or URL *",
-                        helperText:
-                            "https://doi.org/10.1145/2470654.2470728 or\n10.1145/2470654.2470728",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            _doiFormKey.currentState?.fields['doi']
-                                ?.didChange("");
-                            setState(() {
-                              _doiDataFetched = false;
-                            });
-                          },
-                          icon: const Icon(Icons.close),
-                        ),
-                      ),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(),
-                      ]),
-                    ),
-                    const SizedBox(height: 15),
-                    FormBuilderTextField(
-                      name: 'pdfurl',
-                      enableSuggestions: true,
-                      enabled: false,
-                      decoration: InputDecoration(
-                        labelText: "Uploaded PDF's temporary URL",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(),
-                        FormBuilderValidators.url(),
-                      ]),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 25),
-              InkWell(
-                onTap: _isUploading
-                    ? null
-                    : () {
-                        _handleFileUpload(context);
-                      },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .secondary
-                        .withAlpha((0.25 * 255).toInt()),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.primary,
-                      width: 2,
-                      style: BorderStyle.solid,
-                    ),
-                  ),
-                  width: 0.8 * MediaQuery.of(context).size.width,
-                  child: Padding(
-                    padding: const EdgeInsets.all(30.0),
+    return FutureBuilder(
+      future: checkInternet(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!) {
+          return const NoInternet();
+        }
+        if (snapshot.hasError) {
+          return NoInternet();
+        }
+        return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            leading: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(Icons.arrow_back),
+            ),
+          ),
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FormBuilder(
+                    key: _doiFormKey,
                     child: Column(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Icon(
-                            LucideIcons.file,
-                            size: 30,
-                            color: _isUploading
-                                ? Colors.grey
-                                : Theme.of(context).iconTheme.color,
+                        FormBuilderTextField(
+                          name: 'doi',
+                          enableSuggestions: true,
+                          enabled: !_doiDataFetched,
+                          onTapOutside: (event) =>
+                              FocusScope.of(context).unfocus(),
+                          decoration: InputDecoration(
+                            labelText: "Enter DOI ID or URL *",
+                            helperText:
+                                "https://doi.org/10.1145/2470654.2470728 or\n10.1145/2470654.2470728",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                _doiFormKey.currentState?.fields['doi']
+                                    ?.didChange("");
+                                setState(() {
+                                  _doiDataFetched = false;
+                                });
+                              },
+                              icon: const Icon(Icons.close),
+                            ),
                           ),
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(),
+                          ]),
                         ),
-                        Text(
-                          _isUploading
-                              ? "Uploading..."
-                              : "Upload Research Paper PDF",
-                          style: const TextStyle(fontStyle: FontStyle.italic),
+                        const SizedBox(height: 15),
+                        FormBuilderTextField(
+                          name: 'pdfurl',
+                          enableSuggestions: true,
+                          enabled: false,
+                          decoration: InputDecoration(
+                            labelText: "Uploaded PDF's temporary URL",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(),
+                            FormBuilderValidators.url(),
+                          ]),
                         ),
                       ],
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 25),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  iconColor: Theme.of(context).colorScheme.onPrimary,
-                ),
-                onPressed: () {
-                  if (_validateForm()) {
-                    final doi = _doiFormKey.currentState?.fields['doi']?.value;
-                    final pdfURL =
-                        _doiFormKey.currentState?.fields['pdfurl']?.value;
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RequestedPost(
-                          inputDOI: doi,
-                          inputpdfURL: pdfURL,
+                  const SizedBox(height: 25),
+                  InkWell(
+                    onTap: _isUploading
+                        ? null
+                        : () {
+                            _handleFileUpload(context);
+                          },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .secondary
+                            .withAlpha((0.25 * 255).toInt()),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary,
+                          width: 2,
+                          style: BorderStyle.solid,
                         ),
                       ),
-                    );
-                  } else {
-                    showDialog(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                        title: const Text("Error"),
-                        content:
-                            const Text("Please enter a valid DOI ID or URL"),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text("OK"),
-                          ),
-                        ],
+                      width: 0.8 * MediaQuery.of(context).size.width,
+                      child: Padding(
+                        padding: const EdgeInsets.all(30.0),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Icon(
+                                LucideIcons.file,
+                                size: 30,
+                                color: _isUploading
+                                    ? Colors.grey
+                                    : Theme.of(context).iconTheme.color,
+                              ),
+                            ),
+                            Text(
+                              _isUploading
+                                  ? "Uploading..."
+                                  : "Upload Research Paper PDF",
+                              style:
+                                  const TextStyle(fontStyle: FontStyle.italic),
+                            ),
+                          ],
+                        ),
                       ),
-                    );
-                  }
-                },
-                label: const Text("Generate Summary & Mindmap"),
-                icon: const Icon(LucideIcons.send),
+                    ),
+                  ),
+                  const SizedBox(height: 25),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      iconColor: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                    onPressed: () {
+                      if (_validateForm()) {
+                        final doi =
+                            _doiFormKey.currentState?.fields['doi']?.value;
+                        final pdfURL =
+                            _doiFormKey.currentState?.fields['pdfurl']?.value;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RequestedPost(
+                              inputDOI: doi,
+                              inputpdfURL: pdfURL,
+                            ),
+                          ),
+                        );
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: const Text("Error"),
+                            content: const Text(
+                                "Please enter a valid DOI ID or URL"),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text("OK"),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    },
+                    label: const Text("Generate Summary & Mindmap"),
+                    icon: const Icon(LucideIcons.send),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

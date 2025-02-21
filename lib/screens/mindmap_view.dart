@@ -130,7 +130,6 @@ class _MindmapViewState extends State<MindmapView> {
   @override
   Widget build(BuildContext context) {
     final rootNode = parseMindmapData(widget.mindmapData);
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,

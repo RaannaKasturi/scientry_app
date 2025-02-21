@@ -181,7 +181,8 @@ class _HomePageState extends State<HomePage> {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text("Error"),
-            content: Text("An error occurred while fetching data: $e"),
+            content: Text(
+                "An error occurred while fetching data: Check your internet connection and try again"),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -271,6 +272,9 @@ class _HomePageState extends State<HomePage> {
         builder: (context, snapshot) {
           if (!snapshot.hasData || !snapshot.data!) {
             return const NoInternet();
+          }
+          if (snapshot.hasError) {
+            return NoInternet();
           }
           return FutureBuilder<
               (List<Post>, List<Categories>, List<CarouselPost>)>(
