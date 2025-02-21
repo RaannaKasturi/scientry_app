@@ -100,25 +100,62 @@ class _HomePageState extends State<HomePage> {
   bool latestDataFound = false;
   bool _snackbarShown = false;
   BannerAd? _bannerAd;
+  Timer? _connectionCheckTimer;
 
   @override
   void initState() {
     super.initState();
     _initPrefs();
+
+    _connectionCheckTimer =
+        Timer.periodic(const Duration(seconds: 5), (timer) async {
+      bool connected = await SimpleConnectionChecker.isConnectedToInternet();
+      if (connected && _snackbarShown) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        setState(() {
+          _snackbarShown = false;
+        });
+      } else if (!connected && !_snackbarShown) {
+        setState(() {
+          _snackbarShown = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.redAccent,
+            content: const Text(
+              "No internet available. New papers may not be fetched.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            duration: const Duration(hours: 1),
+            dismissDirection: DismissDirection.none,
+          ),
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _connectionCheckTimer?.cancel();
+    _bannerAd?.dispose();
+    super.dispose();
   }
 
   Future<void> _initPrefs() async {
     BannerAd(
       adUnitId: AdHelper.footerAdUnitID,
-      request: AdRequest(),
+      request: const AdRequest(),
       size: AdSize.banner,
       listener: BannerAdListener(
         onAdLoaded: (ad) {
-          setState(
-            () {
-              _bannerAd = ad as BannerAd;
-            },
-          );
+          setState(() {
+            _bannerAd = ad as BannerAd;
+          });
         },
         onAdFailedToLoad: (ad, error) {
           debugPrint("Failed to load ad: $error");
@@ -163,6 +200,21 @@ class _HomePageState extends State<HomePage> {
       return (cachedPosts, cachedCategories, cachedCarouselPosts);
     }
 
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 3),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        content: Text(
+          "Searching for New Research Articles...",
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onPrimary,
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ),
+    );
+
     List<Post> posts = [];
     List<Categories> categories = [];
     List<CarouselPost> carouselPosts = [];
@@ -203,7 +255,7 @@ class _HomePageState extends State<HomePage> {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text("Error"),
-            content: Text(
+            content: const Text(
                 "An error occurred while fetching data: Check your internet connection and try again"),
             actions: [
               TextButton(
@@ -227,36 +279,62 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         latestDataFound = true;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 3),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          content: Text(
+            "New Research Articles found. Updating Feed...",
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ),
+      );
       showLatestPostsDialog(data);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 3),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          content: Text(
+            "No New Research Articles found...",
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ),
+      );
     }
   }
 
   void showLatestPostsDialog(
       (List<Post>, List<Categories>, List<CarouselPost>) data) {
     if (latestDataFound) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Latest Posts"),
-          content: const Text("Latest posts have been fetched. Refresh Feed?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 3),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          content: Text(
+            "New Research Articles found. Updated Feed...",
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onPrimary,
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
             ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  cachedPosts = data.$1;
-                  cachedCategories = data.$2;
-                  cachedCarouselPosts = data.$3;
-                });
-                Navigator.pop(context);
-              },
-              child: const Text("Refresh"),
-            ),
-          ],
+          ),
         ),
+      );
+      setState(
+        () {
+          cachedPosts = data.$1;
+          cachedCategories = data.$2;
+          cachedCarouselPosts = data.$3;
+        },
       );
     }
   }
@@ -266,7 +344,7 @@ class _HomePageState extends State<HomePage> {
     return RawScrollbar(
       thumbColor: Theme.of(context).colorScheme.primary,
       thickness: 5,
-      radius: Radius.circular(10),
+      radius: const Radius.circular(10),
       trackVisibility: true,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(10),
@@ -290,8 +368,9 @@ class _HomePageState extends State<HomePage> {
                 context: context),
             LatestPosts(data: Future.value(posts)),
             CategoriesPostsList(
-                fetchedCategories: Future.value(categories),
-                fetchedPosts: Future.value(posts)),
+              fetchedCategories: Future.value(categories),
+              fetchedPosts: Future.value(posts),
+            ),
           ],
         ),
       ),
@@ -301,14 +380,20 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Row(
           children: const [
             Icon(LucideIcons.brainCircuit),
             SizedBox(width: 3.5),
-            Text("Scientry",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+            Text(
+              "Scientry",
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
         actions: [
@@ -325,13 +410,16 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      bottomSheet: _bannerAd != null
-          ? SizedBox(
-              height: _bannerAd!.size.height.toDouble(),
-              child: AdWidget(ad: _bannerAd!),
+      drawer: const DefaultDrawer(),
+      bottomNavigationBar: _bannerAd != null
+          ? Container(
+              color: Theme.of(context).colorScheme.inversePrimary,
+              height: _bannerAd!.size.height.toDouble() + 10,
+              child: AdWidget(
+                ad: _bannerAd!,
+              ),
             )
           : null,
-      drawer: const DefaultDrawer(),
       body: FutureBuilder<bool>(
         future: SimpleConnectionChecker.isConnectedToInternet(),
         builder: (context, snapshot) {
@@ -340,27 +428,6 @@ class _HomePageState extends State<HomePage> {
           }
           if (snapshot.hasError ||
               (snapshot.hasData && snapshot.data == false)) {
-            if (!_snackbarShown) {
-              _snackbarShown = true;
-              WidgetsBinding.instance.addPostFrameCallback(
-                (_) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    backgroundColor: Colors.redAccent,
-                    content: Text(
-                      "No internet available. New papers may not be fetched.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    duration: Duration(days: 1),
-                    dismissDirection: DismissDirection.none,
-                  ));
-                },
-              );
-            }
             if (cachedPosts.isNotEmpty &&
                 cachedCategories.isNotEmpty &&
                 cachedCarouselPosts.isNotEmpty) {
@@ -383,9 +450,6 @@ class _HomePageState extends State<HomePage> {
             } else {
               return const NoInternet();
             }
-          }
-          if (snapshot.hasData && snapshot.data == true) {
-            _snackbarShown = false;
           }
           return FutureBuilder<
               (List<Post>, List<Categories>, List<CarouselPost>)>(

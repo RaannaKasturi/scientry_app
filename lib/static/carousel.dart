@@ -96,7 +96,6 @@ class _CarouselState extends State<Carousel> {
                                 "Error loading image: $error :: $stackTrace");
                           },
                         );
-
                   return InkWell(
                     onTap: () {
                       Navigator.push(
@@ -165,7 +164,7 @@ class _CarouselState extends State<Carousel> {
                 carouselController: carouselController,
                 options: CarouselOptions(
                   autoPlay: true,
-                  aspectRatio: 3 / 2,
+                  aspectRatio: 16 / 9,
                   viewportFraction: 1,
                   pauseAutoPlayOnManualNavigate: true,
                   onPageChanged: (index, reason) {
@@ -196,10 +195,7 @@ class _CarouselState extends State<Carousel> {
                           borderRadius: BorderRadius.circular(10),
                           color: currentIndex == entry.key
                               ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .onPrimary
-                                  .withAlpha((0.6 * 255).toInt()),
+                              : Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     );

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -8,7 +10,7 @@ import 'package:scientry/theme/theme_provider.dart';
 void main() async {
   WidgetsBinding widgetBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetBinding);
-  MobileAds.instance.initialize();
+  unawaited(MobileAds.instance.initialize());
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(context),
