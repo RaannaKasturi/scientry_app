@@ -217,7 +217,7 @@ class DefaultDrawer extends StatelessWidget {
                     },
                   ),
                   SizedBox(
-                    height: 40,
+                    height: 20,
                   ),
                 ],
               ),
