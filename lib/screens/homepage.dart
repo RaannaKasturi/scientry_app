@@ -96,6 +96,7 @@ class _HomePageState extends State<HomePage> {
   List<Categories> cachedCategories = [];
   List<CarouselPost> cachedCarouselPosts = [];
   bool latestDataFound = false;
+  bool _snackbarShown = false;
 
   @override
   void initState() {
@@ -239,6 +240,44 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  /// Helper method to build the posts UI given the data.
+  Widget buildPostsUI(List<Post> posts, List<Categories> categories,
+      List<CarouselPost> carouselPosts) {
+    return RawScrollbar(
+      thumbColor: Theme.of(context).colorScheme.primary,
+      thickness: 5,
+      radius: Radius.circular(10),
+      trackVisibility: true,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          children: [
+            Carousel(
+              carouselPosts: carouselPosts
+                  .take(7)
+                  .map((post) => CarouselPost(
+                        id: post.id,
+                        title: post.title,
+                        image: post.image,
+                        category: post.category,
+                        link: post.link,
+                      ))
+                  .toList(),
+            ),
+            SectionTitle(
+                title: "Latest Posts",
+                link: "https://thescientry.blogspot.com/",
+                context: context),
+            LatestPosts(data: Future.value(posts)),
+            CategoriesPostsList(
+                fetchedCategories: Future.value(categories),
+                fetchedPosts: Future.value(posts)),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -270,11 +309,58 @@ class _HomePageState extends State<HomePage> {
       body: FutureBuilder<bool>(
         future: SimpleConnectionChecker.isConnectedToInternet(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData || !snapshot.data!) {
-            return const NoInternet();
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const LoadingPosts();
           }
-          if (snapshot.hasError) {
-            return NoInternet();
+          // When there is an error or no internet connection:
+          if (snapshot.hasError ||
+              (snapshot.hasData && snapshot.data == false)) {
+            if (!_snackbarShown) {
+              _snackbarShown = true;
+              WidgetsBinding.instance.addPostFrameCallback(
+                (_) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    backgroundColor: Colors.redAccent,
+                    content: Text(
+                      "No internet available. New papers may not be fetched.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    duration: Duration(days: 1),
+                    dismissDirection: DismissDirection.none,
+                  ));
+                },
+              );
+            }
+            if (cachedPosts.isNotEmpty &&
+                cachedCategories.isNotEmpty &&
+                cachedCarouselPosts.isNotEmpty) {
+              return FutureBuilder<
+                  (List<Post>, List<Categories>, List<CarouselPost>)>(
+                future: Future.value(
+                    (cachedPosts, cachedCategories, cachedCarouselPosts)),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const LoadingPosts();
+                  } else if (snapshot.hasError) {
+                    return const NoInternet();
+                  }
+                  var posts = snapshot.data?.$1 ?? [];
+                  var categories = snapshot.data?.$2 ?? [];
+                  var carouselPosts = snapshot.data?.$3 ?? [];
+                  return buildPostsUI(posts, categories, carouselPosts);
+                },
+              );
+            } else {
+              return const NoInternet();
+            }
+          }
+          if (snapshot.hasData && snapshot.data == true) {
+            _snackbarShown = false;
           }
           return FutureBuilder<
               (List<Post>, List<Categories>, List<CarouselPost>)>(
@@ -286,44 +372,10 @@ class _HomePageState extends State<HomePage> {
               } else if (snapshot.hasError) {
                 return const Center(child: Text("Error loading data"));
               }
-
               var posts = snapshot.data?.$1 ?? [];
               var categories = snapshot.data?.$2 ?? [];
               var carouselPosts = snapshot.data?.$3 ?? [];
-
-              return RawScrollbar(
-                thumbColor: Theme.of(context).colorScheme.primary,
-                thickness: 5,
-                radius: Radius.circular(10),
-                trackVisibility: true,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    children: [
-                      Carousel(
-                        carouselPosts: carouselPosts
-                            .take(7)
-                            .map((post) => CarouselPost(
-                                  id: post.id,
-                                  title: post.title,
-                                  image: post.image,
-                                  category: post.category,
-                                  link: post.link,
-                                ))
-                            .toList(),
-                      ),
-                      SectionTitle(
-                          title: "Latest Posts",
-                          link: "https://thescientry.blogspot.com/",
-                          context: context),
-                      LatestPosts(data: Future.value(posts)),
-                      CategoriesPostsList(
-                          fetchedCategories: Future.value(categories),
-                          fetchedPosts: Future.value(posts)),
-                    ],
-                  ),
-                ),
-              );
+              return buildPostsUI(posts, categories, carouselPosts);
             },
           );
         },

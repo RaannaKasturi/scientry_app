@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:scientry/screens/homepage.dart';
 
 class NoInternet extends StatelessWidget {
   const NoInternet({
@@ -32,7 +33,29 @@ class NoInternet extends StatelessWidget {
               ),
             ),
             SizedBox(
-              height: 100,
+              height: 50,
+            ),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                iconColor: Theme.of(context).colorScheme.onPrimary,
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return HomePage();
+                    },
+                  ),
+                );
+              },
+              label: Text("Back to Home"),
+              icon: Icon(Icons.home),
             ),
           ],
         ),
