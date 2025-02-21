@@ -127,6 +127,7 @@ class _MindmapViewState extends State<MindmapView> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final rootNode = parseMindmapData(widget.mindmapData);
 
@@ -135,66 +136,50 @@ class _MindmapViewState extends State<MindmapView> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Mindmap'),
       ),
-      body: SafeArea(
-        child: RawScrollbar(
-          thumbColor: Theme.of(context).colorScheme.primary,
-          thickness: 5,
-          radius: Radius.circular(10),
-          trackVisibility: true,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: RawScrollbar(
-              thumbColor: Theme.of(context).colorScheme.primary,
-              thickness: 5,
-              radius: Radius.circular(10),
-              trackVisibility: true,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
+      body: InteractiveViewer(
+        boundaryMargin: const EdgeInsets.all(0),
+        minScale: 0.5,
+        maxScale: 3.0,
+        constrained: false,
+        child: Container(
+          color: Theme.of(context).colorScheme.surface,
+          padding: const EdgeInsets.all(30.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 15),
                 child: Container(
-                  color: Theme.of(context).colorScheme.surface,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 10)
+                          .copyWith(right: 0),
+                  margin: const EdgeInsets.only(left: 10),
                   child: Padding(
-                    padding: const EdgeInsets.all(30.0),
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 10)
-                                .copyWith(right: 0),
-                            margin: const EdgeInsets.only(left: 10),
-                            child: Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Text(
-                                "  ${rootNode.title}    ",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  color:
-                                      Theme.of(context).colorScheme.onPrimary,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        MindMap(
-                          padding: const EdgeInsets.only(left: 50),
-                          dotRadius: 4,
-                          lineColor: Theme.of(context).colorScheme.onSurface,
-                          children: rootNode.children
-                              .map((child) => buildNode(child, context))
-                              .toList(),
-                        ),
-                      ],
+                    padding: const EdgeInsets.all(4.0),
+                    child: Text(
+                      "  ${rootNode.title}    ",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
+              MindMap(
+                padding: const EdgeInsets.only(left: 50),
+                dotRadius: 4,
+                lineColor: Theme.of(context).colorScheme.onSurface,
+                children: rootNode.children
+                    .map((child) => buildNode(child, context))
+                    .toList(),
+              ),
+            ],
           ),
         ),
       ),
