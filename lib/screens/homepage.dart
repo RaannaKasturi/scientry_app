@@ -148,7 +148,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _initPrefs() async {
-    await Permission.ignoreBatteryOptimizations.request();
     BannerAd(
       adUnitId: AdHelper.footerAdUnitID,
       request: const AdRequest(),
@@ -168,6 +167,74 @@ class _HomePageState extends State<HomePage> {
     prefs = await SharedPreferences.getInstance();
     _loadCachedData();
     fetchNewData();
+  }
+
+  Future<void> runInBackground() async {
+    if (await Permission.ignoreBatteryOptimizations.isPermanentlyDenied) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            title: Text(
+              "Permission Required",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            content: Text(
+              "Please allow Scientry to run in the background to receive notifications and stay up-to-date.",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  openAppSettings();
+                },
+                child: const Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
+    } else if (!(await Permission.ignoreBatteryOptimizations.isGranted)) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            title: Text(
+              "Permission Required",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            content: Text(
+              "Please allow Scientry to run in the background to receive notifications and stay up-to-date.",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await Permission.ignoreBatteryOptimizations.request();
+                },
+                child: const Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      if (!(await Permission.ignoreBatteryOptimizations.isGranted)) {
+        await Permission.ignoreBatteryOptimizations.request();
+      }
+    }
   }
 
   void _loadCachedData() {
@@ -280,20 +347,6 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         latestDataFound = true;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          duration: const Duration(seconds: 3),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          content: Text(
-            "New Research Articles found. Updating Feed...",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ),
-      );
       showLatestPostsDialog(data);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -314,14 +367,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   void showLatestPostsDialog(
-      (List<Post>, List<Categories>, List<CarouselPost>) data) {
+      (List<Post>, List<Categories>, List<CarouselPost>) data) async {
     if (latestDataFound) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           duration: const Duration(seconds: 3),
           backgroundColor: Theme.of(context).colorScheme.primary,
           content: Text(
-            "New Research Articles found. Updated Feed...",
+            "New Research Articles found. Updateding Feed...",
             style: TextStyle(
               color: Theme.of(context).colorScheme.onPrimary,
               fontSize: 16,
@@ -330,6 +383,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       );
+      await Future.delayed(const Duration(seconds: 2));
       setState(
         () {
           cachedPosts = data.$1;

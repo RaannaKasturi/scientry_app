@@ -7,6 +7,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:scientry/api/notification_service.dart';
 import 'package:scientry/screens/bookmarks_page.dart';
+import 'package:scientry/screens/login.dart';
+import 'package:scientry/screens/my_account.dart';
 import 'package:scientry/theme/theme_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -43,8 +45,6 @@ class _SettingsPageState extends State<SettingsPage> {
         _notifications = true;
       });
     } else {
-      // If the permission is permanently denied, the system won’t show the prompt again.
-      // Prompt the user to open the app settings to enable the permission manually.
       if (status.isPermanentlyDenied) {
         if (mounted) {
           showDialog(
@@ -145,7 +145,7 @@ class _SettingsPageState extends State<SettingsPage> {
           "Settings",
           style: TextStyle(
             fontSize: 25,
-            color: Theme.of(context).colorScheme.inverseSurface,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         leading: IconButton(
@@ -202,7 +202,13 @@ class _SettingsPageState extends State<SettingsPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => BookmarksPage(),
+                          builder: (context) {
+                            if (FirebaseAuth.instance.currentUser == null) {
+                              return Login();
+                            } else {
+                              return MyAccount();
+                            }
+                          },
                         ),
                       );
                     },

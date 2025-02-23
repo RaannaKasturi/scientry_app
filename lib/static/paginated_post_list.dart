@@ -108,7 +108,7 @@ class _PaginatedPostListState extends State<PaginatedPostList> {
           category,
           style: TextStyle(
             fontSize: 25,
-            color: Theme.of(context).colorScheme.inverseSurface,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ),

@@ -11,7 +11,7 @@ class NotificationService {
 
     // Initialize android service
     const initSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@drawable/brandlogo');
 
     // Initialize iOS service
     const initSettingsIOS = DarwinInitializationSettings(
@@ -32,9 +32,9 @@ class NotificationService {
   NotificationDetails notificationDetails() {
     return const NotificationDetails(
       android: AndroidNotificationDetails(
-        'channel id',
-        'channel name',
-        channelDescription: 'channel description',
+        '0',
+        'Scientry',
+        channelDescription: 'Science Simplified, Knowledge Amplified',
         importance: Importance.max,
         priority: Priority.high,
         playSound: true,

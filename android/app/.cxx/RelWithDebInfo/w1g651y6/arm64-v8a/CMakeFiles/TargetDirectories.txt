@@ -1,0 +1,2 @@
+C:/Users/raanna/Desktop/scientry_app/android/app/.cxx/RelWithDebInfo/w1g651y6/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/raanna/Desktop/scientry_app/android/app/.cxx/RelWithDebInfo/w1g651y6/arm64-v8a/CMakeFiles/rebuild_cache.dir
