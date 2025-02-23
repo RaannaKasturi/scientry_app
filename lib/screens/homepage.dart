@@ -374,7 +374,7 @@ class _HomePageState extends State<HomePage> {
           duration: const Duration(seconds: 3),
           backgroundColor: Theme.of(context).colorScheme.primary,
           content: Text(
-            "New Research Articles found. Updateding Feed...",
+            "New Research Articles found. Updating Feed...",
             style: TextStyle(
               color: Theme.of(context).colorScheme.onPrimary,
               fontSize: 16,

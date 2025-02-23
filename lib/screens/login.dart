@@ -66,14 +66,14 @@ class LoginState extends State<Login> {
           );
         }
       } catch (e) {
-        _loginFailed();
+        _loginFailed(e);
       }
     } else {
-      _loginFailed();
+      _loginFailed('');
     }
   }
 
-  void _loginFailed() {
+  void _loginFailed(e) {
     showDialog(
       context: context,
       builder: (context) => Scaffold(
@@ -94,7 +94,7 @@ class LoginState extends State<Login> {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  "Login failed!",
+                  e.toString(),
                   style: TextStyle(
                     fontSize: 24,
                     color: Theme.of(context).colorScheme.error,
@@ -155,7 +155,7 @@ class LoginState extends State<Login> {
       );
     } catch (e) {
       debugPrint("GLOGIN: ${e.toString()}");
-      _loginFailed();
+      _loginFailed(e.toString());
     }
     return null;
   }
@@ -305,7 +305,7 @@ class LoginState extends State<Login> {
                           try {
                             _loginUser();
                           } catch (e) {
-                            _loginFailed();
+                            _loginFailed(e.toString());
                           }
                         }
                       }),
@@ -344,7 +344,7 @@ class LoginState extends State<Login> {
                               try {
                                 _loginWithGoogle();
                               } catch (e) {
-                                _loginFailed();
+                                _loginFailed(e.toString());
                               }
                             }),
                             style: ButtonStyle(
