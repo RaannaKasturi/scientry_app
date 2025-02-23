@@ -1,9 +1,11 @@
 import 'package:easy_url_launcher/easy_url_launcher.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:scientry/screens/bookmarks_page.dart';
 import 'package:scientry/screens/homepage.dart';
+import 'package:scientry/screens/login.dart';
 import 'package:scientry/screens/request_paper.dart';
 import 'package:scientry/screens/search_page.dart';
 import 'package:scientry/screens/settings_page.dart';
@@ -15,6 +17,7 @@ class DefaultDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isLoggedIn = FirebaseAuth.instance.currentUser != null;
     return FutureBuilder<PackageInfo>(
       future: PackageInfo.fromPlatform(),
       builder: (context, snapshot) {
@@ -29,7 +32,7 @@ class DefaultDrawer extends StatelessWidget {
             children: [
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.only(top: 50, bottom: 30),
+                padding: EdgeInsets.only(top: 40, bottom: 10),
                 color: Theme.of(context).colorScheme.primaryContainer,
                 child: Column(
                   children: [
@@ -64,6 +67,41 @@ class DefaultDrawer extends StatelessWidget {
                         color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    !isLoggedIn
+                        ? ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Login(),
+                                ),
+                              );
+                            },
+                            label: Text(
+                              'Sign In',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                fontSize: 20,
+                              ),
+                            ),
+                            icon: Icon(
+                              Icons.login,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                            style: ButtonStyle(
+                              shape: WidgetStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              backgroundColor: WidgetStateProperty.all(
+                                  Theme.of(context).colorScheme.primary),
+                            ),
+                          )
+                        : SizedBox.shrink(),
                   ],
                 ),
               ),

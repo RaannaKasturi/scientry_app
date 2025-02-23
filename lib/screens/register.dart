@@ -221,7 +221,6 @@ class RegisterState extends State<Register> {
                 ),
               ),
               SizedBox(height: 20),
-              // Name Field
               FormBuilder(
                 key: _registerFormKey,
                 child: Column(
