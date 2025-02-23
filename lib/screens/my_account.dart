@@ -320,8 +320,18 @@ class _MyAccountState extends State<MyAccount> {
     );
   }
 
+  _sendVerificationMail() async {
+    await FirebaseAuth.instance.currentUser!.sendEmailVerification();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Verification email sent to $_email'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    bool isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -415,17 +425,13 @@ class _MyAccountState extends State<MyAccount> {
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'Email',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ],
+                    Text(
+                      'Email ${isEmailVerified ? '' : '(Unverified)'}',
+                      style: TextStyle(
+                        color: isEmailVerified
+                            ? Theme.of(context).colorScheme.onSurface
+                            : Theme.of(context).colorScheme.error,
+                        fontSize: 18,
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -442,6 +448,17 @@ class _MyAccountState extends State<MyAccount> {
                     ),
                   ],
                 ),
+                onTap: () {
+                  if (!isEmailVerified) {
+                    _sendVerificationMail();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Email already verified'),
+                      ),
+                    );
+                  }
+                },
               ),
               Divider(
                 indent: 25,
