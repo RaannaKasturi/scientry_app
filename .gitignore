@@ -49,3 +49,13 @@ app.*.map.json
 *.keystore
 *.properties
 build-releases
+
+# ignore firebase files
+firebase.json
+firebase-debug.json
+firebase-release.json
+*/.firebase/
+*/*firebase*/*
+*/*firebase*
+*/*google*
+*/*/google*
