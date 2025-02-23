@@ -72,6 +72,7 @@ class DefaultDrawer extends StatelessWidget {
               ),
               Expanded(
                 child: ListView(
+                  shrinkWrap: false,
                   padding: EdgeInsets.zero,
                   children: [
                     ListTile(

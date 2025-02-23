@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:scientry/api/notification_service.dart';
 import 'package:scientry/screens/bookmarks_page.dart';
 import 'package:scientry/theme/theme_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,18 +30,47 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _handleNotificationPermission() async {
-    PermissionStatus status = await Permission.notification.status;
-    await Permission.notification.request();
+    // First request for permission
+    PermissionStatus status = await Permission.notification.request();
+
+    // If not granted, try to request again
+    if (!status.isGranted) {
+      status = await Permission.notification.request();
+    }
+
     if (status.isGranted) {
       setState(() {
-        _notifications = !_notifications;
+        _notifications = true;
       });
     } else {
-      PermissionStatus newStatus = await Permission.notification.request();
-      if (newStatus.isGranted) {
-        setState(() {
-          _notifications = true;
-        });
+      // If the permission is permanently denied, the system won’t show the prompt again.
+      // Prompt the user to open the app settings to enable the permission manually.
+      if (status.isPermanentlyDenied) {
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              title: const Text("Permission Required"),
+              content: const Text(
+                  "Notifications permission is permanently denied. Please enable it in the app settings."),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await openAppSettings();
+                  },
+                  child: const Text("Open Settings"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Cancel"),
+                ),
+              ],
+            ),
+          );
+        }
       } else {
         if (mounted) {
           showDialog(
@@ -48,22 +78,42 @@ class _SettingsPageState extends State<SettingsPage> {
             builder: (_) => AlertDialog(
               title: const Text("Permission Required"),
               content: const Text(
-                  "Unable to request for Notifications. Please enable them in settings."),
+                  "Notifications permission was not granted. Would you like to try again?"),
               actions: [
+                TextButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    PermissionStatus newStatus =
+                        await Permission.notification.request();
+                    if (newStatus.isGranted) {
+                      setState(() {
+                        _notifications = true;
+                      });
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              "Permission not granted. Please enable notifications in settings."),
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text("Try Again"),
+                ),
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: const Text("OK"),
+                  child: const Text("Cancel"),
                 ),
               ],
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text(
-                  "Unable to request for Notifications. Please enable them in settings."),
+            const SnackBar(
+              content: Text(
+                  "Permission not granted. Please enable notifications in settings."),
             ),
           );
         }
@@ -164,7 +214,38 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   ListTile(
                     leading: Icon(
-                      LucideIcons.sunMoon,
+                      LucideIcons.bookMarked,
+                      size: 30,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    title: Text(
+                      "Bookmarks",
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    trailing: Icon(
+                      LucideIcons.chevronsRight,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BookmarksPage(),
+                        ),
+                      );
+                    },
+                  ),
+                  Divider(
+                    indent: 25,
+                    endIndent: 25,
+                    height: 5,
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      _darkTheme ? LucideIcons.sun : LucideIcons.moon,
                       size: 30,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
@@ -213,7 +294,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
                           title: Text(
-                            "Get Notifications",
+                            "Daily Reminder",
                             style: TextStyle(
                               fontSize: 20,
                               color: Theme.of(context).colorScheme.onSurface,
@@ -232,37 +313,33 @@ class _SettingsPageState extends State<SettingsPage> {
                     endIndent: 25,
                     height: 5,
                   ),
-                  ListTile(
-                    leading: Icon(
-                      LucideIcons.bookMarked,
-                      size: 30,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    title: Text(
-                      "Bookmarks",
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    trailing: Icon(
-                      LucideIcons.chevronsRight,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BookmarksPage(),
+                  !_notifications
+                      ? const SizedBox()
+                      : ListTile(
+                          leading: Icon(
+                            LucideIcons.bellPlus,
+                            size: 30,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                          title: Text(
+                            "Set Reminder Time",
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                          onTap: () {
+                            NotificationService().showNotification(
+                              title: "Test Notification",
+                              body:
+                                  "Test Notification description is it working..?",
+                            );
+                          },
+                          trailing: Icon(
+                            LucideIcons.chevronsRight,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
-                      );
-                    },
-                  ),
-                  Divider(
-                    indent: 25,
-                    endIndent: 25,
-                    height: 5,
-                  ),
                 ],
               )
             ],

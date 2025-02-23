@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:http/http.dart' as http;
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:scientry/ad_helper.dart';
 import 'package:scientry/front/categories_posts_list.dart';
 import 'package:scientry/front/latest_posts.dart';
@@ -147,6 +148,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _initPrefs() async {
+    await Permission.ignoreBatteryOptimizations.request();
     BannerAd(
       adUnitId: AdHelper.footerAdUnitID,
       request: const AdRequest(),
@@ -267,7 +269,6 @@ class _HomePageState extends State<HomePage> {
         );
       }
     }
-
     return (posts, categories, carouselPosts);
   }
 

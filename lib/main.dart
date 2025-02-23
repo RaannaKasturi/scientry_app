@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:scientry/api/notification_service.dart';
 import 'package:scientry/firebase_options.dart';
 import 'package:scientry/screens/splashscreen.dart';
 import 'package:scientry/theme/theme_provider.dart';
@@ -13,6 +14,7 @@ void main() async {
   WidgetsBinding widgetBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetBinding);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await NotificationService().initNotification();
   unawaited(MobileAds.instance.initialize());
   runApp(
     ChangeNotifierProvider(

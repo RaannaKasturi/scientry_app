@@ -17,6 +17,8 @@
         android:name="android.permission.READ_MEDIA_VIDEO"/>
     <uses-permission
         android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED"/>
+    <uses-permission
+        android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <application
         android:label="Scientry"
         android:name="${applicationName}"
