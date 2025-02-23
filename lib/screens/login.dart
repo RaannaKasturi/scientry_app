@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:lottie/lottie.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/info_pages/processing_page.dart';
@@ -35,6 +37,7 @@ class LoginState extends State<Login> {
   }
 
   final processingText = "Logging in...";
+
   void _loginUser() async {
     _prefs = await SharedPreferences.getInstance();
     if (_loginFormKey.currentState!.saveAndValidate()) {
@@ -132,8 +135,42 @@ class LoginState extends State<Login> {
     );
   }
 
+  void _loginWithGoogle() async {
+    final auth = FirebaseAuth.instance;
+    try {
+      final googleUser = await GoogleSignIn().signIn();
+      final googleAuth = await googleUser?.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+      UserCredential userCredential =
+          await auth.signInWithCredential(credential);
+      _prefs?.setString(
+          'userName', userCredential.user!.displayName ?? 'Set Name');
+      _prefs?.setString('userEmail', userCredential.user!.email ?? 'Set Email');
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    } catch (e) {
+      debugPrint("GLOGIN: ${e.toString()}");
+      _loginFailed();
+    }
+    return null;
+  }
+
+  bool isAndroidFunction() {
+    if (Theme.of(context).platform == TargetPlatform.android) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    bool isAndroid = isAndroidFunction();
     final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
@@ -300,6 +337,39 @@ class LoginState extends State<Login> {
                         ],
                       ),
                     ),
+                    isAndroid ? SizedBox(height: 20) : SizedBox.shrink(),
+                    isAndroid
+                        ? ElevatedButton.icon(
+                            onPressed: (() {
+                              try {
+                                _loginWithGoogle();
+                              } catch (e) {
+                                _loginFailed();
+                              }
+                            }),
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.all<Color>(
+                                  Theme.of(context).colorScheme.primary),
+                              shape: WidgetStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                            label: Text(
+                              "Sign in with Google",
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                            icon: Icon(
+                              FontAwesomeIcons.google,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          )
+                        : SizedBox.shrink(),
                   ],
                 ),
               ),

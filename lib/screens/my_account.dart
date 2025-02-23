@@ -339,6 +339,12 @@ class _MyAccountState extends State<MyAccount> {
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
               Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Login(),
+                ),
+              );
             },
             icon: Icon(
               Icons.logout,

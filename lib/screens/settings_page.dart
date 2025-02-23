@@ -161,6 +161,12 @@ class _SettingsPageState extends State<SettingsPage> {
             child: IconButton(
               onPressed: () {
                 FirebaseAuth.instance.signOut();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Login(),
+                  ),
+                );
               },
               icon: Icon(
                 Icons.logout,
