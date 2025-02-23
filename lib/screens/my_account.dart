@@ -4,6 +4,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/screens/login.dart';
+import 'package:scientry/screens/register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyAccount extends StatefulWidget {
@@ -18,8 +19,9 @@ class _MyAccountState extends State<MyAccount> {
       GlobalKey<FormBuilderState>();
   final GlobalKey<FormBuilderState> _changePasswordFormKey =
       GlobalKey<FormBuilderState>();
+  final GlobalKey<FormBuilderState> _deleteAccountFormKey =
+      GlobalKey<FormBuilderState>();
 
-  // Initialize _name to "Set Name" so cache value will be used on load
   String _name = FirebaseAuth.instance.currentUser?.displayName ?? 'Set Name';
   String _email = FirebaseAuth.instance.currentUser?.email ?? 'Set Email';
   SharedPreferences? _prefs;
@@ -329,6 +331,119 @@ class _MyAccountState extends State<MyAccount> {
     );
   }
 
+  _handleAccountDeletion() async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Delete Account'),
+          content: FormBuilder(
+            key: _deleteAccountFormKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                FormBuilderTextField(
+                  onTapOutside: (event) {
+                    FocusScope.of(context).unfocus();
+                  },
+                  enableSuggestions: true,
+                  name: 'deletionpassword',
+                  obscureText: true,
+                  keyboardType: TextInputType.name,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Enter Password to Delete Account',
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        _deleteAccountFormKey
+                            .currentState!.fields['deletionpassword']!
+                            .didChange('');
+                      },
+                      icon: Icon(
+                        LucideIcons.x,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  validator: FormBuilderValidators.compose([
+                    FormBuilderValidators.required(),
+                    FormBuilderValidators.minLength(8),
+                    FormBuilderValidators.maxLength(20),
+                    FormBuilderValidators.hasLowercaseChars(atLeast: 1),
+                    FormBuilderValidators.hasLowercaseChars(atLeast: 1),
+                    FormBuilderValidators.hasNumericChars(atLeast: 1),
+                    FormBuilderValidators.hasSpecialChars(atLeast: 1),
+                  ]),
+                ),
+                SizedBox(height: 10),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  if (_deleteAccountFormKey.currentState!.saveAndValidate()) {
+                    await FirebaseAuth.instance.currentUser!
+                        .reauthenticateWithCredential(
+                      EmailAuthProvider.credential(
+                        email: _email,
+                        password: _deleteAccountFormKey
+                            .currentState!.fields['deletionpassword']!.value,
+                      ),
+                    );
+                    User user = FirebaseAuth.instance.currentUser!;
+                    await user.reload();
+                    await user.delete();
+                    await FirebaseAuth.instance.signOut();
+                    await _prefs!.clear();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return Register();
+                        },
+                      ),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Account Deleted Successfully'),
+                      ),
+                    );
+                    Navigator.pop(context);
+                  }
+                } catch (e) {
+                  String message = e.toString();
+                  debugPrint("DData: ${message.split('/')[1].split(']')[0]}");
+                  if ((message.split('/')[1].split(']')[0])
+                          .startsWith("invalid-credential") ||
+                      (message.split('/')[1].split(']')[0])
+                          .startsWith("wrong-password")) {
+                    message =
+                        'Incorrect Password or password setup is incomplete. Please change or reset password and try again.';
+                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(message),
+                    ),
+                  );
+                }
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isEmailVerified = FirebaseAuth.instance.currentUser!.emailVerified;
@@ -499,23 +614,90 @@ class _MyAccountState extends State<MyAccount> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Account Support',
+                      'Logout',
                       style: TextStyle(
                         fontSize: 18,
+                        color: Theme.of(context).colorScheme.error,
                       ),
                     ),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        await FirebaseAuth.instance.signOut();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return Login();
+                            },
+                          ),
+                        );
+                      },
                       icon: Icon(
                         LucideIcons.chevronRight,
                         size: 25,
-                        color: Theme.of(context).colorScheme.onSurface,
+                        color: Theme.of(context).colorScheme.error,
                       ),
                     ),
                   ],
                 ),
-                onTap: () {
-                  // TODO: Implement Account Support
+                onTap: () async {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return Login();
+                      },
+                    ),
+                  );
+                },
+              ),
+              Divider(
+                indent: 25,
+                endIndent: 25,
+                height: 5,
+              ),
+              ListTile(
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Delete Account',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                        try {
+                          await _handleAccountDeletion();
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(e.toString()),
+                            ),
+                          );
+                        }
+                      },
+                      icon: Icon(
+                        LucideIcons.chevronRight,
+                        size: 25,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ],
+                ),
+                onTap: () async {
+                  try {
+                    await _handleAccountDeletion();
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(e.toString()),
+                      ),
+                    );
+                  }
                 },
               ),
             ],

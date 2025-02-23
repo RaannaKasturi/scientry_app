@@ -352,6 +352,40 @@ class _SettingsPageState extends State<SettingsPage> {
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
+                  Divider(
+                    indent: 25,
+                    endIndent: 25,
+                    height: 5,
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      LucideIcons.logOut,
+                      size: 30,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    title: Text(
+                      "Logout",
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                    trailing: Icon(
+                      LucideIcons.chevronsRight,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    onTap: () async {
+                      await FirebaseAuth.instance.signOut();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return Login();
+                          },
+                        ),
+                      );
+                    },
+                  ),
                 ],
               )
             ],
