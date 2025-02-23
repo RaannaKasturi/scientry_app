@@ -459,7 +459,7 @@ class _HomePageState extends State<HomePage> {
                   cachedPosts.isEmpty) {
                 return const LoadingPosts();
               } else if (snapshot.hasError) {
-                return const Center(child: Text("Error loading data"));
+                return const LoadingPosts();
               }
               var posts = snapshot.data?.$1 ?? [];
               var categories = snapshot.data?.$2 ?? [];

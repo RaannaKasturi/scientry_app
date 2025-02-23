@@ -629,22 +629,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     );
                   },
                 ),
-                // OutlinedButton.icon(
-                //   onPressed: () {
-                //     EasyLauncher.url(
-                //       url: "https://scientry.raannakasturi.eu.org",
-                //       mode: Mode.platformDefault,
-                //     );
-                //   },
-                //   icon: const Icon(LucideIcons.globe),
-                //   label: Text(
-                //     "Visit Us on the Web",
-                //     style: TextStyle(
-                //       fontSize: 20,
-                //       color: Theme.of(context).colorScheme.onSurface,
-                //     ),
-                //   ),
-                // ),
                 const SizedBox(height: 35),
               ],
             ),

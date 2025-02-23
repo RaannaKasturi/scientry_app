@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:provider/provider.dart';
-import 'package:scientry/screens/login.dart';
+import 'package:scientry/screens/homepage.dart';
 import 'package:scientry/theme/theme_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -47,11 +47,10 @@ class _SplashScreenState extends State<SplashScreen> {
           onComplete: (controller) async {
             await Future.delayed(Duration(milliseconds: 800));
             Navigator.pushReplacement(
-              // ignore: use_build_context_synchronously
               context,
               MaterialPageRoute(
                 builder: (context) {
-                  return Login();
+                  return HomePage();
                 },
               ),
             );
