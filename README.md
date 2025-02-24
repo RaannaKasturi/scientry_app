@@ -7,6 +7,15 @@
 
 **Note:** _This project is the part of final year dissertation/thesis project, It isn't meant for any financial gains apart for the ads that will be played to sponsor my other projects. This project is purely for educational purposes only. After v1.0.0, no App Bundles will be released via GitHub._
 
+## App Available on (planned):
+
+- Amazon Appstore
+- VIVO App Store
+- OPPO App Market
+- Xiaomi GetApps
+- Samsung Galaxy Store
+- Google Play Store
+
 ## Table of Contents
 
 - [About Scientry](#about-scientry)
