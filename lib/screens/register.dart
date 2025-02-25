@@ -8,7 +8,6 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:scientry/screens/homepage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:scientry/screens/login.dart';
-import 'package:scientry/screens/settings_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Register extends StatefulWidget {
@@ -80,9 +79,15 @@ class RegisterState extends State<Register> {
       _prefs?.setString('userEmail', useremail.toString());
       _prefs?.setString('userName', username.toString());
       if (mounted) {
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => SettingsPage()),
+          MaterialPageRoute(
+            builder: (context) {
+              return HomePage();
+            },
+            maintainState: false,
+          ),
+          (route) => false,
         );
       }
     } catch (e) {
@@ -128,9 +133,15 @@ class RegisterState extends State<Register> {
                 ),
                 ElevatedButton(
                   onPressed: (() {
-                    Navigator.pushReplacement(
+                    Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => HomePage()),
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return HomePage();
+                        },
+                        maintainState: false,
+                      ),
+                      (route) => false,
                     );
                   }),
                   style: ButtonStyle(
@@ -172,9 +183,15 @@ class RegisterState extends State<Register> {
       _prefs?.setString(
           'userName', userCredential.user!.displayName ?? 'Set Name');
       _prefs?.setString('userEmail', userCredential.user!.email ?? 'Set Email');
-      Navigator.push(
+      Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(
+          builder: (context) {
+            return HomePage();
+          },
+          maintainState: false,
+        ),
+        (route) => false,
       );
     } catch (e) {
       _registrationFailed(e.toString());
@@ -215,9 +232,15 @@ class RegisterState extends State<Register> {
             child: IconButton(
               icon: Icon(LucideIcons.house),
               onPressed: () {
-                Navigator.push(
+                Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => HomePage()),
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return HomePage();
+                    },
+                    maintainState: false,
+                  ),
+                  (route) => false,
                 );
               },
             ),
@@ -488,9 +511,11 @@ class RegisterState extends State<Register> {
               SizedBox(height: 20),
               InkWell(
                 onTap: () {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => Login()),
+                    MaterialPageRoute(
+                      builder: (context) => Login(),
+                    ),
                   );
                 },
                 child: Text(

@@ -100,14 +100,15 @@ class _HomePageState extends State<HomePage> {
   List<CarouselPost> cachedCarouselPosts = [];
   bool latestDataFound = false;
   bool _snackbarShown = false;
-  BannerAd? _bannerAd;
+  BannerAd? _allScreenFooter;
+  NativeAd? _afterCarouselTitleAd;
   Timer? _connectionCheckTimer;
 
   @override
   void initState() {
     super.initState();
+    runInBackground();
     _initPrefs();
-
     _connectionCheckTimer =
         Timer.periodic(const Duration(seconds: 5), (timer) async {
       bool connected = await SimpleConnectionChecker.isConnectedToInternet();
@@ -122,14 +123,12 @@ class _HomePageState extends State<HomePage> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: Colors.redAccent,
-            content: const Text(
+            backgroundColor: Theme.of(context).colorScheme.error,
+            content: Text(
               "No internet available. New papers may not be fetched.",
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onError,
               ),
             ),
             duration: const Duration(hours: 1),
@@ -143,19 +142,27 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     _connectionCheckTimer?.cancel();
-    _bannerAd?.dispose();
+    _allScreenFooter?.dispose();
     super.dispose();
   }
 
   Future<void> _initPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    _loadCachedData();
+    initializeBannerAd();
+    initializeNativeAd();
+    fetchNewData();
+  }
+
+  initializeBannerAd() {
     BannerAd(
-      adUnitId: AdHelper.footerAdUnitID,
+      adUnitId: AdHelper.allScreenFooterAdUnit,
       request: const AdRequest(),
       size: AdSize.banner,
       listener: BannerAdListener(
         onAdLoaded: (ad) {
           setState(() {
-            _bannerAd = ad as BannerAd;
+            _allScreenFooter = ad as BannerAd;
           });
         },
         onAdFailedToLoad: (ad, error) {
@@ -164,9 +171,27 @@ class _HomePageState extends State<HomePage> {
         },
       ),
     ).load();
-    prefs = await SharedPreferences.getInstance();
-    _loadCachedData();
-    fetchNewData();
+  }
+
+  initializeNativeAd() {
+    NativeAd(
+      adUnitId: AdHelper.afterCarouselTitleAdUnit,
+      request: const AdRequest(),
+      listener: NativeAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _afterCarouselTitleAd = ad as NativeAd;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint("NativeAd: $error");
+          ad.dispose();
+        },
+      ),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small,
+      ),
+    ).load();
   }
 
   Future<void> runInBackground() async {
@@ -269,21 +294,6 @@ class _HomePageState extends State<HomePage> {
       return (cachedPosts, cachedCategories, cachedCarouselPosts);
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(seconds: 3),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        content: Text(
-          "Searching for New Research Articles...",
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onPrimary,
-            fontSize: 16,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-      ),
-    );
-
     List<Post> posts = [];
     List<Categories> categories = [];
     List<CarouselPost> carouselPosts = [];
@@ -319,22 +329,18 @@ class _HomePageState extends State<HomePage> {
       prefs.setStringList('cachedCarouselPosts',
           carouselPosts.map((post) => jsonEncode(post.toJson())).toList());
     } catch (e) {
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text("Error"),
-            content: const Text(
-                "An error occurred while fetching data: Check your internet connection and try again"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("OK"),
-              ),
-            ],
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Theme.of(context).colorScheme.error,
+          content: Text(
+            "Failed to fetch data. Please check your internet connection.",
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onError,
+            ),
           ),
-        );
-      }
+          duration: const Duration(seconds: 5),
+        ),
+      );
     }
     return (posts, categories, carouselPosts);
   }
@@ -348,21 +354,6 @@ class _HomePageState extends State<HomePage> {
         latestDataFound = true;
       });
       showLatestPostsDialog(data);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          duration: const Duration(seconds: 3),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          content: Text(
-            "No New Research Articles found...",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        ),
-      );
     }
   }
 
@@ -374,11 +365,9 @@ class _HomePageState extends State<HomePage> {
           duration: const Duration(seconds: 3),
           backgroundColor: Theme.of(context).colorScheme.primary,
           content: Text(
-            "New Research Articles found. Updating Feed...",
+            "New Research Articles found. Feed Updated...",
             style: TextStyle(
               color: Theme.of(context).colorScheme.onPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
             ),
           ),
         ),
@@ -417,6 +406,15 @@ class _HomePageState extends State<HomePage> {
                       ))
                   .toList(),
             ),
+            _afterCarouselTitleAd != null
+                ? Container(
+                    height: 100,
+                    color: Theme.of(context).colorScheme.inversePrimary,
+                    child: AdWidget(
+                      ad: _afterCarouselTitleAd!,
+                    ),
+                  )
+                : SizedBox.shrink(),
             SectionTitle(
                 title: "Latest Posts",
                 link: "https://thescientry.blogspot.com/",
@@ -466,12 +464,12 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       drawer: const DefaultDrawer(),
-      bottomNavigationBar: _bannerAd != null
+      bottomNavigationBar: _allScreenFooter != null
           ? Container(
               color: Theme.of(context).colorScheme.inversePrimary,
-              height: _bannerAd!.size.height.toDouble() + 10,
+              height: _allScreenFooter!.size.height.toDouble() + 10,
               child: AdWidget(
-                ad: _bannerAd!,
+                ad: _allScreenFooter!,
               ),
             )
           : null,

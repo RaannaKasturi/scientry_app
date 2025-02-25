@@ -1,7 +1,9 @@
 import 'dart:isolate';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lottie/lottie.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:scientry/ad_helper.dart';
 import 'package:scientry/info_pages/error_page.dart';
 import 'package:scientry/info_pages/loading_posts.dart';
 import 'package:scientry/static/post_list.dart';
@@ -89,6 +91,33 @@ class _PaginatedPostListState extends State<PaginatedPostList> {
     return postsList;
   }
 
+  BannerAd? _allScreenFooter;
+
+  void initializeBannerAd() {
+    BannerAd(
+      adUnitId: AdHelper.allScreenFooterAdUnit,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _allScreenFooter = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint("Failed to load ad: $error");
+          ad.dispose();
+        },
+      ),
+    ).load();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initializeBannerAd();
+  }
+
   @override
   Widget build(BuildContext context) {
     category = widget.categoryLink.toString().split("/").last.isEmpty
@@ -112,6 +141,15 @@ class _PaginatedPostListState extends State<PaginatedPostList> {
           ),
         ),
       ),
+      bottomNavigationBar: _allScreenFooter != null
+          ? Container(
+              color: Theme.of(context).colorScheme.inversePrimary,
+              height: _allScreenFooter!.size.height.toDouble() + 10,
+              child: AdWidget(
+                ad: _allScreenFooter!,
+              ),
+            )
+          : null,
       body: FutureBuilder<List<Post>>(
         future: getData(category, pageNumber),
         builder: (context, snapshot) {

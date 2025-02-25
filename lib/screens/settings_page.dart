@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:scientry/api/notification_service.dart';
 import 'package:scientry/screens/bookmarks_page.dart';
+import 'package:scientry/screens/homepage.dart';
 import 'package:scientry/screens/login.dart';
 import 'package:scientry/screens/my_account.dart';
 import 'package:scientry/theme/theme_provider.dart';
@@ -24,6 +25,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   bool _darkTheme = false;
   bool _notifications = false;
+  bool _isLoggedIn = false;
 
   @override
   void initState() {
@@ -131,6 +133,7 @@ class _SettingsPageState extends State<SettingsPage> {
     bool notificationGranted = await getNotificationStatus();
     setState(() {
       _notifications = notificationGranted;
+      _isLoggedIn = FirebaseAuth.instance.currentUser != null;
       _darkTheme = _prefs?.getBool('darkTheme') ?? false;
     });
   }
@@ -155,28 +158,6 @@ class _SettingsPageState extends State<SettingsPage> {
           icon: const Icon(Icons.arrow_back),
           tooltip: "Back",
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: IconButton(
-              onPressed: () {
-                FirebaseAuth.instance.signOut();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Login(),
-                  ),
-                );
-              },
-              icon: Icon(
-                Icons.logout,
-                size: 25,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              tooltip: 'Logout',
-            ),
-          ),
-        ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -320,11 +301,13 @@ class _SettingsPageState extends State<SettingsPage> {
                             onChanged: (_) => _handleNotificationPermission(),
                           ),
                         ),
-                  Divider(
-                    indent: 25,
-                    endIndent: 25,
-                    height: 5,
-                  ),
+                  _notifications
+                      ? Divider(
+                          indent: 25,
+                          endIndent: 25,
+                          height: 5,
+                        )
+                      : const SizedBox.shrink(),
                   !_notifications
                       ? const SizedBox()
                       : ListTile(
@@ -352,40 +335,51 @@ class _SettingsPageState extends State<SettingsPage> {
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
-                  Divider(
-                    indent: 25,
-                    endIndent: 25,
-                    height: 5,
-                  ),
-                  ListTile(
-                    leading: Icon(
-                      LucideIcons.logOut,
-                      size: 30,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    title: Text(
-                      "Logout",
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                    trailing: Icon(
-                      LucideIcons.chevronsRight,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    onTap: () async {
-                      await FirebaseAuth.instance.signOut();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return Login();
+                  _isLoggedIn
+                      ? Divider(
+                          indent: 25,
+                          endIndent: 25,
+                          height: 5,
+                        )
+                      : const SizedBox.shrink(),
+                  _isLoggedIn
+                      ? ListTile(
+                          leading: Icon(
+                            LucideIcons.logOut,
+                            size: 30,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          title: Text(
+                            "Logout",
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                          trailing: Icon(
+                            LucideIcons.chevronsRight,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                          onTap: () async {
+                            await FirebaseAuth.instance.signOut();
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return HomePage();
+                                },
+                                maintainState: false,
+                              ),
+                              (route) => false,
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Logged out successfully"),
+                              ),
+                            );
                           },
-                        ),
-                      );
-                    },
-                  ),
+                        )
+                      : const SizedBox.shrink(),
                 ],
               )
             ],

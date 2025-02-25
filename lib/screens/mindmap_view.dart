@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:mind_map/mind_map.dart';
+import 'package:scientry/ad_helper.dart';
 
 class Node {
   final String title;
@@ -72,6 +74,27 @@ class _MindmapViewState extends State<MindmapView> {
     return unescape.convert(htmlContent).trim();
   }
 
+  BannerAd? _allScreenFooter;
+
+  initializeBannerAd() {
+    BannerAd(
+      adUnitId: AdHelper.allScreenFooterAdUnit,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _allScreenFooter = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint("Failed to load ad: $error");
+          ad.dispose();
+        },
+      ),
+    ).load();
+  }
+
   Widget buildNode(Node node, BuildContext context) {
     if (node.children.isEmpty) {
       return Container(
@@ -127,6 +150,11 @@ class _MindmapViewState extends State<MindmapView> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    initializeBannerAd();
+  }
+
   @override
   Widget build(BuildContext context) {
     final rootNode = parseMindmapData(widget.mindmapData);
@@ -135,6 +163,15 @@ class _MindmapViewState extends State<MindmapView> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Mindmap'),
       ),
+      bottomNavigationBar: _allScreenFooter != null
+          ? Container(
+              color: Theme.of(context).colorScheme.inversePrimary,
+              height: _allScreenFooter!.size.height.toDouble() + 10,
+              child: AdWidget(
+                ad: _allScreenFooter!,
+              ),
+            )
+          : null,
       body: InteractiveViewer(
         boundaryMargin: const EdgeInsets.all(0),
         minScale: 0.5,

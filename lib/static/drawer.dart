@@ -63,12 +63,22 @@ class DefaultDrawer extends StatelessWidget {
                       'Science Simplified,\nKnowledge Amplified',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 18,
                         color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                     SizedBox(
-                      height: 20,
+                      height: 10,
+                    ),
+                    Text(
+                      'Version: ${snapshot.data!.version}+${snapshot.data!.buildNumber}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10,
                     ),
                     !isLoggedIn
                         ? ElevatedButton.icon(
@@ -126,6 +136,11 @@ class DefaultDrawer extends StatelessWidget {
                                 builder: (context) => HomePage()));
                       },
                     ),
+                    Divider(
+                      indent: 25,
+                      endIndent: 25,
+                      height: 5,
+                    ),
                     ListTile(
                       leading: Icon(LucideIcons.bookmark),
                       title: Text(
@@ -138,6 +153,11 @@ class DefaultDrawer extends StatelessWidget {
                             MaterialPageRoute(
                                 builder: (context) => BookmarksPage()));
                       },
+                    ),
+                    Divider(
+                      indent: 25,
+                      endIndent: 25,
+                      height: 5,
                     ),
                     ListTile(
                       leading: Icon(LucideIcons.search),
@@ -152,18 +172,10 @@ class DefaultDrawer extends StatelessWidget {
                                 builder: (context) => SearchPage()));
                       },
                     ),
-                    ListTile(
-                      leading: Icon(LucideIcons.settings),
-                      title: Text(
-                        'Settings',
-                        style: TextStyle(fontSize: 20),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SettingsPage()));
-                      },
+                    Divider(
+                      indent: 25,
+                      endIndent: 25,
+                      height: 5,
                     ),
                     ListTile(
                       leading: Icon(LucideIcons.send),
@@ -178,6 +190,11 @@ class DefaultDrawer extends StatelessWidget {
                                 builder: (context) => RequestPaper()));
                       },
                     ),
+                    Divider(
+                      indent: 25,
+                      endIndent: 25,
+                      height: 5,
+                    ),
                     ListTile(
                       leading: Icon(LucideIcons.messageCirclePlus),
                       title: Text(
@@ -185,81 +202,88 @@ class DefaultDrawer extends StatelessWidget {
                         style: TextStyle(fontSize: 20),
                       ),
                       onTap: () {
-                        EasyLauncher.email(
-                          email: "raannakasturi@gmail.com",
-                          subject: "Feature Request for Scientry (Android)",
-                        );
+                        if (isLoggedIn) {
+                          EasyLauncher.email(
+                            email: "raannakasturi@gmail.com",
+                            subject: "Feature Request for Scientry (Android)",
+                          );
+                        } else {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text("Please login to request a feature"),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                    Divider(
+                      indent: 25,
+                      endIndent: 25,
+                      height: 5,
+                    ),
+                    ListTile(
+                      leading: Icon(LucideIcons.settings),
+                      title: Text(
+                        'Settings',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SettingsPage()));
                       },
                     ),
                   ],
                 ),
               ),
-              Column(
-                children: [
-                  Divider(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: InkWell(
-                      child: RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          children: [
-                            WidgetSpan(
-                              child: Icon(LucideIcons.copyright, size: 15),
+              isLoggedIn
+                  ? Padding(
+                      padding: const EdgeInsets.only(bottom: 25),
+                      child: Column(
+                        children: [
+                          Divider(
+                            indent: 25,
+                            endIndent: 25,
+                            height: 5,
+                          ),
+                          ListTile(
+                            leading: Icon(
+                              LucideIcons.logOut,
+                              color: Theme.of(context).colorScheme.error,
                             ),
-                            TextSpan(
-                              text: ' 2024 Scientry',
+                            title: Text(
+                              "Logout",
                               style: TextStyle(
                                 fontSize: 20,
-                                color: Theme.of(context).colorScheme.tertiary,
+                                color: Theme.of(context).colorScheme.error,
                               ),
-                              children: [
-                                TextSpan(
-                                  text:
-                                      '\nv${snapshot.data!.version}+${snapshot.data!.buildNumber}',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color:
-                                        Theme.of(context).colorScheme.secondary,
-                                  ),
-                                ),
-                              ],
                             ),
-                          ],
-                        ),
+                            onTap: () async {
+                              await FirebaseAuth.instance.signOut();
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return HomePage();
+                                  },
+                                  maintainState: false,
+                                ),
+                                (route) => false,
+                              );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Logged out successfully"),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                      onTap: () {
-                        EasyLauncher.url(
-                          url: "https://scietry.vercel.app/",
-                          mode: Mode.platformDefault,
-                        );
-                      },
-                    ),
-                  ),
-                  InkWell(
-                    child: RichText(
-                      text: TextSpan(
-                        text: 'Designed & Developed by Nayan Kasturi',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                      ),
-                    ),
-                    onTap: () {
-                      EasyLauncher.url(
-                        url: "https://nayankasturi.eu.org/",
-                        mode: Mode.platformDefault,
-                      );
-                    },
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                ],
-              ),
+                    )
+                  : const SizedBox.shrink(),
             ],
           ),
         );

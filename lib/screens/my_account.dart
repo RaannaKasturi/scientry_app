@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:scientry/screens/homepage.dart';
 import 'package:scientry/screens/login.dart';
-import 'package:scientry/screens/register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyAccount extends StatefulWidget {
@@ -25,6 +25,7 @@ class _MyAccountState extends State<MyAccount> {
   String _name = FirebaseAuth.instance.currentUser?.displayName ?? 'Set Name';
   String _email = FirebaseAuth.instance.currentUser?.email ?? 'Set Email';
   SharedPreferences? _prefs;
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -52,11 +53,14 @@ class _MyAccountState extends State<MyAccount> {
       _name = cachedName!;
       _email = cachedEmail!;
     });
-
-    // The email logic remains unchanged.
     String firebaseEmail =
         FirebaseAuth.instance.currentUser?.email ?? 'Set Email';
     await _prefs!.setString('userEmail', firebaseEmail);
+  }
+
+  _clearUserAccountPreferences() {
+    _prefs!.remove('userName');
+    _prefs!.remove('userEmail');
   }
 
   _changeName() async {
@@ -161,162 +165,195 @@ class _MyAccountState extends State<MyAccount> {
       barrierDismissible: false,
       context: context,
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          title: Text('Change Password'),
-          content: FormBuilder(
-            key: _changePasswordFormKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Password must be at 8-20 characters long and must contain at least:\n1. one lowercase letter\n2. one uppercase letter\n3. one number\n4. one special character',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              title: Text('Change Password'),
+              content: SingleChildScrollView(
+                child: FormBuilder(
+                  key: _changePasswordFormKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Password must be 8-20 characters long and contain at least:\n'
+                        '1. One lowercase letter\n'
+                        '2. One uppercase letter\n'
+                        '3. One number\n'
+                        '4. One special character',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      FormBuilderTextField(
+                        obscureText: _obscurePassword,
+                        keyboardType: TextInputType.visiblePassword,
+                        enableSuggestions: true,
+                        name: "password",
+                        onTapOutside: (event) {
+                          FocusScope.of(context).unfocus();
+                        },
+                        decoration: InputDecoration(
+                          helperText:
+                              "Must be 8-20 characters, with at least one uppercase, one lowercase, one number, and one special character",
+                          label: Text("Password *",
+                              style: TextStyle(fontSize: 18)),
+                          border: OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                        ),
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(),
+                          FormBuilderValidators.minLength(8),
+                          FormBuilderValidators.maxLength(20),
+                          FormBuilderValidators.hasLowercaseChars(atLeast: 1),
+                          FormBuilderValidators.hasUppercaseChars(atLeast: 1),
+                          FormBuilderValidators.hasNumericChars(atLeast: 1),
+                          FormBuilderValidators.hasSpecialChars(atLeast: 1),
+                          (val) {
+                            if (val == null || val.isEmpty) {
+                              return 'Confirm Password is required';
+                            }
+                            if (val !=
+                                _changePasswordFormKey
+                                    .currentState?.fields['password']?.value) {
+                              return 'Passwords do not match';
+                            }
+                            return null;
+                          },
+                        ]),
+                      ),
+                      SizedBox(height: 10),
+                      FormBuilderTextField(
+                        obscureText: _obscurePassword,
+                        keyboardType: TextInputType.visiblePassword,
+                        enableSuggestions: false,
+                        name: 'confirmpassword',
+                        onTapOutside: (event) {
+                          FocusScope.of(context).unfocus();
+                        },
+                        decoration: InputDecoration(
+                          labelText: 'Confirm Password',
+                          border: OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
+                        ),
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(),
+                          FormBuilderValidators.minLength(8),
+                          FormBuilderValidators.maxLength(20),
+                          FormBuilderValidators.hasLowercaseChars(atLeast: 1),
+                          FormBuilderValidators.hasUppercaseChars(atLeast: 1),
+                          FormBuilderValidators.hasNumericChars(atLeast: 1),
+                          FormBuilderValidators.hasSpecialChars(atLeast: 1),
+                          (val) {
+                            if (val == null || val.isEmpty) {
+                              return 'Confirm Password is required';
+                            }
+                            if (val !=
+                                _changePasswordFormKey
+                                    .currentState?.fields['password']?.value) {
+                              return 'Passwords do not match';
+                            }
+                            return null;
+                          },
+                        ]),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 10),
-                FormBuilderTextField(
-                  onTapOutside: (event) {
-                    FocusScope.of(context).unfocus();
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
                   },
-                  keyboardType: TextInputType.visiblePassword,
-                  enableSuggestions: false,
-                  name: 'password',
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Password',
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        _changePasswordFormKey.currentState!.fields['password']!
-                            .didChange('');
-                      },
-                      icon: Icon(
-                        LucideIcons.x,
-                        size: 18,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                  validator: FormBuilderValidators.compose([
-                    FormBuilderValidators.required(),
-                    FormBuilderValidators.minLength(8),
-                    FormBuilderValidators.maxLength(20),
-                    FormBuilderValidators.hasLowercaseChars(atLeast: 1),
-                    FormBuilderValidators.hasLowercaseChars(atLeast: 1),
-                    FormBuilderValidators.hasNumericChars(atLeast: 1),
-                    FormBuilderValidators.hasSpecialChars(atLeast: 1),
-                    (val) {
-                      if (val !=
-                          _changePasswordFormKey
-                              .currentState!.fields['confirmpassword']!.value) {
-                        return 'Passwords do not match';
-                      }
-                      return null;
-                    },
-                  ]),
                 ),
-                SizedBox(height: 10),
-                FormBuilderTextField(
-                  onTapOutside: (event) {
-                    FocusScope.of(context).unfocus();
+                TextButton(
+                  onPressed: () async {
+                    try {
+                      if (_changePasswordFormKey.currentState!
+                          .saveAndValidate()) {
+                        await FirebaseAuth.instance.currentUser!.updatePassword(
+                            _changePasswordFormKey.currentState!
+                                .fields['password']!.value as String);
+                        FirebaseAuth.instance.signOut();
+                        Navigator.pop(context);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return HomePage();
+                            },
+                            maintainState: false,
+                          ),
+                          (route) => false,
+                        );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return Login();
+                            },
+                          ),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                'Password changed successfully. Please log in again.'),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(e.toString()),
+                        ),
+                      );
+                    }
                   },
-                  keyboardType: TextInputType.visiblePassword,
-                  enableSuggestions: false,
-                  name: 'confirmpassword',
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Confirm Password',
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        _changePasswordFormKey
-                            .currentState!.fields['confirmpassword']!
-                            .didChange('');
-                      },
-                      icon: Icon(
-                        LucideIcons.x,
-                        size: 18,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                  child: Text(
+                    'Save',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  validator: FormBuilderValidators.compose([
-                    FormBuilderValidators.required(),
-                    FormBuilderValidators.minLength(8),
-                    FormBuilderValidators.maxLength(20),
-                    FormBuilderValidators.hasLowercaseChars(atLeast: 1),
-                    FormBuilderValidators.hasLowercaseChars(atLeast: 1),
-                    FormBuilderValidators.hasNumericChars(atLeast: 1),
-                    FormBuilderValidators.hasSpecialChars(atLeast: 1),
-                    (val) {
-                      if (val !=
-                          _changePasswordFormKey
-                              .currentState!.fields['password']!.value) {
-                        return 'Passwords do not match';
-                      }
-                      return null;
-                    },
-                  ]),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  if (_changePasswordFormKey.currentState!.saveAndValidate()) {
-                    await FirebaseAuth.instance.currentUser!.updatePassword(
-                        _changePasswordFormKey
-                            .currentState!.fields['password']!.value as String);
-                    FirebaseAuth.instance.signOut();
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Login(),
-                      ),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            'Password changed successfully. Please Login Again.'),
-                      ),
-                    );
-                    setState(() {});
-                  }
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(e.toString()),
-                    ),
-                  );
-                }
-              },
-              child: Text(
-                'Save',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ),
-          ],
+            );
+          },
         );
       },
     );
@@ -326,7 +363,8 @@ class _MyAccountState extends State<MyAccount> {
     await FirebaseAuth.instance.currentUser!.sendEmailVerification();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Verification email sent to $_email'),
+        content: Text(
+            'Verification email sent to ${FirebaseAuth.instance.currentUser!.email}'),
       ),
     );
   }
@@ -335,110 +373,109 @@ class _MyAccountState extends State<MyAccount> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text('Delete Account'),
-          content: FormBuilder(
-            key: _deleteAccountFormKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FormBuilderTextField(
-                  onTapOutside: (event) {
-                    FocusScope.of(context).unfocus();
-                  },
-                  enableSuggestions: true,
-                  name: 'deletionpassword',
-                  obscureText: true,
-                  keyboardType: TextInputType.name,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Enter Password to Delete Account',
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        _deleteAccountFormKey
-                            .currentState!.fields['deletionpassword']!
-                            .didChange('');
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Delete Account'),
+              content: FormBuilder(
+                key: _deleteAccountFormKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FormBuilderTextField(
+                      onTapOutside: (event) {
+                        FocusScope.of(context).unfocus();
                       },
-                      icon: Icon(
-                        LucideIcons.x,
-                        size: 18,
-                        color: Theme.of(context).colorScheme.onSurface,
+                      enableSuggestions: true,
+                      name: 'deletionpassword',
+                      obscureText: true,
+                      keyboardType: TextInputType.visiblePassword,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Enter Password to Delete Account',
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            _deleteAccountFormKey
+                                .currentState!.fields['deletionpassword']!
+                                .didChange('');
+                          },
+                          icon: Icon(
+                            LucideIcons.x,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
                       ),
+                      validator: FormBuilderValidators.compose([
+                        FormBuilderValidators.required(),
+                        FormBuilderValidators.minLength(8),
+                        FormBuilderValidators.maxLength(20),
+                        FormBuilderValidators.hasLowercaseChars(atLeast: 1),
+                        FormBuilderValidators.hasUppercaseChars(atLeast: 1),
+                        FormBuilderValidators.hasNumericChars(atLeast: 1),
+                        FormBuilderValidators.hasSpecialChars(atLeast: 1),
+                      ]),
                     ),
-                  ),
-                  validator: FormBuilderValidators.compose([
-                    FormBuilderValidators.required(),
-                    FormBuilderValidators.minLength(8),
-                    FormBuilderValidators.maxLength(20),
-                    FormBuilderValidators.hasLowercaseChars(atLeast: 1),
-                    FormBuilderValidators.hasLowercaseChars(atLeast: 1),
-                    FormBuilderValidators.hasNumericChars(atLeast: 1),
-                    FormBuilderValidators.hasSpecialChars(atLeast: 1),
-                  ]),
+                    SizedBox(height: 10),
+                  ],
                 ),
-                SizedBox(height: 10),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  if (_deleteAccountFormKey.currentState!.saveAndValidate()) {
-                    await FirebaseAuth.instance.currentUser!
-                        .reauthenticateWithCredential(
-                      EmailAuthProvider.credential(
-                        email: _email,
-                        password: _deleteAccountFormKey
-                            .currentState!.fields['deletionpassword']!.value,
-                      ),
-                    );
-                    User user = FirebaseAuth.instance.currentUser!;
-                    await user.reload();
-                    await user.delete();
-                    await FirebaseAuth.instance.signOut();
-                    await _prefs!.clear();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return Register();
-                        },
-                      ),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Account Deleted Successfully'),
-                      ),
-                    );
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
                     Navigator.pop(context);
-                  }
-                } catch (e) {
-                  String message = e.toString();
-                  debugPrint("DData: ${message.split('/')[1].split(']')[0]}");
-                  if ((message.split('/')[1].split(']')[0])
-                          .startsWith("invalid-credential") ||
-                      (message.split('/')[1].split(']')[0])
-                          .startsWith("wrong-password")) {
-                    message =
-                        'Incorrect Password or password setup is incomplete. Please change or reset password and try again.';
-                  }
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(message),
-                    ),
-                  );
-                }
-              },
-              child: Text('Delete'),
-            ),
-          ],
+                  },
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    try {
+                      if (_deleteAccountFormKey.currentState!
+                          .saveAndValidate()) {
+                        await FirebaseAuth.instance.currentUser!
+                            .reauthenticateWithCredential(
+                          EmailAuthProvider.credential(
+                            email: _email,
+                            password: _deleteAccountFormKey.currentState!
+                                .fields['deletionpassword']!.value,
+                          ),
+                        );
+                        await FirebaseAuth.instance.currentUser!.delete();
+                        await FirebaseAuth.instance.signOut();
+                        await _clearUserAccountPreferences();
+                        Navigator.pop(context);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => HomePage()),
+                          (route) => false,
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text('Account Deleted Successfully')),
+                        );
+                      }
+                    } catch (e) {
+                      Navigator.pop(context);
+                      String message = e.toString();
+                      debugPrint(
+                          "DData: ${message.split('/')[1].split(']')[0]}");
+                      if ((message.split('/')[1].split(']')[0])
+                              .startsWith("invalid-credential") ||
+                          (message.split('/')[1].split(']')[0])
+                              .startsWith("wrong-password")) {
+                        message =
+                            'Incorrect Password or password setup is incomplete. Please change or reset password and try again.';
+                      }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(message)),
+                      );
+                    }
+                  },
+                  child: Text('Delete'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -463,11 +500,19 @@ class _MyAccountState extends State<MyAccount> {
           IconButton(
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
-              Navigator.pop(context);
-              Navigator.push(
+              Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Login(),
+                  builder: (context) {
+                    return HomePage();
+                  },
+                  maintainState: false,
+                ),
+                (route) => false,
+              );
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Logged out successfully"),
                 ),
               );
             },
@@ -642,12 +687,25 @@ class _MyAccountState extends State<MyAccount> {
                 ),
                 onTap: () async {
                   await FirebaseAuth.instance.signOut();
-                  Navigator.push(
+                  Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
                       builder: (context) {
-                        return Login();
+                        return HomePage();
                       },
+                      maintainState: false,
+                    ),
+                    (route) => false,
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: Theme.of(context).colorScheme.tertiary,
+                      content: Text(
+                        "Logged out successfully",
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onTertiary,
+                        ),
+                      ),
                     ),
                   );
                 },

@@ -10,7 +10,6 @@ import 'package:scientry/screens/homepage.dart';
 import 'package:scientry/screens/register.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:scientry/screens/reset_password.dart';
-import 'package:scientry/screens/settings_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
@@ -60,16 +59,22 @@ class LoginState extends State<Login> {
           userCredentials.user!.email ?? 'Set Email',
         );
         if (mounted) {
-          Navigator.push(
+          Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => SettingsPage()),
+            MaterialPageRoute(
+              builder: (context) {
+                return HomePage();
+              },
+              maintainState: false,
+            ),
+            (route) => false,
           );
         }
       } catch (e) {
         _loginFailed(e);
       }
     } else {
-      _loginFailed('');
+      _loginFailed('Login failed due to Unknown Reasons');
     }
   }
 
@@ -105,9 +110,15 @@ class LoginState extends State<Login> {
                 ),
                 ElevatedButton(
                   onPressed: (() {
-                    Navigator.push(
+                    Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => HomePage()),
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return HomePage();
+                        },
+                        maintainState: false,
+                      ),
+                      (route) => false,
                     );
                   }),
                   style: ButtonStyle(
@@ -149,9 +160,15 @@ class LoginState extends State<Login> {
       _prefs?.setString(
           'userName', userCredential.user!.displayName ?? 'Set Name');
       _prefs?.setString('userEmail', userCredential.user!.email ?? 'Set Email');
-      Navigator.push(
+      Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(
+          builder: (context) {
+            return HomePage();
+          },
+          maintainState: false,
+        ),
+        (route) => false,
       );
     } catch (e) {
       debugPrint("GLOGIN: ${e.toString()}");
@@ -182,9 +199,15 @@ class LoginState extends State<Login> {
             child: IconButton(
               icon: Icon(LucideIcons.house),
               onPressed: () {
-                Navigator.push(
+                Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => HomePage()),
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return HomePage();
+                    },
+                    maintainState: false,
+                  ),
+                  (route) => false,
                 );
               },
             ),
@@ -304,6 +327,20 @@ class LoginState extends State<Login> {
                         if (_loginFormKey.currentState!.saveAndValidate()) {
                           try {
                             _loginUser();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.secondary,
+                                content: Text(
+                                  "Logged in successfully",
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSecondary,
+                                  ),
+                                ),
+                              ),
+                            );
                           } catch (e) {
                             _loginFailed(e.toString());
                           }
@@ -343,6 +380,20 @@ class LoginState extends State<Login> {
                             onPressed: (() {
                               try {
                                 _loginWithGoogle();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    backgroundColor:
+                                        Theme.of(context).colorScheme.secondary,
+                                    content: Text(
+                                      "Logged in successfully",
+                                      style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                );
                               } catch (e) {
                                 _loginFailed(e.toString());
                               }
@@ -376,7 +427,7 @@ class LoginState extends State<Login> {
               SizedBox(height: 20),
               InkWell(
                 onTap: () {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => Register()),
                   );
@@ -392,7 +443,7 @@ class LoginState extends State<Login> {
               SizedBox(height: 20),
               InkWell(
                 onTap: () {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => ResetPassword()),
                   );
