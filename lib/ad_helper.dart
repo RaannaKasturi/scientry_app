@@ -30,4 +30,14 @@ class AdHelper {
       throw UnsupportedError("Unsupported platform");
     }
   }
+
+  static String get backupNativeAdUnit {
+    if (Platform.isAndroid) {
+      return "ca-app-pub-8253303708714765/9271205570";
+    } else if (Platform.isIOS) {
+      return "ca-app-pub-8253303708714765/8649492691";
+    } else {
+      throw UnsupportedError("Unsupported platform");
+    }
+  }
 }

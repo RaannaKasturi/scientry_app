@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:scientry/ad_helper.dart';
-import 'package:scientry/static/banner_ad.dart';
 import 'package:scientry/static/category_posts.dart';
 import 'package:scientry/static/post_list.dart';
 import 'package:scientry/static/section_title.dart';
@@ -40,23 +39,25 @@ class CategoriesPostsList extends StatefulWidget {
 }
 
 class _CategoriesPostsListState extends State<CategoriesPostsList> {
-  BannerAd? _allScreenFooter;
+  NativeAd? _backupNativeAd;
 
-  void initializeBannerAd() {
-    BannerAd(
-      adUnitId: AdHelper.allScreenFooterAdUnit,
+  initializeNativeAd() {
+    NativeAd(
+      adUnitId: AdHelper.backupNativeAdUnit,
       request: const AdRequest(),
-      size: AdSize.banner,
-      listener: BannerAdListener(
+      listener: NativeAdListener(
         onAdLoaded: (ad) {
           setState(() {
-            _allScreenFooter = ad as BannerAd;
+            _backupNativeAd = ad as NativeAd;
           });
         },
         onAdFailedToLoad: (ad, error) {
-          debugPrint("Failed to load ad: $error");
+          debugPrint("backupNativeAd: $error");
           ad.dispose();
         },
+      ),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small,
       ),
     ).load();
   }
@@ -64,17 +65,20 @@ class _CategoriesPostsListState extends State<CategoriesPostsList> {
   @override
   void initState() {
     super.initState();
-    initializeBannerAd();
+    initializeNativeAd();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<dynamic>>(
-      future: Future.wait([widget.fetchedCategories, widget.fetchedPosts]),
+    return FutureBuilder<List<Categories>>(
+      future: widget.fetchedCategories,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Container(
-            padding: const EdgeInsets.only(top: 30, bottom: 30),
+            padding: const EdgeInsets.only(
+              top: 30,
+              bottom: 30,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: const [
@@ -97,52 +101,49 @@ class _CategoriesPostsListState extends State<CategoriesPostsList> {
                     ),
                   ],
                 ),
-                SizedBox(width: 30),
+                SizedBox(
+                  width: 30,
+                ),
                 CircularProgressIndicator(),
               ],
             ),
           );
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
-        } else if (!snapshot.hasData) {
-          return const Text('No data available.');
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return Text('No categories available.');
         } else {
-          final categories = snapshot.data![0] as List<Categories>;
-          final posts = snapshot.data![1] as List<Post>;
-          final filteredCategories = categories.where((category) {
-            return posts.any((post) => post.category == category.term);
+          List<Widget> children = [
+            _backupNativeAd != null
+                ? Container(
+                    height: 100,
+                    color: Theme.of(context).colorScheme.inversePrimary,
+                    child: AdWidget(
+                      ad: _backupNativeAd!,
+                    ),
+                  )
+                : SizedBox.shrink(),
+          ];
+          snapshot.data!.map((cat) {
+            children.add(
+              Column(
+                children: [
+                  SectionTitle(
+                    title: cat.term,
+                    link: cat.link,
+                    context: context,
+                  ),
+                  CategoryPosts(
+                    category: cat.term,
+                    data: widget.fetchedPosts,
+                    numPosts: 3,
+                  ),
+                ],
+              ),
+            );
           }).toList();
-          if (filteredCategories.isEmpty) {
-            return const Text('No categories available.');
-          }
-          List<Widget> children = [];
-          for (int i = 0; i < filteredCategories.length; i++) {
-            if (i == 0 && _allScreenFooter != null) {
-              children.add(BannerAdmob());
-            }
-            children.add(Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SectionTitle(
-                  title: filteredCategories[i].term,
-                  link: filteredCategories[i].link,
-                  context: context,
-                ),
-                CategoryPosts(
-                  category: filteredCategories[i].term,
-                  data: Future.value(posts),
-                  numPosts: 3,
-                ),
-              ],
-            ));
-            if ((i + 1) % 5 == 0 && _allScreenFooter != null) {
-              children.add(BannerAdmob());
-            }
-          }
-          return SingleChildScrollView(
-            child: Column(
-              children: children,
-            ),
+          return Column(
+            children: children,
           );
         }
       },

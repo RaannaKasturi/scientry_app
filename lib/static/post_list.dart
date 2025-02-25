@@ -1,10 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:latext/latext.dart';
-import 'package:scientry/ad_helper.dart';
 import 'package:scientry/screens/single_post.dart';
-import 'package:scientry/static/banner_ad.dart';
 
 class Post {
   final String title;
@@ -163,62 +160,24 @@ class PostCard extends StatelessWidget {
   }
 }
 
-class PostList extends StatefulWidget {
+class PostList extends StatelessWidget {
   final List<Post> posts;
   final int postsToShow;
 
   const PostList({super.key, required this.posts, required this.postsToShow});
 
   @override
-  State<PostList> createState() => _PostListState();
-}
-
-class _PostListState extends State<PostList> {
-  BannerAd? _allScreenFooter;
-
-  void initializeBannerAd() {
-    BannerAd(
-      adUnitId: AdHelper.allScreenFooterAdUnit,
-      request: const AdRequest(),
-      size: AdSize.banner,
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          setState(() {
-            _allScreenFooter = ad as BannerAd;
-          });
-        },
-        onAdFailedToLoad: (ad, error) {
-          debugPrint("Failed to load ad: $error");
-          ad.dispose();
-        },
-      ),
-    ).load();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    initializeBannerAd();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    List<Widget> children = [];
-    for (int i = 0; i < widget.postsToShow; i++) {
-      if ((i + 1) % 10 == 0 && _allScreenFooter != null) {
-        children.add(BannerAdmob());
-      }
-      children.add(PostCard(
-        title: widget.posts[i].title,
-        image: widget.posts[i].image,
-        category: widget.posts[i].category,
-        link: widget.posts[i].link,
-      ));
-    }
-    return SingleChildScrollView(
-      child: Column(
-        children: children,
-      ),
+    return Column(
+      children: posts
+          .take(postsToShow)
+          .map((post) => PostCard(
+                title: post.title,
+                image: post.image,
+                category: post.category,
+                link: post.link,
+              ))
+          .toList(),
     );
   }
 }
