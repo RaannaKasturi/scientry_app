@@ -203,9 +203,8 @@ class _PostListState extends State<PostList> {
 
   @override
   Widget build(BuildContext context) {
-    int totalPosts = widget.posts.length;
     List<Widget> children = [];
-    for (int i = 0; i < totalPosts; i++) {
+    for (int i = 0; i < widget.postsToShow; i++) {
       if ((i + 1) % 10 == 0 && _allScreenFooter != null) {
         children.add(BannerAdmob());
       }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:html_unescape/html_unescape.dart';
+import 'package:latext/latext.dart';
 import 'package:mind_map/mind_map.dart';
 import 'package:scientry/ad_helper.dart';
 
@@ -104,12 +105,14 @@ class _MindmapViewState extends State<MindmapView> {
         ),
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-        child: Text(
-          " ${node.title}  ",
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.onTertiary,
+        child: LaTexT(
+          laTeXCode: Text(
+            " ${node.title}  ",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).colorScheme.onTertiary,
+            ),
           ),
         ),
       );

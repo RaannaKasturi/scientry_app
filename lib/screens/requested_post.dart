@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:isolate';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:http/http.dart' as http;
 import 'package:markdown/markdown.dart' as md;
 import 'package:easy_url_launcher/easy_url_launcher.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:latext/latext.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:scientry/ad_helper.dart';
 import 'package:scientry/api/fetch_data.dart';
 import 'package:scientry/info_pages/error_page.dart';
 import 'package:scientry/info_pages/no_data_found.dart';
@@ -133,9 +135,71 @@ class RequestedPost extends StatefulWidget {
 }
 
 class _RequestedPostState extends State<RequestedPost> {
+  NativeAd? _afterCarouselTitleAd;
+  InterstitialAd? _transitionToMindmapAd;
+  BannerAd? _allScreenFooter;
+
   String unescapeHTMLContent(String htmlContent) {
     var unescape = HtmlUnescape();
     return unescape.convert(htmlContent).trim();
+  }
+
+  initializeTransitionToMindmap() {
+    InterstitialAd.load(
+      adUnitId: AdHelper.transitionToMindmapAdUnit,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          setState(() {
+            _transitionToMindmapAd = ad;
+          });
+        },
+        onAdFailedToLoad: (error) {
+          debugPrint("singlePostAds: $error");
+        },
+      ),
+    );
+  }
+
+  initializeBannerAd() {
+    BannerAd(
+      adUnitId: AdHelper.allScreenFooterAdUnit,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _allScreenFooter = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint("Failed to load ad: $error");
+          ad.dispose();
+        },
+      ),
+    ).load();
+  }
+
+  initializeNativeAd() {
+    NativeAd(
+      adUnitId: AdHelper.afterCarouselTitleAdUnit,
+      request: const AdRequest(),
+      factoryId: 'adFactoryExample',
+      listener: NativeAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _afterCarouselTitleAd = ad as NativeAd;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint("singlePostAds: $error");
+          ad.dispose();
+        },
+      ),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.small,
+      ),
+    ).load();
   }
 
   Future<PostData?> getData(inputDOI, inputpdfURL) async {
@@ -152,6 +216,12 @@ class _RequestedPostState extends State<RequestedPost> {
     } else {
       return null;
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initializeTransitionToMindmap();
   }
 
   @override
@@ -190,6 +260,15 @@ class _RequestedPostState extends State<RequestedPost> {
             debugPrint("Log: Received post data: ${post.toString()}");
             return Scaffold(
               backgroundColor: Theme.of(context).colorScheme.surface,
+              bottomNavigationBar: _allScreenFooter != null
+                  ? Container(
+                      color: Theme.of(context).colorScheme.inversePrimary,
+                      height: _allScreenFooter!.size.height.toDouble() + 10,
+                      child: AdWidget(
+                        ad: _allScreenFooter!,
+                      ),
+                    )
+                  : null,
               body: RawScrollbar(
                 thumbColor: Theme.of(context).colorScheme.primary,
                 thickness: 5,
@@ -300,6 +379,17 @@ class _RequestedPostState extends State<RequestedPost> {
                                 color: Theme.of(context).colorScheme.onSurface,
                                 thickness: 1,
                                 height: 40),
+                            _afterCarouselTitleAd != null
+                                ? Container(
+                                    height: 100,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .inversePrimary,
+                                    child: AdWidget(
+                                      ad: _afterCarouselTitleAd!,
+                                    ),
+                                  )
+                                : SizedBox.shrink(),
                             HtmlWidget(post.summary,
                                 textStyle: const TextStyle(
                                   fontSize: 17,
@@ -377,6 +467,9 @@ class _RequestedPostState extends State<RequestedPost> {
               floatingActionButton: FloatingActionButton(
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 onPressed: () {
+                  if (_transitionToMindmapAd != null) {
+                    _transitionToMindmapAd!.show();
+                  }
                   Navigator.push(
                     context,
                     MaterialPageRoute(
