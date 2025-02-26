@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:scientry/screens/homepage.dart';
 
 class NoInternet extends StatelessWidget {
@@ -45,13 +46,10 @@ class NoInternet extends StatelessWidget {
                 iconColor: Theme.of(context).colorScheme.onPrimary,
               ),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return HomePage();
-                    },
-                  ),
+                context.pushTransition(
+                  curve: Curves.easeInOut,
+                  type: PageTransitionType.size,
+                  child: HomePage(),
                 );
               },
               label: Text("Back to Home"),

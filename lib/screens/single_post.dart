@@ -8,6 +8,7 @@ import 'package:html/parser.dart' as parser;
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:latext/latext.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:scientry/ad_helper.dart';
 import 'package:scientry/info_pages/error_page.dart';
 import 'package:scientry/screens/mindmap_view.dart';
@@ -34,7 +35,6 @@ class _SinglePostState extends State<SinglePost> {
   late SharedPreferences prefs;
   bool _isBookmarked = false;
   NativeAd? _afterCarouselTitleAd;
-  InterstitialAd? _transitionToMindmapAd;
   BannerAd? _allScreenFooter;
 
   String extractCategory(pageContent) {
@@ -62,23 +62,6 @@ class _SinglePostState extends State<SinglePost> {
       citation: doc.querySelector('div#paper_citation')!.text.trim(),
       doilink: SinglePost.extractDOI(
           doc.querySelector('div#paper_citation')!.text.trim()),
-    );
-  }
-
-  initializeTransitionToMindmap() {
-    InterstitialAd.load(
-      adUnitId: AdHelper.transitionToMindmapAdUnit,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          setState(() {
-            _transitionToMindmapAd = ad;
-          });
-        },
-        onAdFailedToLoad: (error) {
-          debugPrint("singlePostAds: $error");
-        },
-      ),
     );
   }
 
@@ -135,9 +118,6 @@ class _SinglePostState extends State<SinglePost> {
   @override
   void initState() {
     super.initState();
-    initializeNativeAd();
-    initializeBannerAd();
-    initializeTransitionToMindmap();
     SharedPreferences.getInstance().then((instance) {
       prefs = instance;
       List<String> bookmarkedPosts =
@@ -150,6 +130,8 @@ class _SinglePostState extends State<SinglePost> {
         _isBookmarked = bookmarked;
       });
     });
+    initializeNativeAd();
+    initializeBannerAd();
   }
 
   @override
@@ -398,15 +380,11 @@ class _SinglePostState extends State<SinglePost> {
               floatingActionButton: FloatingActionButton(
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 onPressed: () {
-                  if (_transitionToMindmapAd != null) {
-                    _transitionToMindmapAd!.show();
-                  }
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MindmapView(
-                        mindmapData: '# ${post.title}\n${post.mindmap}',
-                      ),
+                  context.pushTransition(
+                    curve: Curves.easeInOut,
+                    type: PageTransitionType.fade,
+                    child: MindmapView(
+                      mindmapData: '# ${post.title}\n${post.mindmap}',
                     ),
                   );
                 },

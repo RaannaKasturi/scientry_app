@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:scientry/screens/bookmarks_page.dart';
 import 'package:scientry/screens/homepage.dart';
 import 'package:scientry/screens/login.dart';
@@ -83,11 +84,10 @@ class DefaultDrawer extends StatelessWidget {
                     !isLoggedIn
                         ? ElevatedButton.icon(
                             onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => Login(),
-                                ),
+                              context.pushTransition(
+                                curve: Curves.easeInOut,
+                                type: PageTransitionType.fade,
+                                child: Login(),
                               );
                             },
                             label: Text(
@@ -130,10 +130,11 @@ class DefaultDrawer extends StatelessWidget {
                         style: TextStyle(fontSize: 20),
                       ),
                       onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => HomePage()));
+                        context.pushReplacementTransition(
+                          curve: Curves.easeInOut,
+                          type: PageTransitionType.fade,
+                          child: HomePage(),
+                        );
                       },
                     ),
                     Divider(
@@ -148,10 +149,11 @@ class DefaultDrawer extends StatelessWidget {
                         style: TextStyle(fontSize: 20),
                       ),
                       onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BookmarksPage()));
+                        context.pushTransition(
+                          curve: Curves.easeInOut,
+                          type: PageTransitionType.fade,
+                          child: BookmarksPage(),
+                        );
                       },
                     ),
                     Divider(
@@ -166,10 +168,11 @@ class DefaultDrawer extends StatelessWidget {
                         style: TextStyle(fontSize: 20),
                       ),
                       onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SearchPage()));
+                        context.pushTransition(
+                          curve: Curves.easeInOut,
+                          type: PageTransitionType.fade,
+                          child: SearchPage(),
+                        );
                       },
                     ),
                     Divider(
@@ -184,10 +187,11 @@ class DefaultDrawer extends StatelessWidget {
                         style: TextStyle(fontSize: 20),
                       ),
                       onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => RequestPaper()));
+                        context.pushTransition(
+                          curve: Curves.easeInOut,
+                          type: PageTransitionType.fade,
+                          child: RequestPaper(),
+                        );
                       },
                     ),
                     Divider(
@@ -230,10 +234,11 @@ class DefaultDrawer extends StatelessWidget {
                         style: TextStyle(fontSize: 20),
                       ),
                       onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SettingsPage()));
+                        context.pushTransition(
+                          curve: Curves.easeInOut,
+                          type: PageTransitionType.fade,
+                          child: SettingsPage(),
+                        );
                       },
                     ),
                   ],
@@ -263,15 +268,11 @@ class DefaultDrawer extends StatelessWidget {
                             ),
                             onTap: () async {
                               await FirebaseAuth.instance.signOut();
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    return HomePage();
-                                  },
-                                  maintainState: false,
-                                ),
-                                (route) => false,
+                              context.pushAndRemoveUntilTransition(
+                                curve: Curves.easeInOut,
+                                type: PageTransitionType.fade,
+                                predicate: (route) => false,
+                                child: HomePage(),
                               );
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(

@@ -5,6 +5,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:lottie/lottie.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:scientry/screens/homepage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:scientry/screens/login.dart';
@@ -79,15 +80,11 @@ class RegisterState extends State<Register> {
       _prefs?.setString('userEmail', useremail.toString());
       _prefs?.setString('userName', username.toString());
       if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) {
-              return HomePage();
-            },
-            maintainState: false,
-          ),
-          (route) => false,
+        context.pushAndRemoveUntilTransition(
+          curve: Curves.easeInOut,
+          type: PageTransitionType.fade,
+          predicate: (route) => false,
+          child: HomePage(),
         );
       }
     } catch (e) {
@@ -133,15 +130,11 @@ class RegisterState extends State<Register> {
                 ),
                 ElevatedButton(
                   onPressed: (() {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return HomePage();
-                        },
-                        maintainState: false,
-                      ),
-                      (route) => false,
+                    context.pushAndRemoveUntilTransition(
+                      curve: Curves.easeInOut,
+                      type: PageTransitionType.fade,
+                      predicate: (route) => false,
+                      child: HomePage(),
                     );
                   }),
                   style: ButtonStyle(
@@ -183,15 +176,11 @@ class RegisterState extends State<Register> {
       _prefs?.setString(
           'userName', userCredential.user!.displayName ?? 'Set Name');
       _prefs?.setString('userEmail', userCredential.user!.email ?? 'Set Email');
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) {
-            return HomePage();
-          },
-          maintainState: false,
-        ),
-        (route) => false,
+      context.pushAndRemoveUntilTransition(
+        curve: Curves.easeInOut,
+        type: PageTransitionType.fade,
+        predicate: (route) => false,
+        child: HomePage(),
       );
     } catch (e) {
       _registrationFailed(e.toString());
@@ -232,15 +221,11 @@ class RegisterState extends State<Register> {
             child: IconButton(
               icon: Icon(LucideIcons.house),
               onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return HomePage();
-                    },
-                    maintainState: false,
-                  ),
-                  (route) => false,
+                context.pushAndRemoveUntilTransition(
+                  curve: Curves.easeInOut,
+                  type: PageTransitionType.fade,
+                  predicate: (route) => false,
+                  child: HomePage(),
                 );
               },
             ),
@@ -511,11 +496,10 @@ class RegisterState extends State<Register> {
               SizedBox(height: 20),
               InkWell(
                 onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Login(),
-                    ),
+                  context.pushReplacementTransition(
+                    curve: Curves.easeInOut,
+                    type: PageTransitionType.fade,
+                    child: Login(),
                   );
                 },
                 child: Text(

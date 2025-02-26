@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:scientry/static/paginated_post_list.dart';
 
 class SectionTitle extends StatelessWidget {
@@ -55,13 +56,10 @@ class SectionTitle extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return PaginatedPostList(categoryLink: link);
-                  },
-                ),
+              context.pushTransition(
+                curve: Curves.easeInOut,
+                type: PageTransitionType.fade,
+                child: PaginatedPostList(categoryLink: link),
               );
             },
             child: Text('View More'),

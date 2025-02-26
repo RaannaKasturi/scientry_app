@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:http/http.dart' as http;
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:scientry/ad_helper.dart';
 import 'package:scientry/front/categories_posts_list.dart';
@@ -453,11 +454,10 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SearchPage(),
-                ),
+              context.pushTransition(
+                curve: Curves.easeInOut,
+                type: PageTransitionType.fade,
+                child: SearchPage(),
               );
             },
           ),

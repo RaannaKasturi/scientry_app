@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import 'package:scientry/screens/homepage.dart';
 import 'package:scientry/theme/theme_provider.dart';
@@ -46,13 +47,10 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Animate(
           onComplete: (controller) async {
             await Future.delayed(Duration(milliseconds: 800));
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return HomePage();
-                },
-              ),
+            context.pushReplacementTransition(
+              curve: Curves.easeInOut,
+              type: PageTransitionType.fade,
+              child: HomePage(),
             );
           },
           autoPlay: true,

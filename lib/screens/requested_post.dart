@@ -9,6 +9,7 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:latext/latext.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:scientry/ad_helper.dart';
 import 'package:scientry/api/fetch_data.dart';
 import 'package:scientry/info_pages/error_page.dart';
@@ -136,29 +137,11 @@ class RequestedPost extends StatefulWidget {
 
 class _RequestedPostState extends State<RequestedPost> {
   NativeAd? _afterCarouselTitleAd;
-  InterstitialAd? _transitionToMindmapAd;
   BannerAd? _allScreenFooter;
 
   String unescapeHTMLContent(String htmlContent) {
     var unescape = HtmlUnescape();
     return unescape.convert(htmlContent).trim();
-  }
-
-  initializeTransitionToMindmap() {
-    InterstitialAd.load(
-      adUnitId: AdHelper.transitionToMindmapAdUnit,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          setState(() {
-            _transitionToMindmapAd = ad;
-          });
-        },
-        onAdFailedToLoad: (error) {
-          debugPrint("singlePostAds: $error");
-        },
-      ),
-    );
   }
 
   initializeBannerAd() {
@@ -221,7 +204,8 @@ class _RequestedPostState extends State<RequestedPost> {
   @override
   void initState() {
     super.initState();
-    initializeTransitionToMindmap();
+    initializeBannerAd();
+    initializeNativeAd();
   }
 
   @override
@@ -467,15 +451,11 @@ class _RequestedPostState extends State<RequestedPost> {
               floatingActionButton: FloatingActionButton(
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 onPressed: () {
-                  if (_transitionToMindmapAd != null) {
-                    _transitionToMindmapAd!.show();
-                  }
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MindmapView(
-                        mindmapData: '# ${post.title}\n${post.mindmap}',
-                      ),
+                  context.pushTransition(
+                    curve: Curves.easeInOut,
+                    type: PageTransitionType.fade,
+                    child: MindmapView(
+                      mindmapData: '# ${post.title}\n${post.mindmap}',
                     ),
                   );
                 },

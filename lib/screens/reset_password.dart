@@ -3,6 +3,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:lottie/lottie.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:scientry/info_pages/error_page.dart';
 import 'package:scientry/screens/homepage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -69,9 +70,10 @@ class ResetPasswordState extends State<ResetPassword> {
         ),
       );
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Login()),
+        context.pushReplacementTransition(
+          curve: Curves.easeInOut,
+          type: PageTransitionType.fade,
+          child: Login(),
         );
       }
     } catch (e) {
@@ -104,9 +106,10 @@ class ResetPasswordState extends State<ResetPassword> {
             child: IconButton(
               icon: Icon(LucideIcons.house),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => HomePage()),
+                context.pushTransition(
+                  curve: Curves.easeInOut,
+                  type: PageTransitionType.fade,
+                  child: HomePage(),
                 );
               },
             ),
@@ -224,11 +227,10 @@ class ResetPasswordState extends State<ResetPassword> {
                 children: [
                   OutlinedButton.icon(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Login(),
-                        ),
+                      context.pushTransition(
+                        curve: Curves.easeInOut,
+                        type: PageTransitionType.fade,
+                        child: Login(),
                       );
                     },
                     label: Text(
@@ -261,11 +263,10 @@ class ResetPasswordState extends State<ResetPassword> {
                   ),
                   OutlinedButton.icon(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Register(),
-                        ),
+                      context.pushTransition(
+                        curve: Curves.easeInOut,
+                        type: PageTransitionType.fade,
+                        child: Register(),
                       );
                     },
                     label: Text(

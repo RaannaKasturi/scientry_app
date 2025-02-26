@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:scientry/screens/single_post.dart';
 
 class CarouselPost {
@@ -98,11 +99,10 @@ class _CarouselState extends State<Carousel> {
                         );
                   return InkWell(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SinglePost(postURL: item.link),
-                        ),
+                      context.pushTransition(
+                        curve: Curves.easeInOut,
+                        type: PageTransitionType.fade,
+                        child: SinglePost(postURL: item.link),
                       );
                     },
                     child: Stack(

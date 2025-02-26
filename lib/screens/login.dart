@@ -5,6 +5,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:lottie/lottie.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:scientry/info_pages/processing_page.dart';
 import 'package:scientry/screens/homepage.dart';
 import 'package:scientry/screens/register.dart';
@@ -59,15 +60,11 @@ class LoginState extends State<Login> {
           userCredentials.user!.email ?? 'Set Email',
         );
         if (mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                return HomePage();
-              },
-              maintainState: false,
-            ),
-            (route) => false,
+          context.pushAndRemoveUntilTransition(
+            curve: Curves.easeInOut,
+            type: PageTransitionType.fade,
+            predicate: (route) => false,
+            child: HomePage(),
           );
         }
       } catch (e) {
@@ -110,15 +107,11 @@ class LoginState extends State<Login> {
                 ),
                 ElevatedButton(
                   onPressed: (() {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return HomePage();
-                        },
-                        maintainState: false,
-                      ),
-                      (route) => false,
+                    context.pushAndRemoveUntilTransition(
+                      curve: Curves.easeInOut,
+                      type: PageTransitionType.fade,
+                      predicate: (route) => false,
+                      child: HomePage(),
                     );
                   }),
                   style: ButtonStyle(
@@ -160,15 +153,11 @@ class LoginState extends State<Login> {
       _prefs?.setString(
           'userName', userCredential.user!.displayName ?? 'Set Name');
       _prefs?.setString('userEmail', userCredential.user!.email ?? 'Set Email');
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) {
-            return HomePage();
-          },
-          maintainState: false,
-        ),
-        (route) => false,
+      context.pushAndRemoveUntilTransition(
+        curve: Curves.easeInOut,
+        type: PageTransitionType.fade,
+        predicate: (route) => false,
+        child: HomePage(),
       );
     } catch (e) {
       debugPrint("GLOGIN: ${e.toString()}");
@@ -199,15 +188,11 @@ class LoginState extends State<Login> {
             child: IconButton(
               icon: Icon(LucideIcons.house),
               onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return HomePage();
-                    },
-                    maintainState: false,
-                  ),
-                  (route) => false,
+                context.pushAndRemoveUntilTransition(
+                  curve: Curves.easeInOut,
+                  type: PageTransitionType.fade,
+                  predicate: (route) => false,
+                  child: HomePage(),
                 );
               },
             ),
@@ -427,9 +412,10 @@ class LoginState extends State<Login> {
               SizedBox(height: 20),
               InkWell(
                 onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => Register()),
+                  context.pushReplacementTransition(
+                    curve: Curves.easeInOut,
+                    type: PageTransitionType.fade,
+                    child: Register(),
                   );
                 },
                 child: Text(
@@ -443,9 +429,10 @@ class LoginState extends State<Login> {
               SizedBox(height: 20),
               InkWell(
                 onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => ResetPassword()),
+                  context.pushReplacementTransition(
+                    curve: Curves.easeInOut,
+                    type: PageTransitionType.fade,
+                    child: ResetPassword(),
                   );
                 },
                 child: Text(

@@ -2,8 +2,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:http/http.dart' as http;
+import 'package:page_transition/page_transition.dart';
+import 'package:scientry/ad_helper.dart';
 import 'package:scientry/api/fetch_pdf_data.dart';
 import 'package:scientry/info_pages/no_internet.dart';
 import 'dart:convert';
@@ -21,6 +24,24 @@ class RequestPaperState extends State<RequestPaper> {
   final GlobalKey<FormBuilderState> _doiFormKey = GlobalKey<FormBuilderState>();
   bool _isUploading = false;
   bool _doiDataFetched = false;
+  InterstitialAd? _requestedPaperAd;
+
+  initializeTransitionToMindmap() {
+    InterstitialAd.load(
+      adUnitId: AdHelper.transitionToMindmapAdUnit,
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          setState(() {
+            _requestedPaperAd = ad;
+          });
+        },
+        onAdFailedToLoad: (error) {
+          debugPrint("singlePostAds: $error");
+        },
+      ),
+    );
+  }
 
   Future<void> _handleFileUpload(BuildContext context) async {
     _doiFormKey.currentState?.fields['doi']?.didChange("");
@@ -285,13 +306,15 @@ class RequestPaperState extends State<RequestPaper> {
                             _doiFormKey.currentState?.fields['doi']?.value;
                         final pdfURL =
                             _doiFormKey.currentState?.fields['pdfurl']?.value;
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RequestedPost(
-                              inputDOI: doi,
-                              inputpdfURL: pdfURL,
-                            ),
+                        if (_requestedPaperAd != null) {
+                          _requestedPaperAd!.show();
+                        }
+                        context.pushTransition(
+                          curve: Curves.easeInOut,
+                          type: PageTransitionType.fade,
+                          child: RequestedPost(
+                            inputDOI: doi,
+                            inputpdfURL: pdfURL,
                           ),
                         );
                       } else {

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:scientry/api/notification_service.dart';
@@ -186,17 +187,18 @@ class _SettingsPageState extends State<SettingsPage> {
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            if (FirebaseAuth.instance.currentUser == null) {
-                              return Login();
-                            } else {
-                              return MyAccount();
-                            }
-                          },
-                        ),
+                      goto() {
+                        if (FirebaseAuth.instance.currentUser == null) {
+                          return Login();
+                        } else {
+                          return MyAccount();
+                        }
+                      }
+
+                      context.pushTransition(
+                        curve: Curves.easeInOut,
+                        type: PageTransitionType.fade,
+                        child: goto(),
                       );
                     },
                   ),
@@ -223,11 +225,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => BookmarksPage(),
-                        ),
+                      context.pushTransition(
+                        curve: Curves.easeInOut,
+                        type: PageTransitionType.fade,
+                        child: BookmarksPage(),
                       );
                     },
                   ),
@@ -362,15 +363,11 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                           onTap: () async {
                             await FirebaseAuth.instance.signOut();
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) {
-                                  return HomePage();
-                                },
-                                maintainState: false,
-                              ),
-                              (route) => false,
+                            context.pushAndRemoveUntilTransition(
+                              curve: Curves.easeInOut,
+                              type: PageTransitionType.fade,
+                              predicate: (route) => false,
+                              child: HomePage(),
                             );
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(

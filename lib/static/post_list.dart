@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:latext/latext.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:scientry/screens/single_post.dart';
 
 class Post {
@@ -59,11 +60,10 @@ class PostCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SinglePost(postURL: link),
-            ),
+          context.pushTransition(
+            curve: Curves.easeInOut,
+            type: PageTransitionType.fade,
+            child: SinglePost(postURL: link),
           );
         },
         child: Row(

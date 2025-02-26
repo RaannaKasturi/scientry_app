@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:scientry/screens/homepage.dart';
 import 'package:scientry/screens/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -310,23 +311,16 @@ class _MyAccountState extends State<MyAccount> {
                                 .fields['password']!.value as String);
                         FirebaseAuth.instance.signOut();
                         Navigator.pop(context);
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return HomePage();
-                            },
-                            maintainState: false,
-                          ),
-                          (route) => false,
+                        context.pushAndRemoveUntilTransition(
+                          curve: Curves.easeInOut,
+                          type: PageTransitionType.fade,
+                          predicate: (route) => false,
+                          child: HomePage(),
                         );
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return Login();
-                            },
-                          ),
+                        context.pushTransition(
+                          curve: Curves.easeInOut,
+                          type: PageTransitionType.fade,
+                          child: Login(),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -444,10 +438,11 @@ class _MyAccountState extends State<MyAccount> {
                         await FirebaseAuth.instance.signOut();
                         await _clearUserAccountPreferences();
                         Navigator.pop(context);
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => HomePage()),
-                          (route) => false,
+                        context.pushAndRemoveUntilTransition(
+                          curve: Curves.easeInOut,
+                          type: PageTransitionType.fade,
+                          predicate: (route) => false,
+                          child: HomePage(),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -500,15 +495,11 @@ class _MyAccountState extends State<MyAccount> {
           IconButton(
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) {
-                    return HomePage();
-                  },
-                  maintainState: false,
-                ),
-                (route) => false,
+              context.pushAndRemoveUntilTransition(
+                curve: Curves.easeInOut,
+                type: PageTransitionType.fade,
+                predicate: (route) => false,
+                child: HomePage(),
               );
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -668,13 +659,10 @@ class _MyAccountState extends State<MyAccount> {
                     IconButton(
                       onPressed: () async {
                         await FirebaseAuth.instance.signOut();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return Login();
-                            },
-                          ),
+                        context.pushTransition(
+                          curve: Curves.easeInOut,
+                          type: PageTransitionType.fade,
+                          child: Login(),
                         );
                       },
                       icon: Icon(
@@ -687,15 +675,11 @@ class _MyAccountState extends State<MyAccount> {
                 ),
                 onTap: () async {
                   await FirebaseAuth.instance.signOut();
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return HomePage();
-                      },
-                      maintainState: false,
-                    ),
-                    (route) => false,
+                  context.pushAndRemoveUntilTransition(
+                    curve: Curves.easeInOut,
+                    type: PageTransitionType.fade,
+                    predicate: (route) => false,
+                    child: HomePage(),
                   );
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
