@@ -443,7 +443,7 @@ class _TTSFunctionalityState extends State<TTSFunctionality>
           (element) => compatibleLanguages.contains(element),
           orElse: () => 'en-US');
       await flutterTts.setLanguage(language);
-      await flutterTts.setSpeechRate(0.5);
+      await flutterTts.setSpeechRate(0.375);
       await flutterTts.setVolume(1.0);
       await flutterTts.setPitch(0.9);
       setState(() {
