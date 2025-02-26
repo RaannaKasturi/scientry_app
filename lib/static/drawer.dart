@@ -84,6 +84,7 @@ class DefaultDrawer extends StatelessWidget {
                     !isLoggedIn
                         ? ElevatedButton.icon(
                             onPressed: () {
+                              Navigator.pop(context);
                               context.pushTransition(
                                 curve: Curves.easeInOut,
                                 type: PageTransitionType.fade,
@@ -130,6 +131,7 @@ class DefaultDrawer extends StatelessWidget {
                         style: TextStyle(fontSize: 20),
                       ),
                       onTap: () {
+                        Navigator.pop(context);
                         context.pushReplacementTransition(
                           curve: Curves.easeInOut,
                           type: PageTransitionType.fade,
@@ -149,6 +151,7 @@ class DefaultDrawer extends StatelessWidget {
                         style: TextStyle(fontSize: 20),
                       ),
                       onTap: () {
+                        Navigator.pop(context);
                         context.pushTransition(
                           curve: Curves.easeInOut,
                           type: PageTransitionType.fade,
@@ -168,6 +171,7 @@ class DefaultDrawer extends StatelessWidget {
                         style: TextStyle(fontSize: 20),
                       ),
                       onTap: () {
+                        Navigator.pop(context);
                         context.pushTransition(
                           curve: Curves.easeInOut,
                           type: PageTransitionType.fade,
@@ -187,6 +191,7 @@ class DefaultDrawer extends StatelessWidget {
                         style: TextStyle(fontSize: 20),
                       ),
                       onTap: () {
+                        Navigator.pop(context);
                         context.pushTransition(
                           curve: Curves.easeInOut,
                           type: PageTransitionType.fade,
@@ -207,6 +212,7 @@ class DefaultDrawer extends StatelessWidget {
                       ),
                       onTap: () {
                         if (isLoggedIn) {
+                          Navigator.pop(context);
                           EasyLauncher.email(
                             email: "raannakasturi@gmail.com",
                             subject: "Feature Request for Scientry (Android)",
@@ -234,6 +240,7 @@ class DefaultDrawer extends StatelessWidget {
                         style: TextStyle(fontSize: 20),
                       ),
                       onTap: () {
+                        Navigator.pop(context);
                         context.pushTransition(
                           curve: Curves.easeInOut,
                           type: PageTransitionType.fade,
@@ -268,6 +275,7 @@ class DefaultDrawer extends StatelessWidget {
                             ),
                             onTap: () async {
                               await FirebaseAuth.instance.signOut();
+                              Navigator.pop(context);
                               context.pushAndRemoveUntilTransition(
                                 curve: Curves.easeInOut,
                                 type: PageTransitionType.fade,

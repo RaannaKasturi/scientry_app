@@ -1,4 +1,5 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -10,7 +11,7 @@ import 'package:scientry/ad_helper.dart';
 import 'package:scientry/api/fetch_pdf_data.dart';
 import 'package:scientry/info_pages/no_internet.dart';
 import 'dart:convert';
-import 'package:scientry/screens/requested_post.dart';
+import 'package:scientry/screens/requested_paper.dart';
 import 'package:simple_connection_checker/simple_connection_checker.dart';
 
 class RequestPaper extends StatefulWidget {
@@ -248,7 +249,16 @@ class RequestPaperState extends State<RequestPaper> {
                     onTap: _isUploading
                         ? null
                         : () {
-                            _handleFileUpload(context);
+                            if (FirebaseAuth.instance.currentUser == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                      Text("Please Login in to upload a file"),
+                                ),
+                              );
+                            } else {
+                              _handleFileUpload(context);
+                            }
                           },
                     child: Container(
                       decoration: BoxDecoration(
@@ -312,7 +322,7 @@ class RequestPaperState extends State<RequestPaper> {
                         context.pushTransition(
                           curve: Curves.easeInOut,
                           type: PageTransitionType.fade,
-                          child: RequestedPost(
+                          child: RequestedPaper(
                             inputDOI: doi,
                             inputpdfURL: pdfURL,
                           ),

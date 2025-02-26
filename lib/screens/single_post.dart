@@ -296,17 +296,6 @@ class _SinglePostState extends State<SinglePost> {
                                 color: Theme.of(context).colorScheme.onSurface,
                                 thickness: 1,
                                 height: 40),
-                            _afterCarouselTitleAd != null
-                                ? Container(
-                                    height: 100,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .inversePrimary,
-                                    child: AdWidget(
-                                      ad: _afterCarouselTitleAd!,
-                                    ),
-                                  )
-                                : SizedBox.shrink(),
                             HtmlWidget(post.summary,
                                 textStyle: const TextStyle(
                                   fontSize: 18,
@@ -322,6 +311,17 @@ class _SinglePostState extends State<SinglePost> {
                                     unescapeHTMLContent(post.citation),
                                     style: const TextStyle(fontSize: 17))),
                             const SizedBox(height: 50),
+                            _afterCarouselTitleAd != null
+                                ? Container(
+                                    height: 100,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .inversePrimary,
+                                    child: AdWidget(
+                                      ad: _afterCarouselTitleAd!,
+                                    ),
+                                  )
+                                : SizedBox.shrink(),
                             Padding(
                               padding: const EdgeInsets.all(15.0),
                               child: Column(

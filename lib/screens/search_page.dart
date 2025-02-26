@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:http/http.dart' as http;
+import 'package:scientry/ad_helper.dart';
 import 'package:scientry/info_pages/error_page.dart';
 import 'package:scientry/info_pages/loading_posts.dart';
 import 'package:scientry/info_pages/no_data_found.dart';
@@ -59,6 +61,26 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final GlobalKey<FormBuilderState> _searchKeywordFormKey =
       GlobalKey<FormBuilderState>();
+  BannerAd? _allScreenFooter;
+
+  initializeBannerAd() {
+    BannerAd(
+      adUnitId: AdHelper.allScreenFooterAdUnit,
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _allScreenFooter = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint("Failed to load ad: $error");
+          ad.dispose();
+        },
+      ),
+    ).load();
+  }
 
   Future<List<Post>> getData(String searchKeyword) async {
     final ReceivePort receivePort = ReceivePort();
@@ -97,6 +119,7 @@ class _SearchPageState extends State<SearchPage> {
   void initState() {
     _searchFuture = getData("");
     super.initState();
+    initializeBannerAd();
   }
 
   @override
@@ -112,6 +135,15 @@ class _SearchPageState extends State<SearchPage> {
         }
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.surface,
+          bottomNavigationBar: _allScreenFooter != null
+              ? Container(
+                  color: Theme.of(context).colorScheme.inversePrimary,
+                  height: _allScreenFooter!.size.height.toDouble() + 10,
+                  child: AdWidget(
+                    ad: _allScreenFooter!,
+                  ),
+                )
+              : null,
           appBar: AppBar(
             backgroundColor: Theme.of(context).colorScheme.inversePrimary,
             title: FormBuilder(

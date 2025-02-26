@@ -105,13 +105,16 @@ class _MindmapViewState extends State<MindmapView> {
         ),
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-        child: LaTexT(
-          laTeXCode: Text(
-            " ${node.title}  ",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Theme.of(context).colorScheme.onTertiary,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: LaTexT(
+            laTeXCode: Text(
+              " ${node.title}\t",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onTertiary,
+              ),
             ),
           ),
         ),
@@ -129,13 +132,15 @@ class _MindmapViewState extends State<MindmapView> {
             margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 10)
                 .copyWith(right: 0),
             child: Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: Text(
-                " ${node.title}  ",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(context).colorScheme.onSecondary,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: LaTexT(
+                laTeXCode: Text(
+                  " ${node.title}\t",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).colorScheme.onSecondary,
+                  ),
                 ),
               ),
             ),
@@ -198,13 +203,15 @@ class _MindmapViewState extends State<MindmapView> {
                           .copyWith(right: 0),
                   margin: const EdgeInsets.only(left: 10),
                   child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Text(
-                      "  ${rootNode.title}    ",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Theme.of(context).colorScheme.onPrimary,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: LaTexT(
+                      laTeXCode: Text(
+                        "  ${rootNode.title}\t",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
                       ),
                     ),
                   ),

@@ -32,7 +32,7 @@ class PostData {
   });
 }
 
-class RequestedPost extends StatefulWidget {
+class RequestedPaper extends StatefulWidget {
   final dynamic inputDOI;
   final dynamic inputpdfURL;
 
@@ -125,17 +125,17 @@ class RequestedPost extends StatefulWidget {
     sendPort.send({'posts': sendingData});
   }
 
-  const RequestedPost({
+  const RequestedPaper({
     super.key,
     required this.inputDOI,
     required this.inputpdfURL,
   });
 
   @override
-  State<RequestedPost> createState() => _RequestedPostState();
+  State<RequestedPaper> createState() => _RequestedPaperState();
 }
 
-class _RequestedPostState extends State<RequestedPost> {
+class _RequestedPaperState extends State<RequestedPaper> {
   NativeAd? _afterCarouselTitleAd;
   BannerAd? _allScreenFooter;
 
@@ -187,7 +187,7 @@ class _RequestedPostState extends State<RequestedPost> {
 
   Future<PostData?> getData(inputDOI, inputpdfURL) async {
     ReceivePort receivePort = ReceivePort();
-    final isolate = await Isolate.spawn(RequestedPost.generateSummaryMindmap, {
+    final isolate = await Isolate.spawn(RequestedPaper.generateSummaryMindmap, {
       'sendPort': receivePort.sendPort,
       'inputDOI': inputDOI,
       'inputpdfURL': inputpdfURL
@@ -206,6 +206,10 @@ class _RequestedPostState extends State<RequestedPost> {
     super.initState();
     initializeBannerAd();
     initializeNativeAd();
+    setState(() {
+      _afterCarouselTitleAd;
+      _allScreenFooter;
+    });
   }
 
   @override
@@ -363,17 +367,6 @@ class _RequestedPostState extends State<RequestedPost> {
                                 color: Theme.of(context).colorScheme.onSurface,
                                 thickness: 1,
                                 height: 40),
-                            _afterCarouselTitleAd != null
-                                ? Container(
-                                    height: 100,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .inversePrimary,
-                                    child: AdWidget(
-                                      ad: _afterCarouselTitleAd!,
-                                    ),
-                                  )
-                                : SizedBox.shrink(),
                             HtmlWidget(post.summary,
                                 textStyle: const TextStyle(
                                   fontSize: 17,
@@ -393,6 +386,17 @@ class _RequestedPostState extends State<RequestedPost> {
                                         fontSize: 17,
                                         fontWeight: FontWeight.w500))),
                             const SizedBox(height: 50),
+                            _afterCarouselTitleAd != null
+                                ? Container(
+                                    height: 100,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .inversePrimary,
+                                    child: AdWidget(
+                                      ad: _afterCarouselTitleAd!,
+                                    ),
+                                  )
+                                : SizedBox.shrink(),
                             Padding(
                               padding: const EdgeInsets.all(15.0),
                               child: Column(
