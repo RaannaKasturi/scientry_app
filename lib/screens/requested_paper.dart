@@ -16,6 +16,7 @@ import 'package:scientry/info_pages/error_page.dart';
 import 'package:scientry/info_pages/no_data_found.dart';
 import 'package:scientry/info_pages/processing_page.dart';
 import 'package:scientry/screens/mindmap_view.dart';
+import 'package:scientry/screens/single_post.dart';
 import 'package:share_plus/share_plus.dart';
 
 class PostData {
@@ -360,6 +361,10 @@ class _RequestedPaperState extends State<RequestedPaper> {
                                       ),
                                     ),
                                   ),
+                                ),
+                                TTSFunctionality(
+                                  htmlContent: post.summary,
+                                  title: post.title,
                                 ),
                               ],
                             ),
