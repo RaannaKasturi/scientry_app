@@ -3,7 +3,7 @@
 ![GitHub repo size](https://img.shields.io/github/repo-size/raannakasturi/scientry)
 ![GitHub stars](https://img.shields.io/github/stars/raannakasturi/scientry?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/raannakasturi/scientry?style=social)
-![License](https://img.shields.io/github/license/raannakasturi/scientry)
+[![License](https://img.shields.io/badge/License-BSD_4--Clause-blue.svg)](https://choosealicense.com/licenses/bsd-4-clause/)
 
 **Note:** _This project is the part of final year dissertation/thesis project, It isn't meant for any financial gains apart for the ads that will be played to sponsor my other projects. This project is purely for educational purposes only. After v1.0.0, no App Bundles will be released via GitHub._
 
