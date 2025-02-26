@@ -58,7 +58,7 @@ class SectionTitle extends StatelessWidget {
             onPressed: () {
               context.pushTransition(
                 curve: Curves.easeInOut,
-                type: PageTransitionType.fade,
+                type: PageTransitionType.rightToLeft,
                 child: PaginatedPostList(categoryLink: link),
               );
             },

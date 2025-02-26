@@ -313,13 +313,13 @@ class _MyAccountState extends State<MyAccount> {
                         Navigator.pop(context);
                         context.pushAndRemoveUntilTransition(
                           curve: Curves.easeInOut,
-                          type: PageTransitionType.fade,
+                          type: PageTransitionType.rightToLeft,
                           predicate: (route) => false,
                           child: HomePage(),
                         );
                         context.pushTransition(
                           curve: Curves.easeInOut,
-                          type: PageTransitionType.fade,
+                          type: PageTransitionType.rightToLeft,
                           child: Login(),
                         );
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -440,7 +440,7 @@ class _MyAccountState extends State<MyAccount> {
                         Navigator.pop(context);
                         context.pushAndRemoveUntilTransition(
                           curve: Curves.easeInOut,
-                          type: PageTransitionType.fade,
+                          type: PageTransitionType.rightToLeft,
                           predicate: (route) => false,
                           child: HomePage(),
                         );
@@ -497,7 +497,7 @@ class _MyAccountState extends State<MyAccount> {
               await FirebaseAuth.instance.signOut();
               context.pushAndRemoveUntilTransition(
                 curve: Curves.easeInOut,
-                type: PageTransitionType.fade,
+                type: PageTransitionType.rightToLeft,
                 predicate: (route) => false,
                 child: HomePage(),
               );
@@ -661,7 +661,7 @@ class _MyAccountState extends State<MyAccount> {
                         await FirebaseAuth.instance.signOut();
                         context.pushTransition(
                           curve: Curves.easeInOut,
-                          type: PageTransitionType.fade,
+                          type: PageTransitionType.rightToLeft,
                           child: Login(),
                         );
                       },
@@ -677,7 +677,7 @@ class _MyAccountState extends State<MyAccount> {
                   await FirebaseAuth.instance.signOut();
                   context.pushAndRemoveUntilTransition(
                     curve: Curves.easeInOut,
-                    type: PageTransitionType.fade,
+                    type: PageTransitionType.rightToLeft,
                     predicate: (route) => false,
                     child: HomePage(),
                   );

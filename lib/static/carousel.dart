@@ -101,7 +101,7 @@ class _CarouselState extends State<Carousel> {
                     onTap: () {
                       context.pushTransition(
                         curve: Curves.easeInOut,
-                        type: PageTransitionType.fade,
+                        type: PageTransitionType.rightToLeft,
                         child: SinglePost(postURL: item.link),
                       );
                     },

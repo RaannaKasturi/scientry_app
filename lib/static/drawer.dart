@@ -87,7 +87,7 @@ class DefaultDrawer extends StatelessWidget {
                               Navigator.pop(context);
                               context.pushTransition(
                                 curve: Curves.easeInOut,
-                                type: PageTransitionType.fade,
+                                type: PageTransitionType.rightToLeft,
                                 child: Login(),
                               );
                             },
@@ -134,7 +134,7 @@ class DefaultDrawer extends StatelessWidget {
                         Navigator.pop(context);
                         context.pushReplacementTransition(
                           curve: Curves.easeInOut,
-                          type: PageTransitionType.fade,
+                          type: PageTransitionType.rightToLeft,
                           child: HomePage(),
                         );
                       },
@@ -154,7 +154,7 @@ class DefaultDrawer extends StatelessWidget {
                         Navigator.pop(context);
                         context.pushTransition(
                           curve: Curves.easeInOut,
-                          type: PageTransitionType.fade,
+                          type: PageTransitionType.rightToLeft,
                           child: BookmarksPage(),
                         );
                       },
@@ -174,7 +174,7 @@ class DefaultDrawer extends StatelessWidget {
                         Navigator.pop(context);
                         context.pushTransition(
                           curve: Curves.easeInOut,
-                          type: PageTransitionType.fade,
+                          type: PageTransitionType.rightToLeft,
                           child: SearchPage(),
                         );
                       },
@@ -194,7 +194,7 @@ class DefaultDrawer extends StatelessWidget {
                         Navigator.pop(context);
                         context.pushTransition(
                           curve: Curves.easeInOut,
-                          type: PageTransitionType.fade,
+                          type: PageTransitionType.rightToLeft,
                           child: RequestPaper(),
                         );
                       },
@@ -214,7 +214,7 @@ class DefaultDrawer extends StatelessWidget {
                         if (isLoggedIn) {
                           Navigator.pop(context);
                           EasyLauncher.email(
-                            email: "raannakasturi@gmail.com",
+                            email: "scientry@binarybiology.top",
                             subject: "Feature Request for Scientry (Android)",
                           );
                         } else {
@@ -243,7 +243,7 @@ class DefaultDrawer extends StatelessWidget {
                         Navigator.pop(context);
                         context.pushTransition(
                           curve: Curves.easeInOut,
-                          type: PageTransitionType.fade,
+                          type: PageTransitionType.rightToLeft,
                           child: SettingsPage(),
                         );
                       },
@@ -278,7 +278,7 @@ class DefaultDrawer extends StatelessWidget {
                               Navigator.pop(context);
                               context.pushAndRemoveUntilTransition(
                                 curve: Curves.easeInOut,
-                                type: PageTransitionType.fade,
+                                type: PageTransitionType.rightToLeft,
                                 predicate: (route) => false,
                                 child: HomePage(),
                               );

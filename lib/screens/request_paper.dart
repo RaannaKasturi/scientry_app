@@ -321,7 +321,7 @@ class RequestPaperState extends State<RequestPaper> {
                         }
                         context.pushTransition(
                           curve: Curves.easeInOut,
-                          type: PageTransitionType.fade,
+                          type: PageTransitionType.rightToLeft,
                           child: RequestedPaper(
                             inputDOI: doi,
                             inputpdfURL: pdfURL,

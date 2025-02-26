@@ -2,11 +2,10 @@ import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:scientry/api/notification_service.dart';
+import 'package:scientry/screens/about_scientry.dart';
 import 'package:scientry/screens/bookmarks_page.dart';
 import 'package:scientry/screens/homepage.dart';
 import 'package:scientry/screens/login.dart';
@@ -35,10 +34,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _handleNotificationPermission() async {
-    // First request for permission
     PermissionStatus status = await Permission.notification.request();
-
-    // If not granted, try to request again
     if (!status.isGranted) {
       status = await Permission.notification.request();
     }
@@ -197,7 +193,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
                       context.pushTransition(
                         curve: Curves.easeInOut,
-                        type: PageTransitionType.fade,
+                        type: PageTransitionType.rightToLeft,
                         child: goto(),
                       );
                     },
@@ -227,7 +223,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () {
                       context.pushTransition(
                         curve: Curves.easeInOut,
-                        type: PageTransitionType.fade,
+                        type: PageTransitionType.rightToLeft,
                         child: BookmarksPage(),
                       );
                     },
@@ -302,81 +298,89 @@ class _SettingsPageState extends State<SettingsPage> {
                             onChanged: (_) => _handleNotificationPermission(),
                           ),
                         ),
-                  _notifications
-                      ? Divider(
-                          indent: 25,
-                          endIndent: 25,
-                          height: 5,
-                        )
-                      : const SizedBox.shrink(),
-                  !_notifications
-                      ? const SizedBox()
-                      : ListTile(
-                          leading: Icon(
-                            LucideIcons.bellPlus,
-                            size: 30,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                          title: Text(
-                            "Set Reminder Time",
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                          onTap: () {
-                            NotificationService().showNotification(
-                              title: "Test Notification",
-                              body:
-                                  "Test Notification description is it working..?",
-                            );
-                          },
-                          trailing: Icon(
-                            LucideIcons.chevronsRight,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                  _isLoggedIn
-                      ? Divider(
-                          indent: 25,
-                          endIndent: 25,
-                          height: 5,
-                        )
-                      : const SizedBox.shrink(),
-                  _isLoggedIn
-                      ? ListTile(
-                          leading: Icon(
-                            LucideIcons.logOut,
-                            size: 30,
-                            color: Theme.of(context).colorScheme.error,
-                          ),
-                          title: Text(
-                            "Logout",
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Theme.of(context).colorScheme.error,
-                            ),
-                          ),
-                          trailing: Icon(
-                            LucideIcons.chevronsRight,
-                            color: Theme.of(context).colorScheme.error,
-                          ),
-                          onTap: () async {
-                            await FirebaseAuth.instance.signOut();
-                            context.pushAndRemoveUntilTransition(
-                              curve: Curves.easeInOut,
-                              type: PageTransitionType.fade,
-                              predicate: (route) => false,
-                              child: HomePage(),
-                            );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Logged out successfully"),
-                              ),
-                            );
-                          },
-                        )
-                      : const SizedBox.shrink(),
+                  Divider(
+                    indent: 25,
+                    endIndent: 25,
+                    height: 5,
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      LucideIcons.info,
+                      size: 30,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    title: Text(
+                      "About Scientry",
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    onTap: () {
+                      context.pushTransition(
+                        curve: Curves.easeInOut,
+                        type: PageTransitionType.rightToLeft,
+                        child: AboutScientry(),
+                      );
+                    },
+                    trailing: Icon(
+                      LucideIcons.chevronsRight,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  Divider(
+                    indent: 25,
+                    endIndent: 25,
+                    height: 5,
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      LucideIcons.shieldUser,
+                      size: 30,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    title: Text(
+                      "Privacy Policy",
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    onTap: () {
+                      EasyLauncher.url(
+                          url:
+                              "https://scientry.binarybiology.top/app/privacy-policy",
+                          mode: Mode.externalApp);
+                    },
+                    trailing: Icon(
+                      LucideIcons.chevronsRight,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  Divider(
+                    indent: 25,
+                    endIndent: 25,
+                    height: 5,
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      LucideIcons.handshake,
+                      size: 30,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    title: Text(
+                      "Terms & Conditions",
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    onTap: () {},
+                    trailing: Icon(
+                      LucideIcons.chevronsRight,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                 ],
               )
             ],
@@ -386,73 +390,92 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Divider(
-                  color: Theme.of(context).colorScheme.primary,
+                _isLoggedIn
+                    ? OutlinedButton.icon(
+                        onPressed: () async {
+                          await FirebaseAuth.instance.signOut();
+                          context.pushAndRemoveUntilTransition(
+                            curve: Curves.easeInOut,
+                            type: PageTransitionType.rightToLeft,
+                            predicate: (route) => false,
+                            child: HomePage(),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Logged out successfully"),
+                            ),
+                          );
+                        },
+                        label: Text(
+                          "Logout",
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                        icon: Icon(
+                          LucideIcons.logOut,
+                          color: Theme.of(context).colorScheme.error,
+                          size: 25,
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          side: BorderSide(
+                            color: Theme.of(context).colorScheme.error,
+                            width: 2.0,
+                          ),
+                          foregroundColor: Theme.of(context).colorScheme.error,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Divider(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
-                FutureBuilder<PackageInfo>(
-                  future: PackageInfo.fromPlatform(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: InkWell(
-                          child: RichText(
-                            textAlign: TextAlign.center,
-                            text: TextSpan(
-                              children: [
-                                WidgetSpan(
-                                  child: Icon(LucideIcons.copyright, size: 15),
-                                ),
-                                TextSpan(
-                                  text: ' 2024 Scientry',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    color:
-                                        Theme.of(context).colorScheme.tertiary,
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text:
-                                          '\nv${snapshot.data!.version}+${snapshot.data!.buildNumber}',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .secondary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: InkWell(
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        children: [
+                          WidgetSpan(
+                            child: Icon(LucideIcons.copyright, size: 15),
+                          ),
+                          TextSpan(
+                            text: ' 2024 Scientry',
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Theme.of(context).colorScheme.tertiary,
                             ),
                           ),
-                          onTap: () {
-                            EasyLauncher.url(
-                              url: "https://scietry.vercel.app/",
-                              mode: Mode.platformDefault,
-                            );
-                          },
-                        ),
+                        ],
+                      ),
+                    ),
+                    onTap: () {
+                      EasyLauncher.url(
+                        url: "https://scientry.binarybiology.top/",
+                        mode: Mode.externalApp,
                       );
-                    }
-                    return const SizedBox();
-                  },
+                    },
+                  ),
                 ),
                 InkWell(
-                  child: TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      "Made with 💖 by Nayan Kasturi",
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                  child: Text(
+                    "Brought to you by Binary Biology",
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                   onTap: () {
                     EasyLauncher.url(
-                      url: "https://nayankasturi.eu.org",
-                      mode: Mode.platformDefault,
+                      url: "https://binarybiology.top/",
+                      mode: Mode.externalApp,
                     );
                   },
                 ),

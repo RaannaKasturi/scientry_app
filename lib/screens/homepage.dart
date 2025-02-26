@@ -109,6 +109,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     runInBackground();
+    notificationsPermission();
     _initPrefs();
     _connectionCheckTimer =
         Timer.periodic(const Duration(seconds: 5), (timer) async {
@@ -259,6 +260,74 @@ class _HomePageState extends State<HomePage> {
     } else {
       if (!(await Permission.ignoreBatteryOptimizations.isGranted)) {
         await Permission.ignoreBatteryOptimizations.request();
+      }
+    }
+  }
+
+  Future<void> notificationsPermission() async {
+    if (await Permission.notification.isPermanentlyDenied) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            title: Text(
+              "Permission Required",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            content: Text(
+              "Please allow Scientry send notifications regarding latest papers.",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  openAppSettings();
+                },
+                child: const Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
+    } else if (!(await Permission.notification.isGranted)) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            title: Text(
+              "Permission Required",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            content: Text(
+              "Please allow Scientry send notifications regarding latest papers.",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await Permission.notification.request();
+                },
+                child: const Text("OK"),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      if (!(await Permission.notification.isGranted)) {
+        await Permission.notification.request();
       }
     }
   }
@@ -456,7 +525,7 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               context.pushTransition(
                 curve: Curves.easeInOut,
-                type: PageTransitionType.fade,
+                type: PageTransitionType.rightToLeft,
                 child: SearchPage(),
               );
             },

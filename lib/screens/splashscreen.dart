@@ -49,7 +49,7 @@ class _SplashScreenState extends State<SplashScreen> {
             await Future.delayed(Duration(milliseconds: 800));
             context.pushReplacementTransition(
               curve: Curves.easeInOut,
-              type: PageTransitionType.fade,
+              type: PageTransitionType.rightToLeft,
               child: HomePage(),
             );
           },

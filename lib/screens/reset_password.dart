@@ -72,7 +72,7 @@ class ResetPasswordState extends State<ResetPassword> {
       if (mounted) {
         context.pushReplacementTransition(
           curve: Curves.easeInOut,
-          type: PageTransitionType.fade,
+          type: PageTransitionType.rightToLeft,
           child: Login(),
         );
       }
@@ -108,7 +108,7 @@ class ResetPasswordState extends State<ResetPassword> {
               onPressed: () {
                 context.pushTransition(
                   curve: Curves.easeInOut,
-                  type: PageTransitionType.fade,
+                  type: PageTransitionType.rightToLeft,
                   child: HomePage(),
                 );
               },
@@ -229,7 +229,7 @@ class ResetPasswordState extends State<ResetPassword> {
                     onPressed: () {
                       context.pushTransition(
                         curve: Curves.easeInOut,
-                        type: PageTransitionType.fade,
+                        type: PageTransitionType.rightToLeft,
                         child: Login(),
                       );
                     },
@@ -265,7 +265,7 @@ class ResetPasswordState extends State<ResetPassword> {
                     onPressed: () {
                       context.pushTransition(
                         curve: Curves.easeInOut,
-                        type: PageTransitionType.fade,
+                        type: PageTransitionType.rightToLeft,
                         child: Register(),
                       );
                     },

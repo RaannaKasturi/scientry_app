@@ -457,7 +457,7 @@ class _RequestedPaperState extends State<RequestedPaper> {
                 onPressed: () {
                   context.pushTransition(
                     curve: Curves.easeInOut,
-                    type: PageTransitionType.fade,
+                    type: PageTransitionType.rightToLeft,
                     child: MindmapView(
                       mindmapData: '# ${post.title}\n${post.mindmap}',
                     ),

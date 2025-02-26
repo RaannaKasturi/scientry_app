@@ -82,7 +82,7 @@ class RegisterState extends State<Register> {
       if (mounted) {
         context.pushAndRemoveUntilTransition(
           curve: Curves.easeInOut,
-          type: PageTransitionType.fade,
+          type: PageTransitionType.rightToLeft,
           predicate: (route) => false,
           child: HomePage(),
         );
@@ -132,7 +132,7 @@ class RegisterState extends State<Register> {
                   onPressed: (() {
                     context.pushAndRemoveUntilTransition(
                       curve: Curves.easeInOut,
-                      type: PageTransitionType.fade,
+                      type: PageTransitionType.rightToLeft,
                       predicate: (route) => false,
                       child: HomePage(),
                     );
@@ -178,7 +178,7 @@ class RegisterState extends State<Register> {
       _prefs?.setString('userEmail', userCredential.user!.email ?? 'Set Email');
       context.pushAndRemoveUntilTransition(
         curve: Curves.easeInOut,
-        type: PageTransitionType.fade,
+        type: PageTransitionType.rightToLeft,
         predicate: (route) => false,
         child: HomePage(),
       );
@@ -223,7 +223,7 @@ class RegisterState extends State<Register> {
               onPressed: () {
                 context.pushAndRemoveUntilTransition(
                   curve: Curves.easeInOut,
-                  type: PageTransitionType.fade,
+                  type: PageTransitionType.rightToLeft,
                   predicate: (route) => false,
                   child: HomePage(),
                 );
@@ -498,7 +498,7 @@ class RegisterState extends State<Register> {
                 onTap: () {
                   context.pushReplacementTransition(
                     curve: Curves.easeInOut,
-                    type: PageTransitionType.fade,
+                    type: PageTransitionType.rightToLeft,
                     child: Login(),
                   );
                 },

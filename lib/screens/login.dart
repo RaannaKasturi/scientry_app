@@ -62,7 +62,7 @@ class LoginState extends State<Login> {
         if (mounted) {
           context.pushAndRemoveUntilTransition(
             curve: Curves.easeInOut,
-            type: PageTransitionType.fade,
+            type: PageTransitionType.rightToLeft,
             predicate: (route) => false,
             child: HomePage(),
           );
@@ -109,7 +109,7 @@ class LoginState extends State<Login> {
                   onPressed: (() {
                     context.pushAndRemoveUntilTransition(
                       curve: Curves.easeInOut,
-                      type: PageTransitionType.fade,
+                      type: PageTransitionType.rightToLeft,
                       predicate: (route) => false,
                       child: HomePage(),
                     );
@@ -155,7 +155,7 @@ class LoginState extends State<Login> {
       _prefs?.setString('userEmail', userCredential.user!.email ?? 'Set Email');
       context.pushAndRemoveUntilTransition(
         curve: Curves.easeInOut,
-        type: PageTransitionType.fade,
+        type: PageTransitionType.rightToLeft,
         predicate: (route) => false,
         child: HomePage(),
       );
@@ -190,7 +190,7 @@ class LoginState extends State<Login> {
               onPressed: () {
                 context.pushAndRemoveUntilTransition(
                   curve: Curves.easeInOut,
-                  type: PageTransitionType.fade,
+                  type: PageTransitionType.rightToLeft,
                   predicate: (route) => false,
                   child: HomePage(),
                 );
@@ -414,7 +414,7 @@ class LoginState extends State<Login> {
                 onTap: () {
                   context.pushReplacementTransition(
                     curve: Curves.easeInOut,
-                    type: PageTransitionType.fade,
+                    type: PageTransitionType.rightToLeft,
                     child: Register(),
                   );
                 },
@@ -431,7 +431,7 @@ class LoginState extends State<Login> {
                 onTap: () {
                   context.pushReplacementTransition(
                     curve: Curves.easeInOut,
-                    type: PageTransitionType.fade,
+                    type: PageTransitionType.rightToLeft,
                     child: ResetPassword(),
                   );
                 },
