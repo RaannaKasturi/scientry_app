@@ -375,7 +375,12 @@ class _SettingsPageState extends State<SettingsPage> {
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
-                    onTap: () {},
+                    onTap: () {
+                      EasyLauncher.url(
+                          url:
+                              "https://scientry.binarybiology.top/app/terms-and-conditions",
+                          mode: Mode.externalApp);
+                    },
                     trailing: Icon(
                       LucideIcons.chevronsRight,
                       color: Theme.of(context).colorScheme.onSurface,

@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:html2md/html2md.dart' as html2md;
 import 'package:html_unescape/html_unescape.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parser;
@@ -284,11 +286,20 @@ class _SinglePostState extends State<SinglePost> {
                                     ),
                                   ),
                                 ),
-                                BookmarkButton(
-                                  post: post,
-                                  postURL: widget.postURL,
-                                  prefs: prefs,
-                                  initialBookmarked: _isBookmarked,
+                                Column(
+                                  children: [
+                                    BookmarkButton(
+                                      post: post,
+                                      postURL: widget.postURL,
+                                      prefs: prefs,
+                                      initialBookmarked: _isBookmarked,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    TTSFunctionality(
+                                      htmlContent: post.summary,
+                                      title: post.title,
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -397,6 +408,134 @@ class _SinglePostState extends State<SinglePost> {
           },
         );
       },
+    );
+  }
+}
+
+class TTSFunctionality extends StatefulWidget {
+  final String htmlContent;
+  final String title;
+  const TTSFunctionality(
+      {super.key, required this.htmlContent, required this.title});
+
+  @override
+  State<TTSFunctionality> createState() => _TTSFunctionalityState();
+}
+
+class _TTSFunctionalityState extends State<TTSFunctionality>
+    with WidgetsBindingObserver {
+  FlutterTts flutterTts = FlutterTts();
+  late bool isTTSAvailable = false;
+  late bool isTTSPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    initializeTTS();
+  }
+
+  initializeTTS() async {
+    try {
+      List installedLanguages = await flutterTts.getLanguages;
+      List compatibleLanguages = ['en-US', 'en-IN', 'en-GB', 'en-AU', 'en-CA'];
+      String language = installedLanguages.firstWhere(
+          (element) => compatibleLanguages.contains(element),
+          orElse: () => 'en-US');
+      await flutterTts.setLanguage(language);
+      await flutterTts.setSpeechRate(0.5);
+      await flutterTts.setVolume(1.0);
+      await flutterTts.setPitch(0.9);
+      setState(() {
+        isTTSAvailable = true;
+      });
+    } catch (e) {
+      debugPrint("Language: Error initializing TTS: $e");
+      setState(() {
+        isTTSAvailable = false;
+      });
+    }
+  }
+
+  _htmlToString(String htmlContent) {
+    debugPrint(htmlContent);
+    String content =
+        html2md.convert(htmlContent).replaceAll(RegExp(r'---*'), '');
+    String summary = content.split("Highlights")[0].trim();
+    String highlights =
+        "\n\nHighlights \n ${content.split("Highlights")[1].trim().split("Key Insights")[0].trim().replaceAll("*", "").trim()}";
+    String keyInsights =
+        "\n\nKey Insights \n ${content.split("Key Insights")[1].trim().replaceAll("*", "").trim()}";
+    return [summary, highlights, keyInsights];
+  }
+
+  _handleTTSPlay(title, content) {
+    String sanitizedtitle = title;
+    List<String> sanitizedContent = _htmlToString(content);
+    String summary = sanitizedContent[0];
+    String highlights = sanitizedContent[1];
+    String keyInsights = sanitizedContent[2];
+    if (isTTSAvailable) {
+      String preparedContent =
+          "$sanitizedtitle\n\n$summary\n$highlights\n$keyInsights";
+      setState(() {
+        isTTSPlaying = true;
+      });
+      flutterTts.speak(preparedContent);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Text to Speech is not available on this device."),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  _handleTTSStop() {
+    if (isTTSAvailable) {
+      if (isTTSPlaying) {
+        setState(() {
+          isTTSPlaying = false;
+        });
+        flutterTts.stop();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Content is not playing."),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    flutterTts.stop();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
+      flutterTts.stop();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: isTTSPlaying
+          ? _handleTTSStop
+          : () => _handleTTSPlay(widget.title, widget.htmlContent),
+      icon: Icon(
+        !isTTSPlaying ? LucideIcons.play : LucideIcons.pause,
+        color: Theme.of(context).colorScheme.primary,
+      ),
     );
   }
 }
