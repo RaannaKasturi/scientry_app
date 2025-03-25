@@ -1,0 +1,2 @@
+C:/Users/raanna/Desktop/scientry_app/android/app/.cxx/Debug/q3x71256/x86/CMakeFiles/edit_cache.dir
+C:/Users/raanna/Desktop/scientry_app/android/app/.cxx/Debug/q3x71256/x86/CMakeFiles/rebuild_cache.dir

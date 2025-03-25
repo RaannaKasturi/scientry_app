@@ -1,0 +1,3 @@
+-dontwarn com.google.android.gms.safetynet.SafetyNet
+-dontwarn com.google.android.gms.safetynet.SafetyNetApi$AttestationResponse
+-dontwarn com.google.android.gms.safetynet.SafetyNetClient

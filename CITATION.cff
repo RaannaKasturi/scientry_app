@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+title: Scientry App
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - given-names: Nayan
+    family-names: Kasturi
+    email: raannakasturi@gmail.com
+    orcid: "https://orcid.org/0009-0005-4775-4197"
+    affiliation: >-
+      Guru Nanak Khalsa College of Arts, Science & Commerce,
+      Mumbai
+repository-code: "https://github.com/RaannaKasturi/scientry_app"
+url: "https://scientry.vercel.app"
+abstract: >-
+  Scientry is an AI-powered research assistant designed to
+  simplify and enhance access to scientific knowledge. It
+  generates concise summaries and interactive mindmaps from
+  research papers sourced from platforms like ArXiv and
+  PubMed Central, making complex information more
+  accessible. The app ensures faster data retrieval through
+  caching, enables easy content sharing, and provides direct
+  links to full papers. With future enhancements like
+  bookmarking, dark mode, and full cross-platform support,
+  **Scientry** aims to revolutionize the way users explore
+  and understand scientific research.
+keywords:
+  - Research Papers
+  - research
+  - bioinformatics
+  - flutter
+  - dart
+  - ai
+  - ml
+  - artificial intelligence
+  - llm
+  - summary
+  - mindmap
+  - key insights
+  - android
+  - ios
+license: AGPL-3.0
