@@ -3,7 +3,7 @@ from gradio_client import Client
 import requests
 
 def upload_pdf():
-    pdf_url = "https://www.mdpi.com/2073-4352/15/5/393/pdf"
+    pdf_url = "https://raw.githubusercontent.com/RaannaKasturi/scientry_app/master/keep-scientry-alive/srep22492.pdf"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
     }
@@ -13,6 +13,7 @@ def upload_pdf():
     with open("temp.pdf", 'rb') as file:
         files = {'file': file}
         response = requests.post(api_url, files=files)
+    print(response.json())
     url = response.json()['data']['url']
     download_url = f"https://tmpfiles.org/dl/{url.split('.org/')[-1]}"
     return download_url
