@@ -3,7 +3,7 @@ from gradio_client import Client
 import requests
 
 def upload_pdf():
-    pdf_url = "https://pmc.ncbi.nlm.nih.gov/articles/PMC4776148/pdf/srep22492.pdf"
+    pdf_url = "https://www.mdpi.com/2073-4352/15/5/393/pdf"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
     }
