@@ -7,13 +7,17 @@
 
 **Note:** _This project is the part of final year dissertation/thesis project, It isn't meant for any financial gains apart for the ads that will be played to sponsor my other projects. This project is purely for educational purposes only. After v1.0.0, no App Bundles will be released via GitHub._
 
-## App Available on (planned):
+## Rate us Online:
 
-- Amazon Appstore
-- VIVO App Store
-- OPPO App Market
-- Xiaomi GetApps
-- Samsung Galaxy Store
+<a href="https://www.producthunt.com/posts/scientry?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-scientry" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=962796&theme=light&t=1746713269805" alt="Scientry - Science&#0032;Simplified&#0044;&#0032;Knowledge&#0032;Amplified | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a><a href="https://play.google.com/store/apps/details?id=top.binarybiology.scientry" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Scientry - Apps on Google Play" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
+## App Available on:
+
+- Amazon Appstore (planned)
+- VIVO App Store (planned)
+- OPPO App Market (planned)
+- Xiaomi GetApps (planned)
+- Samsung Galaxy Store (planned)
 - Google Play Store
 
 ## Table of Contents
