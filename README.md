@@ -1,7 +1,5 @@
 # Scientry App: Science Simplified, Knowledge Amplified [![GitHub Release](https://img.shields.io/github/v/release/raannakasturi/scientry_app?include_prereleases&sort=date&display_name=release&label=Latest%20Release&color=%23545A92)](https://github.com/RaannaKasturi/scientry_app/releases/tag/0.2.0%2B1) [![Scientry Request Papers](https://github.com/RaannaKasturi/scientry_app/actions/workflows/keep-scientry-alive.yml/badge.svg)](https://github.com/RaannaKasturi/scientry_app/actions/workflows/keep-scientry-alive.yml)
 
-[![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
-
 ![GitHub repo size](https://img.shields.io/github/repo-size/raannakasturi/scientry)
 ![GitHub stars](https://img.shields.io/github/stars/raannakasturi/scientry?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/raannakasturi/scientry?style=social)
